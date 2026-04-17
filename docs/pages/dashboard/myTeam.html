@@ -649,10 +649,9 @@
     <div class="nav-links">
       <a href="home.html">Home</a>
       <a href="players.html">Players</a>
+      <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html" class="active">My Team</a>
       <a href="announcements.html">Announcements</a>
-      <a href="../settings/appearanceSettings.html">Settings</a>
-      <a href="#" id="logoutBtn" style="color:#dc3545;">Logout</a>
     </div>
   </div>
 
@@ -869,14 +868,6 @@
     // Update welcome message
     document.getElementById('welcomeMsg').textContent = 
       `${auth.getDisplayName()}'s team statistics and match history.`;
-
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      if (confirm('Are you sure you want to logout?')) {
-        auth.logout('../../index.html');
-      }
-    });
 
     // View Toggle
     document.querySelectorAll('.view-btn').forEach(btn => {

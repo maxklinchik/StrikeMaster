@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en" data-ui="cartoon">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="../../assets/images/BowlingPinCartoon.png">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/cartoon-ui.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="../../assets/js/accent-loader.js"></script>
+  <script src="../../assets/js/season-context.js"></script>
+  <script src="../../assets/js/config/api.js"></script>
+  <script src="../../assets/js/config/teams.js"></script>
+  <script src="../../assets/js/auth-helper.js"></script>
+  <title>Settings - Strike Master</title>
+
+  <style>
+    :root {
+      --accent-color: #ff6b6b;
+      --main-color: #6ecbff;
+      --bg-color: #fff4c2;
+      --content-bg: #fff9e2;
+      --card-bg: #ffffff;
+      --text-color: #1f1f1f;
+      --text-muted: #4b4b4b;
+      --border-color: rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1f1f1f;
+      --content-bg: #2a2a2a;
+      --card-bg: #2f2f2f;
+      --text-color: #f8f8f8;
+      --text-muted: #c8c8c8;
+      --border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: var(--main-color);
+      color: var(--sidebar-text-color, white);
+      padding: 24px 0;
+      position: fixed;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-brand img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .season-select {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 2px solid rgba(0, 0, 0, 0.12);
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    .season-select label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--text-color);
+    }
+
+    .season-select select {
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-color);
+      font-family: inherit;
+    }
+
+    .season-select select:focus {
+      outline: none;
+    }
+
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .sidebar-header p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    .sidebar a, .sidebar button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: none;
+      border: none;
+      color: var(--sidebar-text-color, rgba(255,255,255,0.85));
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .sidebar a:hover, .sidebar button:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .sidebar a.active {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+    }
+
+    .sidebar a svg, .sidebar button svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+
+    #logoutBtn {
+      margin-top: auto;
+      color: #fca5a5;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 16px;
+      margin-top: 16px;
+    }
+
+    #logoutBtn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+
+    /* Main content */
+    .content {
+      flex: 1;
+      margin-left: 240px;
+      padding: 32px 40px;
+      max-width: 900px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: var(--text-color);
+    }
+
+    .page-header p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border-color);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-header .icon {
+      width: 40px;
+      height: 40px;
+      background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-header .icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--accent-color);
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .card-header p {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Settings rows */
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .setting-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .setting-row:first-child {
+      padding-top: 0;
+    }
+
+    .setting-info h3 {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .setting-info p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .setting-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Color picker */
+    .color-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="color"] {
+      width: 44px;
+      height: 44px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 6px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(0.95);
+    }
+
+    .btn-secondary {
+      background: var(--content-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border-color);
+    }
+
+    /* Preset colors */
+    .preset-colors {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .preset-color {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .preset-color:hover {
+      transform: scale(1.1);
+    }
+
+    .preset-color.selected {
+      border-color: var(--text-color);
+    }
+
+    /* Logo Grid */
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .logo-option {
+      background: var(--content-bg);
+      border: 2px solid transparent;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logo-option:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .logo-option.selected {
+      border-color: var(--accent-color);
+      background: color-mix(in srgb, var(--accent-color) 10%, var(--content-bg));
+    }
+
+    .logo-option img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      margin-bottom: 8px;
+    }
+
+    .logo-option span {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Current logo preview */
+    .current-preview {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--content-bg);
+      border-radius: 10px;
+    }
+
+    .current-preview img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .current-preview .info h4 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .current-preview .info p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Message */
+    .message {
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.success {
+      background: #dcfce7;
+      color: #166534;
+      display: block;
+    }
+
+    .message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      display: block;
+    }
+
+    /* Toggle switch */
+    .toggle-switch {
+      position: relative;
+      width: 52px;
+      height: 28px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border-color);
+      transition: 0.3s;
+      border-radius: 28px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--accent-color);
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 12px;
+      }
+      body { overflow: auto; }
+      .sidebar-header {
+        width: 100%;
+        padding: 0 0 12px;
+        margin-bottom: 12px;
+      }
+      .sidebar-brand {
+        flex-wrap: wrap;
+      }
+      .season-select label {
+        display: none;
+      }
+      .sidebar a, .sidebar button {
+        padding: 10px 14px;
+        flex: 1;
+        justify-content: center;
+      }
+      .content {
+        margin-left: 0;
+        padding: 20px;
+        height: auto;
+        overflow: visible;
+      }
+      .layout {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <img data-team-logo src="../../assets/images/BowlingPinCartoon.png" alt="School logo">
+          <div class="season-select">
+            <label for="seasonSelect">Season</label>
+            <select id="seasonSelect" data-season-select>
+              <option value="2025-2026">2025-26</option>
+              <option value="2024-2025">2024-25</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+        </div>
+        <h2>Settings</h2>
+        <p>Customize your experience</p>
+      </div>
+      <a href="appearanceSettings.html" class="active">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+        Appearance
+      </a>
+      <a href="accountInfo.html">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        Account
+      </a>
+      <a href="../dashboard/home.html">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/></svg>
+        Back to Dashboard
+      </a>
+      <button id="logoutBtn">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Logout
+      </button>
+    </div>
+
+    <div class="content">
+      <div class="page-header">
+        <h1>Appearance</h1>
+        <p>Personalize how Strike Master looks for you</p>
+      </div>
+
+      <div id="message" class="message"></div>
+
+      <!-- Theme Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          </div>
+          <div>
+            <h2>Theme</h2>
+            <p>Switch between light and dark mode</p>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>Dark Mode</h3>
+            <p>Reduce eye strain in low light</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>Simple UI</h3>
+            <p>Use the original clean layout</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="simpleUiToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Accent Color Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+          </div>
+          <div>
+            <h2>Accent Color</h2>
+            <p>Choose your primary brand color</p>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>Custom Color</h3>
+            <p>Pick any color you like</p>
+          </div>
+          <div class="color-picker-wrapper">
+            <input type="color" id="accentColorPicker" value="#ffa500">
+            <button class="btn btn-secondary" id="resetAccent">Reset</button>
+          </div>
+        </div>
+        <div class="preset-colors" id="accentPresets">
+          <div class="preset-color" data-color="#ffa500" style="background: #ffa500;" title="Orange"></div>
+          <div class="preset-color" data-color="#ef4444" style="background: #ef4444;" title="Red"></div>
+          <div class="preset-color" data-color="#3b82f6" style="background: #3b82f6;" title="Blue"></div>
+          <div class="preset-color" data-color="#22c55e" style="background: #22c55e;" title="Green"></div>
+          <div class="preset-color" data-color="#a855f7" style="background: #a855f7;" title="Purple"></div>
+          <div class="preset-color" data-color="#14b8a6" style="background: #14b8a6;" title="Teal"></div>
+          <div class="preset-color" data-color="#f59e0b" style="background: #f59e0b;" title="Amber"></div>
+          <div class="preset-color" data-color="#ec4899" style="background: #ec4899;" title="Pink"></div>
+        </div>
+      </div>
+
+      <!-- Sidebar Color Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+          </div>
+          <div>
+            <h2>Sidebar Color</h2>
+            <p>Customize navigation background</p>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>Custom Color</h3>
+            <p>Match your school or team colors</p>
+          </div>
+          <div class="color-picker-wrapper">
+            <input type="color" id="mainColorPicker" value="#5f371c">
+            <button class="btn btn-secondary" id="resetMain">Reset</button>
+          </div>
+        </div>
+        <div class="preset-colors" id="mainPresets">
+          <div class="preset-color" data-color="#5f371c" style="background: #5f371c;" title="Brown"></div>
+          <div class="preset-color" data-color="#1e293b" style="background: #1e293b;" title="Slate"></div>
+          <div class="preset-color" data-color="#1e3a5f" style="background: #1e3a5f;" title="Navy"></div>
+          <div class="preset-color" data-color="#14532d" style="background: #14532d;" title="Forest"></div>
+          <div class="preset-color" data-color="#581c87" style="background: #581c87;" title="Purple"></div>
+          <div class="preset-color" data-color="#7f1d1d" style="background: #7f1d1d;" title="Maroon"></div>
+          <div class="preset-color" data-color="#0f172a" style="background: #0f172a;" title="Dark"></div>
+          <div class="preset-color" data-color="#374151" style="background: #374151;" title="Gray"></div>
+        </div>
+      </div>
+
+      <!-- Team Logo Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
+          <div>
+            <h2>Team Logo</h2>
+            <p>Select your school's logo</p>
+          </div>
+        </div>
+        <div class="current-preview">
+          <img id="currentLogoImg" src="../../assets/images/Team Logos/phLogo.png" alt="Current Logo">
+          <div class="info">
+            <h4 id="currentLogoName">Current Logo</h4>
+            <p>Displayed in navigation across all pages</p>
+          </div>
+        </div>
+        <div class="logo-grid" id="logoGrid">
+          <!-- Logos will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Available team logos
+    const availableLogos = getAvailableLogos();
+    let currentLogo = localStorage.getItem('teamLogo') || 'phLogo.png';
+
+    // Initialize
+    function init() {
+      initLogoGrid();
+      initTheme();
+      initUiMode();
+      initColors();
+    }
+
+    // Logo Grid
+    function initLogoGrid() {
+      const grid = document.getElementById('logoGrid');
+      grid.innerHTML = availableLogos.map(logo => `
+        <div class="logo-option ${logo.file === currentLogo ? 'selected' : ''}" 
+             data-logo="${logo.file}" 
+             data-accent="${logo.accentColor}" 
+             data-main="${logo.mainColor}">
+          <img src="../../assets/images/Team Logos/${logo.file}" alt="${logo.name}">
+          <span>${logo.name}</span>
+        </div>
+      `).join('');
+
+      grid.querySelectorAll('.logo-option').forEach(option => {
+        option.addEventListener('click', () => {
+          selectLogo(option.dataset.logo, option.dataset.accent, option.dataset.main);
+        });
+      });
+
+      updateCurrentLogoPreview();
+    }
+
+    function selectLogo(logoFile, accentColor, mainColor) {
+      currentLogo = logoFile;
+      localStorage.setItem('teamLogo', logoFile);
+      updateTeamLogoImages(logoFile);
+
+      document.querySelectorAll('.logo-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.logo === logoFile);
+      });
+
+      if (accentColor) {
+        document.getElementById('accentColorPicker').value = accentColor;
+        localStorage.setItem("accentColor", accentColor);
+        document.documentElement.style.setProperty("--accent-color", accentColor);
+        updatePresetSelection('accentPresets', accentColor);
+        updateAccentTextColor(accentColor);
+      }
+      if (mainColor) {
+        document.getElementById('mainColorPicker').value = mainColor;
+        localStorage.setItem("mainColor", mainColor);
+        document.documentElement.style.setProperty("--main-color", mainColor);
+        updatePresetSelection('mainPresets', mainColor);
+        updateSidebarTextColor(mainColor);
+      }
+
+      updateDashboardButtonStyles(mainColor, accentColor);
+      updateCurrentLogoPreview();
+      showMessage('Theme updated! Changes apply across all pages.', 'success');
+    }
+
+    function updateTeamLogoImages(logoFile) {
+      const logoImgs = document.querySelectorAll('[data-team-logo]');
+      if (!logoImgs.length) return;
+
+      const currentPath = window.location.pathname;
+      const basePath = currentPath.includes('/pages/')
+        ? '../../assets/images/Team Logos/'
+        : 'assets/images/Team Logos/';
+
+      logoImgs.forEach(img => {
+        img.src = `${basePath}${logoFile}`;
+      });
+    }
+    
+    function updateAccentTextColor(hex) {
+      const c = hex.replace('#', '').trim();
+      const r = parseInt(c.substr(0, 2), 16);
+      const g = parseInt(c.substr(2, 2), 16);
+      const b = parseInt(c.substr(4, 2), 16);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      
+      if (luminance > 0.5) {
+        document.documentElement.style.setProperty("--accent-text-color", "#000000");
+      } else {
+        document.documentElement.style.setProperty("--accent-text-color", "#ffffff");
+      }
+    }
+
+    function updateDashboardButtonStyles(mainHex, accentHex) {
+      if (!mainHex || !accentHex) return;
+      const c = mainHex.replace('#', '').trim();
+      if (c.length < 6) return;
+      const r = parseInt(c.substr(0, 2), 16);
+      const g = parseInt(c.substr(2, 2), 16);
+      const b = parseInt(c.substr(4, 2), 16);
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const chroma = max - min;
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      const isVeryLight = luminance > 0.88;
+      const isGray = chroma < 18;
+      const accentC = accentHex.replace('#', '').trim();
+      const ar = parseInt(accentC.substr(0, 2), 16);
+      const ag = parseInt(accentC.substr(2, 2), 16);
+      const ab = parseInt(accentC.substr(4, 2), 16);
+      const accentLum = (0.299 * ar + 0.587 * ag + 0.114 * ab) / 255;
+      const accentText = accentLum > 0.5 ? '#000000' : '#ffffff';
+
+      if (isVeryLight || isGray) {
+        document.documentElement.style.setProperty('--dashboard-button-bg', accentHex);
+        document.documentElement.style.setProperty('--dashboard-button-text', accentText);
+        document.documentElement.style.setProperty('--dashboard-button-border', 'rgba(0, 0, 0, 0.28)');
+      } else {
+        document.documentElement.style.setProperty('--dashboard-button-bg', 'var(--card-bg)');
+        document.documentElement.style.setProperty('--dashboard-button-text', 'var(--text-color)');
+        document.documentElement.style.setProperty('--dashboard-button-border', 'var(--button-border-color)');
+      }
+    }
+
+    function updateCurrentLogoPreview() {
+      const logo = availableLogos.find(l => l.file === currentLogo);
+      document.getElementById('currentLogoImg').src = `../../assets/images/Team Logos/${currentLogo}`;
+      document.getElementById('currentLogoName').textContent = logo ? logo.name : currentLogo;
+    }
+
+    // Theme
+    function initTheme() {
+      const savedTheme = localStorage.getItem("theme") || "light";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+      document.getElementById('themeToggle').checked = savedTheme === 'dark';
+
+      document.getElementById('themeToggle').addEventListener('change', (e) => {
+        const theme = e.target.checked ? 'dark' : 'light';
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem("theme", theme);
+      });
+    }
+
+    function initUiMode() {
+      const simpleToggle = document.getElementById('simpleUiToggle');
+      const isSimple = localStorage.getItem("simpleUi") === "true";
+      simpleToggle.checked = isSimple;
+      document.documentElement.setAttribute("data-ui", isSimple ? "simple" : "cartoon");
+
+      simpleToggle.addEventListener('change', (e) => {
+        const simple = e.target.checked;
+        localStorage.setItem("simpleUi", simple);
+        document.documentElement.setAttribute("data-ui", simple ? "simple" : "cartoon");
+      });
+    }
+
+    // Colors
+    function initColors() {
+      const accentPicker = document.getElementById('accentColorPicker');
+      const mainPicker = document.getElementById('mainColorPicker');
+
+      // Load saved colors
+      const savedAccent = localStorage.getItem("accentColor");
+      const savedMain = localStorage.getItem("mainColor");
+
+      if (savedAccent) {
+        accentPicker.value = savedAccent;
+        document.documentElement.style.setProperty("--accent-color", savedAccent);
+        updateAccentTextColor(savedAccent);
+      }
+      if (savedMain) {
+        mainPicker.value = savedMain;
+        document.documentElement.style.setProperty("--main-color", savedMain);
+        updateSidebarTextColor(savedMain);
+      }
+      updateDashboardButtonStyles(mainPicker.value, accentPicker.value);
+
+      updatePresetSelection('accentPresets', savedAccent || "#ffa500");
+      updatePresetSelection('mainPresets', savedMain || "#5f371c");
+
+      // Accent color events
+      accentPicker.addEventListener("input", (e) => {
+        const color = e.target.value;
+        localStorage.setItem("accentColor", color);
+        document.documentElement.style.setProperty("--accent-color", color);
+        updatePresetSelection('accentPresets', color);
+        updateAccentTextColor(color);
+        updateDashboardButtonStyles(mainPicker.value, color);
+      });
+
+      document.querySelectorAll('#accentPresets .preset-color').forEach(preset => {
+        preset.addEventListener('click', () => {
+          const color = preset.dataset.color;
+          accentPicker.value = color;
+          localStorage.setItem("accentColor", color);
+          document.documentElement.style.setProperty("--accent-color", color);
+          updatePresetSelection('accentPresets', color);
+          updateAccentTextColor(color);
+          updateDashboardButtonStyles(mainPicker.value, color);
+        });
+      });
+
+      // Main color events
+      mainPicker.addEventListener("input", (e) => {
+        const color = e.target.value;
+        localStorage.setItem("mainColor", color);
+        document.documentElement.style.setProperty("--main-color", color);
+        updateSidebarTextColor(color);
+        updatePresetSelection('mainPresets', color);
+        updateDashboardButtonStyles(color, accentPicker.value);
+      });
+
+      document.querySelectorAll('#mainPresets .preset-color').forEach(preset => {
+        preset.addEventListener('click', () => {
+          const color = preset.dataset.color;
+          mainPicker.value = color;
+          localStorage.setItem("mainColor", color);
+          document.documentElement.style.setProperty("--main-color", color);
+          updateSidebarTextColor(color);
+          updatePresetSelection('mainPresets', color);
+          updateDashboardButtonStyles(color, accentPicker.value);
+        });
+      });
+
+      // Reset buttons - reset to current team's colors (from selected logo)
+      document.getElementById("resetAccent").addEventListener("click", () => {
+        // Get current team's accent color from the selected logo
+        const selectedLogo = availableLogos.find(l => l.file === currentLogo);
+        const defaultColor = selectedLogo ? selectedLogo.accentColor : "#ffa500";
+        accentPicker.value = defaultColor;
+        document.documentElement.style.setProperty("--accent-color", defaultColor);
+        localStorage.setItem("accentColor", defaultColor);
+        updatePresetSelection('accentPresets', defaultColor);
+        updateAccentTextColor(defaultColor);
+        updateDashboardButtonStyles(mainPicker.value, defaultColor);
+        showMessage('Accent color reset to team default', 'success');
+      });
+
+      document.getElementById("resetMain").addEventListener("click", () => {
+        // Get current team's main color from the selected logo
+        const selectedLogo = availableLogos.find(l => l.file === currentLogo);
+        const defaultColor = selectedLogo ? selectedLogo.mainColor : "#5f371c";
+        mainPicker.value = defaultColor;
+        document.documentElement.style.setProperty("--main-color", defaultColor);
+        localStorage.setItem("mainColor", defaultColor);
+        updatePresetSelection('mainPresets', defaultColor);
+        updateSidebarTextColor(defaultColor);
+        updateDashboardButtonStyles(defaultColor, accentPicker.value);
+        showMessage('Main color reset to team default', 'success');
+      });
+    }
+
+    function updateSidebarTextColor(hex) {
+      const c = hex.replace('#', '').trim();
+      const r = parseInt(c.substr(0, 2), 16);
+      const g = parseInt(c.substr(2, 2), 16);
+      const b = parseInt(c.substr(4, 2), 16);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      
+      if (luminance > 0.5) {
+        document.documentElement.style.setProperty("--sidebar-text-color", "#000000");
+        document.documentElement.classList.add('light-sidebar');
+      } else {
+        document.documentElement.style.setProperty("--sidebar-text-color", "#ffffff");
+        document.documentElement.classList.remove('light-sidebar');
+      }
+    }
+    
+    // Ensure accent color has good contrast with backgrounds
+    function ensureAccentContrast(accentHex, mainHex) {
+      // Check if accent and main are too similar
+      const getColorValues = (hex) => {
+        const c = hex.replace('#', '').trim();
+        return {
+          r: parseInt(c.substr(0, 2), 16),
+          g: parseInt(c.substr(2, 2), 16),
+          b: parseInt(c.substr(4, 2), 16)
+        };
+      };
+      
+      const accent = getColorValues(accentHex);
+      const main = getColorValues(mainHex);
+      
+      // Calculate color difference
+      const diff = Math.abs(accent.r - main.r) + Math.abs(accent.g - main.g) + Math.abs(accent.b - main.b);
+      
+      // If colors are too similar (diff < 100), return a warning
+      return diff >= 100;
+    }
+
+    function updatePresetSelection(containerId, selectedColor) {
+      document.querySelectorAll(`#${containerId} .preset-color`).forEach(preset => {
+        preset.classList.toggle('selected', preset.dataset.color === selectedColor);
+      });
+    }
+
+    function showMessage(text, type) {
+      const msg = document.getElementById('message');
+      msg.textContent = text;
+      msg.className = `message ${type}`;
+      setTimeout(() => { msg.className = 'message'; }, 3000);
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      if (confirm('Are you sure you want to logout?')) {
+        auth.logout('../../index.html');
+      }
+    });
+
+    // Require authentication
+    if (!auth.requireCoach('../auth/login.html')) {
+      throw new Error('Not authenticated');
+    }
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>

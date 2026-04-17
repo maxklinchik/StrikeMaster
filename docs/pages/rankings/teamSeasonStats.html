@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Season Stats - Strike Master</title>
+  <link rel="icon" type="image/png" href="../../assets/images/2.png">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <script src="../../assets/js/accent-loader.js"></script>
+  <script src="../../assets/js/config/api.js"></script>
+  <script src="../../assets/js/auth-helper.js"></script>
+  <style>
+    :root {
+      --orange: var(--accent-color);
+      --brown: var(--main-color);
+      --white: #ffffff;
+      --black: #000000;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--white);
+      color: var(--black);
+    }
+
+    .page-header {
+      text-align: center;
+      padding: 60px 10%;
+      background: linear-gradient(180deg, var(--white), #f4f1ed);
+    }
+    .page-header h1 {
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--orange);
+      margin-bottom: 15px;
+    }
+    .page-header p {
+      font-size: 18px;
+      color: #444;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      padding: 20px;
+    }
+
+    .tab-btn {
+      padding: 12px 30px;
+      border: 2px solid var(--orange);
+      background: transparent;
+      color: var(--orange);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .tab-btn.active {
+      background: var(--orange);
+      color: white;
+    }
+
+    .stats-summary {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      padding: 40px 10%;
+    }
+
+    .card {
+      background: var(--white);
+      border: 2px solid var(--orange);
+      border-radius: 12px;
+      padding: 25px;
+      width: 200px;
+      text-align: center;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover { transform: translateY(-5px); }
+
+    .card h2 {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .card p {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--orange);
+      margin: 0;
+    }
+
+    .card p.no-data {
+      font-size: 18px;
+      color: #999;
+    }
+
+    .stats-table-container {
+      width: 90%;
+      max-width: 900px;
+      margin: 20px auto 40px;
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .stats-table th, .stats-table td {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .stats-table th {
+      background-color: var(--brown);
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    .stats-table tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    .stats-table tbody tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+
+    .no-data-row {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-size: 18px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background: var(--brown);
+      color: var(--white);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="../../index.html" class="logo">
+      <img src="../../assets/images/Team Logos/phLogo.png" alt="Strike Master Logo">
+    </a>
+    <div class="nav-links">
+      <a href="../dashboard/home.html">Home</a>
+      <a href="../dashboard/players.html">Players</a>
+      <a href="../settings/appearanceSettings.html">Settings</a>
+      <a href="../dashboard/myTeam.html">My Team</a>
+      <a href="#" id="logoutBtn" style="color:#dc3545;">Logout</a>
+    </div>
+  </div>
+
+  <section class="page-header">
+    <h1>Season Stats</h1>
+    <p>Overview of your team's bowling performance this season.</p>
+  </section>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-gender="boys">Boys Team</button>
+    <button class="tab-btn" data-gender="girls">Girls Team</button>
+  </div>
+
+  <section class="stats-summary" id="statsSummary">
+    <div class="card">
+      <h2>Total Games</h2>
+      <p id="totalGames" class="no-data">NO DATA</p>
+    </div>
+    <div class="card">
+      <h2>Team Average</h2>
+      <p id="teamAverage" class="no-data">NO DATA</p>
+    </div>
+    <div class="card">
+      <h2>High Game</h2>
+      <p id="highGame" class="no-data">NO DATA</p>
+    </div>
+    <div class="card">
+      <h2>Total Players</h2>
+      <p id="totalPlayers" class="no-data">NO DATA</p>
+    </div>
+  </section>
+
+  <div class="stats-table-container">
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Games</th>
+          <th>Average</th>
+          <th>High Game</th>
+          <th>Total Pins</th>
+        </tr>
+      </thead>
+      <tbody id="playersTable">
+        <tr>
+          <td colspan="5" class="loading">Loading stats...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <p>© 2025 Strike Master | Season Stats</p>
+  </div>
+
+  <script>
+    // Require authentication - redirect to login if not logged in
+    if (!auth.requireCoach('../auth/login.html')) {
+      throw new Error('Not authenticated');
+    }
+
+    const currentUser = auth.getUser();
+    let currentGender = 'boys';
+    let boysTeamId = null;
+    let girlsTeamId = null;
+
+    // Setup logout button
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('Are you sure you want to logout?')) {
+        auth.logout('../../index.html');
+      }
+    });
+
+    async function init() {
+      if (!currentUser || !currentUser.id) {
+        document.getElementById('playersTable').innerHTML = 
+          '<tr><td colspan="5" class="no-data-row">Please log in to view your team stats</td></tr>';
+        return;
+      }
+
+      try {
+        const res = await api.get('/api/coach/' + currentUser.id + '/teams');
+        const teams = await res.json();
+        teams.forEach(team => {
+          if (team.gender === 'boys') boysTeamId = team.id;
+          if (team.gender === 'girls') girlsTeamId = team.id;
+        });
+      } catch (err) {
+        console.error('Failed to get teams:', err);
+      }
+      loadStats();
+    }
+
+    async function loadStats() {
+      const teamId = currentGender === 'boys' ? boysTeamId : girlsTeamId;
+      
+      document.getElementById('totalGames').textContent = 'NO DATA';
+      document.getElementById('totalGames').className = 'no-data';
+      document.getElementById('teamAverage').textContent = 'NO DATA';
+      document.getElementById('teamAverage').className = 'no-data';
+      document.getElementById('highGame').textContent = 'NO DATA';
+      document.getElementById('highGame').className = 'no-data';
+      document.getElementById('totalPlayers').textContent = 'NO DATA';
+      document.getElementById('totalPlayers').className = 'no-data';
+
+      if (!teamId) {
+        document.getElementById('playersTable').innerHTML = 
+          '<tr><td colspan="5" class="no-data-row">NO DATA - Please log in to view your team stats</td></tr>';
+        return;
+      }
+
+      try {
+        const playersRes = await api.get('/api/teams/' + teamId + '/players');
+        const players = await playersRes.json();
+
+        if (!players || players.length === 0) {
+          document.getElementById('playersTable').innerHTML = 
+            '<tr><td colspan="5" class="no-data-row">NO DATA - No players on this team yet</td></tr>';
+          return;
+        }
+
+        document.getElementById('totalPlayers').textContent = players.length;
+        document.getElementById('totalPlayers').className = '';
+
+        let playerStats = [];
+        let totalGames = 0;
+        let allScores = [];
+        let highGame = 0;
+
+        for (const player of players) {
+          try {
+            const scoresRes = await api.get('/api/players/' + player.id + '/scores');
+            if (scoresRes.ok) {
+              const scores = await scoresRes.json();
+              if (scores && scores.length > 0) {
+                const playerScores = scores.map(s => s.score);
+                const gamesPlayed = playerScores.length;
+                const totalPins = playerScores.reduce((a, b) => a + b, 0);
+                const avg = Math.round(totalPins / gamesPlayed);
+                const playerHigh = Math.max(...playerScores);
+
+                playerStats.push({
+                  name: player.first_name + ' ' + player.last_name,
+                  games: gamesPlayed,
+                  average: avg,
+                  highGame: playerHigh,
+                  totalPins: totalPins
+                });
+
+                totalGames += gamesPlayed;
+                allScores.push(...playerScores);
+                if (playerHigh > highGame) highGame = playerHigh;
+              } else {
+                playerStats.push({
+                  name: player.first_name + ' ' + player.last_name,
+                  games: 0,
+                  average: '-',
+                  highGame: '-',
+                  totalPins: 0
+                });
+              }
+            } else {
+              playerStats.push({
+                name: player.first_name + ' ' + player.last_name,
+                games: 0,
+                average: '-',
+                highGame: '-',
+                totalPins: 0
+              });
+            }
+          } catch (err) {
+            playerStats.push({
+              name: player.first_name + ' ' + player.last_name,
+              games: 0,
+              average: '-',
+              highGame: '-',
+              totalPins: 0
+            });
+          }
+        }
+
+        if (totalGames > 0) {
+          document.getElementById('totalGames').textContent = totalGames;
+          document.getElementById('totalGames').className = '';
+          
+          const teamAvg = Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length);
+          document.getElementById('teamAverage').textContent = teamAvg;
+          document.getElementById('teamAverage').className = '';
+          
+          document.getElementById('highGame').textContent = highGame;
+          document.getElementById('highGame').className = '';
+        }
+
+        if (playerStats.length > 0) {
+          let html = '';
+          for (const p of playerStats) {
+            html += '<tr><td>' + p.name + '</td><td>' + p.games + '</td><td>' + p.average + '</td><td>' + p.highGame + '</td><td>' + p.totalPins + '</td></tr>';
+          }
+          document.getElementById('playersTable').innerHTML = html;
+        } else {
+          document.getElementById('playersTable').innerHTML = 
+            '<tr><td colspan="5" class="no-data-row">NO DATA</td></tr>';
+        }
+
+      } catch (err) {
+        console.error('Failed to load stats:', err);
+        document.getElementById('playersTable').innerHTML = 
+          '<tr><td colspan="5" class="no-data-row">NO DATA - Failed to load stats</td></tr>';
+      }
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentGender = btn.dataset.gender;
+        loadStats();
+      });
+    });
+
+    init();
+  </script>
+</body>
+</html>

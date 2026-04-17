@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Linking Google... - Strike Master</title>
+  <link rel="icon" type="image/png" href="../../assets/images/2.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neutral-900: #111827;
+      --neutral-700: #374151;
+      --neutral-500: #6b7280;
+      --neutral-300: #d1d5db;
+      --neutral-100: #f3f4f6;
+      --neutral-50: #f9fafb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--neutral-50);
+      color: var(--neutral-900);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 48px;
+      border-radius: 16px;
+      width: 400px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      border: 1px solid var(--neutral-100);
+      text-align: center;
+    }
+    .brand-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--neutral-900);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .brand-icon svg {
+      width: 36px;
+      height: 36px;
+      stroke: white;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--neutral-100);
+      border-top-color: var(--neutral-900);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--neutral-900);
+      margin: 0 0 8px;
+    }
+    p {
+      color: var(--neutral-500);
+      font-size: 14px;
+      margin: 0;
+    }
+    .message {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .message.error {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+    .message.success {
+      background: #f0fdf4;
+      color: #16a34a;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: var(--neutral-500);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .back-link:hover {
+      color: var(--neutral-900);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand-icon">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+    </div>
+    <div class="spinner" id="spinner"></div>
+    <h2 id="title">Linking Google Account...</h2>
+    <p id="subtitle">Please wait while we link your account</p>
+    <div class="message" id="message" style="display: none;"></div>
+    <a class="back-link" id="backLink" href="../settings/accountInfo.html" style="display: none;">← Back to Settings</a>
+  </div>
+
+  <script>
+    function showError(text) {
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('title').textContent = 'Linking Failed';
+      document.getElementById('subtitle').textContent = '';
+      document.getElementById('message').textContent = text;
+      document.getElementById('message').className = 'message error';
+      document.getElementById('message').style.display = 'block';
+      document.getElementById('backLink').style.display = 'inline-block';
+    }
+
+    function showSuccess(text) {
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('title').textContent = 'Success!';
+      document.getElementById('subtitle').textContent = '';
+      document.getElementById('message').textContent = text;
+      document.getElementById('message').className = 'message success';
+      document.getElementById('message').style.display = 'block';
+    }
+
+    // Parse the hash fragment to get tokens
+    function parseHash() {
+      const hash = window.location.hash.substring(1);
+      const params = {};
+      hash.split('&').forEach(part => {
+        const [key, value] = part.split('=');
+        if (key && value) {
+          params[key] = decodeURIComponent(value);
+        }
+      });
+      return params;
+    }
+
+    // Decode JWT to get user info
+    function decodeJWT(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        console.error('Failed to decode JWT:', e);
+        return null;
+      }
+    }
+
+    function handleCallback() {
+      const params = parseHash();
+      
+      // Check for error in URL
+      if (params.error) {
+        showError(params.error_description || params.error || 'Authentication failed');
+        return;
+      }
+
+      const accessToken = params.access_token;
+      if (!accessToken) {
+        showError('No access token found. Please try again.');
+        return;
+      }
+
+      // Decode the JWT to get user info
+      const payload = decodeJWT(accessToken);
+      if (!payload) {
+        showError('Invalid token. Please try again.');
+        return;
+      }
+
+      console.log('Google user payload:', payload);
+
+      // Extract Google user info from JWT
+      const userMetadata = payload.user_metadata || {};
+      const googleUser = {
+        googleId: payload.sub,
+        email: payload.email || userMetadata.email,
+        name: userMetadata.full_name || userMetadata.name,
+        avatar_url: userMetadata.avatar_url || userMetadata.picture
+      };
+
+      console.log('Extracted Google user:', googleUser);
+
+      // Store the Google data for the account settings page to process
+      localStorage.setItem('pending_google_link', JSON.stringify(googleUser));
+
+      showSuccess('Google account verified! Redirecting...');
+      
+      // Redirect back to account settings
+      setTimeout(() => {
+        window.location.href = '../settings/accountInfo.html';
+      }, 1000);
+    }
+
+    // Run on page load
+    handleCallback();
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+:root {
+  /* Brand colors (user controlled) */
+  --accent-color: #ff6b6b;
+  --main-color: #6ecbff;
+  --sidebar-text-color: #111111;
+  --accent-text-color: #111111;
+  --button-border-color: rgba(0, 0, 0, 0.25);
+  --button-shadow-color: rgba(0, 0, 0, 0.18);
+  --dashboard-button-bg: var(--card-bg);
+  --dashboard-button-text: var(--text-color);
+  --dashboard-button-border: var(--button-border-color);
+
+  /* Theme colors */
+  --bg-color: #fff4c2;
+  --content-bg: #fff9e2;
+  --card-bg: #ffffff;
+  --text-color: #111111;
+  --text-muted: #4b4b4b;
+  --border-color: rgba(0, 0, 0, 0.12);
+  --accent-color-hover: color-mix(in srgb, var(--accent-color) 85%, black);
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] {
+  --bg-color: #1f1f1f;
+  --content-bg: #2a2a2a;
+  --card-bg: #2f2f2f;
+  --text-color: #f8f8f8;
+  --text-muted: #c8c8c8;
+  --border-color: rgba(255, 255, 255, 0.18);
+}

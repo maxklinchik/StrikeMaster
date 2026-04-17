@@ -1,7 +1,7 @@
 // API Client for GitHub Pages Frontend
 // This will call your Railway API backend
 
-const API_URL = 'https://strikemaster-production.up.railway.app';
+const API_URL = 'https://strikemaster.up.railway.app';
 
 class APIClient {
   constructor() {

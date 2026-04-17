@@ -17,7 +17,7 @@
 Go to your Railway project → **Variables** tab and add:
 
 ```
-SUPABASE_URL=https://fxqddamrgadttkfxvjth.supabase.co
+SUPABASE_URL=https://mphwgkeplvqnqnlbaoha.supabase.co
 SUPABASE_SERVICE_KEY=YOUR_SERVICE_ROLE_KEY_HERE
 NODE_ENV=production
 ```
@@ -40,7 +40,7 @@ After deployment succeeds:
 2. Go to **Settings** tab
 3. Scroll to **"Networking"** section
 4. Click **"Generate Domain"**
-5. Copy the URL (e.g., `https://strikemaster-production.up.railway.app`)
+5. Copy the URL (e.g., `https://strikemaster.up.railway.app`)
 
 ### 4. Update Frontend API URL
 

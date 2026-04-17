@@ -1110,7 +1110,7 @@
       const colSpan = showGender ? 8 : 7;
       tbody.innerHTML = `<tr><td colspan="${colSpan}" class="no-players">Loading averages...</td></tr>`;
 
-      const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+      const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
       const results = await Promise.all(players.map(async (player) => {
         try {
           const res = await fetch(`${API_BASE}/api/players/${player.id}/records`);
@@ -1225,7 +1225,7 @@
     async function loadPlayers() {
       const container = document.getElementById('playersList');
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         let allPlayers = [];
         if (currentGender === 'all') {
           const [boysRes, girlsRes] = await Promise.all([
@@ -1272,7 +1272,7 @@
       const player = players.find(p => p.id === playerId);
       document.getElementById('statsPlayerName').textContent = `${player.first_name} ${player.last_name}'s Stats`;
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/players/${playerId}/records`);
         if (response.ok) playerRecords = await response.json(); else playerRecords = [];
         populateLocationFilter();
@@ -1517,7 +1517,7 @@
         return;
       }
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/players/${editPlayerId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -1544,7 +1544,7 @@
       const selectedGender = genderSelect ? genderSelect.value : (currentGender === 'girls' ? 'girls' : 'boys');
       if (!firstName || !lastName || !gradYear) { showMessage('Please fill in all required fields.', 'error'); return; }
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/players`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ coachId, firstName, lastName, gradYear: parseInt(gradYear), gender: selectedGender, email })
@@ -1568,7 +1568,7 @@
     async function deletePlayer(playerId) {
       if (!confirm('Are you sure you want to remove this player?')) return;
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/players/${playerId}`, { method: 'DELETE' });
         if (!response.ok) { const data = await response.json(); throw new Error(data.error || 'Failed to remove player'); }
         showMessage('Player removed.', 'success');

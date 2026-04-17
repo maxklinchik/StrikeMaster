@@ -16,7 +16,7 @@
 ### 2. Verify Environment Variables on Railway
 
 Make sure these are set correctly:
-- `SUPABASE_URL` = `https://fxqddamrgadttkfxvjth.supabase.co`
+- `SUPABASE_URL` = `https://mphwgkeplvqnqnlbaoha.supabase.co`
 - `SUPABASE_SERVICE_KEY` = (your service role key from Supabase)
 
 ### 3. How the New System Works
@@ -137,13 +137,13 @@ Test these URLs directly in browser (replace with your Railway URL):
 
 **Health check:**
 ```
-https://strikemaster-production.up.railway.app/api/health
+https://strikemaster.up.railway.app/api/health
 ```
 Should return: `{"status":"ok","timestamp":"...","database":"connected"}`
 
 **After logging in, test with your user ID:**
 ```
-https://strikemaster-production.up.railway.app/api/players?coachId=[YOUR_USER_ID]&gender=boys
+https://strikemaster.up.railway.app/api/players?coachId=[YOUR_USER_ID]&gender=boys
 ```
 
 ## Architecture Summary

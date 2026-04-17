@@ -925,7 +925,7 @@
     // Load matches from API
     async function loadMatches() {
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/matches?coachId=${coachId}`);
         
         if (!response.ok) throw new Error('Failed to load matches');

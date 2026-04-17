@@ -1683,7 +1683,7 @@
     // Load saved locations from Supabase
     async function loadSavedLocations() {
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/locations?coachId=${coachId}`);
         if (response.ok) {
           savedLocations = await response.json();
@@ -1728,7 +1728,7 @@
       if (!newLocation) return;
 
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/locations`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1842,7 +1842,7 @@
     // Load players for the form
     async function loadPlayers(genderOverride) {
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const activeGender = genderOverride || currentGender;
 
         if (activeGender === 'all' || activeGender === 'coed') {
@@ -2169,7 +2169,7 @@
       };
 
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         
         if (isEditing) {
           // Update existing match (single gender)
@@ -2236,7 +2236,7 @@
 
     // Helper function to save player records and return total wood
     async function savePlayerRecords(matchId, genderFilter) {
-      const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+      const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
       const rows = document.querySelectorAll('.player-row');
       let totalWood = 0;
       const matchType = document.getElementById('matchType')?.value || 'team';
@@ -2319,7 +2319,7 @@
       
       try {
         updateSeasonTitle();
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         let url = `${API_BASE}/api/matches?coachId=${coachId}`;
         if (currentGender !== 'all') {
           url += `&gender=${currentGender}`;
@@ -2548,7 +2548,7 @@
     // Edit match
     async function editMatch(matchId) {
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         
         // Fetch match details
         const matchResponse = await fetch(`${API_BASE}/api/matches/${matchId}?coachId=${coachId}`);
@@ -2678,7 +2678,7 @@
       }
 
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/matches/${matchId}`, {
           method: 'DELETE'
         });

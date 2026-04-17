@@ -812,7 +812,7 @@
       const container = document.getElementById('playersList');
       
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         
         // If "all" is selected, load both boys and girls
         let allPlayers = [];
@@ -874,7 +874,7 @@
 
       // Load player records
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/players/${playerId}/records`);
         
         if (response.ok) {
@@ -1059,7 +1059,7 @@
         return;
       }
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/players/${editPlayerId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -1092,7 +1092,7 @@
       }
 
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/players`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1140,7 +1140,7 @@
       }
 
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const response = await fetch(`${API_BASE}/api/players/${playerId}`, {
           method: 'DELETE'
         });

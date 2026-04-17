@@ -216,20 +216,20 @@ const TEAMS_CONFIG = {
     accentColor: '#f26531', // Orange
     mainColor: '#663415'    // Brown
   },
-  // Pascack Valley High School - Green and White
+  // Pascack Valley High School - Green and Light Grey
   'pascack valley': {
     name: 'Pascack Valley High School',
     shortName: 'Pascack Valley',
     logo: 'pvLogo.png',
     accentColor: '#388640', // Green
-    mainColor: '#FFFFFF'    // White
+    mainColor: '#cdcdcd'    // Light Grey
   },
   'pv': {
     name: 'Pascack Valley High School',
     shortName: 'Pascack Valley',
     logo: 'pvLogo.png',
     accentColor: '#388640', // Green
-    mainColor: '#FFFFFF'
+    mainColor: '#cdcdcd'
   },
   // Passaic County Technical Institute - Blue and Black
   'passaic county technical institute': {

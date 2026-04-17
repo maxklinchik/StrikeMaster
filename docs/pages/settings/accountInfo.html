@@ -194,6 +194,7 @@
       align-items: center;
       font-size: 15px;
       margin-bottom: 14px;
+      justify-content: space-between;
     }
 
     .info-row:last-of-type { margin-bottom: 0; }
@@ -208,6 +209,21 @@
       color: var(--text-color);
       font-weight: 500;
       word-break: break-all;
+      flex: 1;
+    }
+
+    .info-row .btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    #editProfileForm {
+      width: 100%;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
     }
 
     .form-grid {
@@ -417,21 +433,30 @@
         </div>
 
         <div class="info-row">
-          <span class="info-label">Full Name:</span>
-          <span class="info-value" id="profileUsername">Loading...</span>
+          <div>
+            <span class="info-label">Full Name:</span>
+            <span class="info-value" id="profileUsername">Loading...</span>
+          </div>
+          <button class="btn btn-primary" id="editProfileBtn" type="button" style="margin-left: auto;">Edit</button>
         </div>
         <div class="info-row">
-          <span class="info-label">Email:</span>
-          <span class="info-value" id="profileEmail">Loading...</span>
+          <div>
+            <span class="info-label">Email:</span>
+            <span class="info-value" id="profileEmail">Loading...</span>
+          </div>
         </div>
         <div class="info-row">
-          <span class="info-label">Coach Code:</span>
-          <span class="info-value" id="profileCoachCode">Loading...</span>
+          <div>
+            <span class="info-label">Coach Code:</span>
+            <span class="info-value" id="profileCoachCode">Loading...</span>
+          </div>
         </div>
-
-        <div class="button-row" id="profileActions">
-          <button class="btn btn-primary" id="editProfileBtn" type="button">Edit Profile</button>
-          <button class="btn btn-primary" id="changePasswordBtn" type="button">Change Password</button>
+        <div class="info-row">
+          <div>
+            <span class="info-label">Password:</span>
+            <span class="info-value" id="profilePassword">••••••</span>
+          </div>
+          <button class="btn btn-primary" id="changePasswordBtn" type="button" style="margin-left: auto;">Change</button>
         </div>
 
         <div id="editProfileForm" style="display: none;">

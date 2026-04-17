@@ -4,7 +4,7 @@ A modern team management and scoring application for high school bowling teams. 
 
 ## 🌐 Live Demo
 
-**GitHub Pages**: [https://arkokush.github.io/StrikeMaster/](https://maxklinchik.github.io/StrikeMaster/)
+**GitHub Pages**: [https://maxklinchik.github.io/StrikeMaster/](https://maxklinchik.github.io/StrikeMaster/)
 
 ## 📁 Project Structure
 

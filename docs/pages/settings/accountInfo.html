@@ -460,27 +460,36 @@
           </div>
         </div>
 
-        <div id="editProfileForm" style="display: none;">
+        <div id="editFullNameForm" style="display: none;">
           <div class="form-grid">
             <div class="form-group">
               <label for="editUsername">Full Name</label>
               <input type="text" id="editUsername" placeholder="Enter your full name">
             </div>
+          </div>
+          <div class="inline-actions">
+            <button class="btn btn-primary" id="saveFullNameBtn" type="button">Save Changes</button>
+            <button class="btn btn-secondary" id="cancelFullNameBtn" type="button">Cancel</button>
+          </div>
+        </div>
+
+        <div id="editEmailForm" style="display: none;">
+          <div class="form-grid">
             <div class="form-group">
               <label for="editEmail">Email</label>
               <input type="email" id="editEmail" placeholder="Email address">
             </div>
           </div>
           <div class="inline-actions">
-            <button class="btn btn-primary" id="saveProfileBtn" type="button">Save Changes</button>
-            <button class="btn btn-secondary" id="cancelProfileBtn" type="button">Cancel</button>
+            <button class="btn btn-primary" id="saveEmailBtn" type="button">Save Changes</button>
+            <button class="btn btn-secondary" id="cancelEmailBtn" type="button">Cancel</button>
           </div>
         </div>
 
         <div id="passwordForm" style="display: none; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
           <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 600;">Change Password</h3>
           <div class="form-grid">
-            <div class="form-group">
+            <div class="form-group" style="grid-column: 1 / -1;">
               <label for="oldPassword">Old Password</label>
               <input type="password" id="oldPassword" placeholder="Enter old password">
             </div>
@@ -606,9 +615,12 @@
 
       const editProfileBtn = document.getElementById('editProfileBtn');
       const editEmailBtn = document.getElementById('editEmailBtn');
-      const editProfileForm = document.getElementById('editProfileForm');
-      const saveProfileBtn = document.getElementById('saveProfileBtn');
-      const cancelProfileBtn = document.getElementById('cancelProfileBtn');
+      const editFullNameForm = document.getElementById('editFullNameForm');
+      const editEmailForm = document.getElementById('editEmailForm');
+      const saveFullNameBtn = document.getElementById('saveFullNameBtn');
+      const cancelFullNameBtn = document.getElementById('cancelFullNameBtn');
+      const saveEmailBtn = document.getElementById('saveEmailBtn');
+      const cancelEmailBtn = document.getElementById('cancelEmailBtn');
       const editUsername = document.getElementById('editUsername');
       const editEmail = document.getElementById('editEmail');
 
@@ -623,11 +635,18 @@
       };
 
       const hideEditForm = () => {
-        if (editProfileForm) editProfileForm.style.display = 'none';
+        if (editFullNameForm) editFullNameForm.style.display = 'none';
+        if (editEmailForm) editEmailForm.style.display = 'none';
       };
 
-      const showEditForm = () => {
-        if (editProfileForm) editProfileForm.style.display = 'block';
+      const showFullNameForm = () => {
+        if (editFullNameForm) editFullNameForm.style.display = 'block';
+        if (editEmailForm) editEmailForm.style.display = 'none';
+      };
+
+      const showEmailForm = () => {
+        if (editEmailForm) editEmailForm.style.display = 'block';
+        if (editFullNameForm) editFullNameForm.style.display = 'none';
       };
 
       const hidePasswordForm = () => {
@@ -651,35 +670,35 @@
         editProfileBtn?.addEventListener('click', () => {
           syncEditFields();
           hidePasswordForm();
-          showEditForm();
+          showFullNameForm();
         });
 
         editEmailBtn?.addEventListener('click', () => {
           syncEditFields();
           hidePasswordForm();
-          showEditForm();
+          showEmailForm();
         });
 
-
-        cancelProfileBtn?.addEventListener('click', () => {
+        cancelFullNameBtn?.addEventListener('click', () => {
           hideEditForm();
         });
 
-        saveProfileBtn?.addEventListener('click', async () => {
+        cancelEmailBtn?.addEventListener('click', () => {
+          hideEditForm();
+        });
+
+        saveFullNameBtn?.addEventListener('click', async () => {
           const nextUsername = editUsername.value.trim();
-          const nextEmail = editEmail.value.trim();
 
-
-
-          if (!nextUsername || !nextEmail) {
-            showMessage('Username and email are required.', 'error');
+          if (!nextUsername) {
+            showMessage('Full name is required.', 'error');
             return;
           }
 
           try {
             const res = await api.put(`/api/auth/profile/${currentUser.id}`, {
               username: nextUsername,
-              email: nextEmail
+              email: email
             });
 
             if (!res.ok) {
@@ -692,14 +711,45 @@
             localStorage.setItem('bowling_user', JSON.stringify(updatedUser));
 
             username = updated.username || nextUsername;
-            email = updated.email || nextEmail;
             document.getElementById('profileUsername').textContent = username;
-            document.getElementById('profileEmail').textContent = email;
 
-            showMessage('Profile updated successfully.', 'success');
+            showMessage('Full name updated successfully.', 'success');
             hideEditForm();
           } catch (err) {
-            showMessage(err.message || 'Failed to update profile.', 'error');
+            showMessage(err.message || 'Failed to update full name.', 'error');
+          }
+        });
+
+        saveEmailBtn?.addEventListener('click', async () => {
+          const nextEmail = editEmail.value.trim();
+
+          if (!nextEmail) {
+            showMessage('Email is required.', 'error');
+            return;
+          }
+
+          try {
+            const res = await api.put(`/api/auth/profile/${currentUser.id}`, {
+              username: username,
+              email: nextEmail
+            });
+
+            if (!res.ok) {
+              const errorMessage = await readResponseMessage(res, 'Failed to update profile');
+              throw new Error(errorMessage);
+            }
+
+            const updated = await res.json().catch(() => ({}));
+            const updatedUser = { ...currentUser, ...updated };
+            localStorage.setItem('bowling_user', JSON.stringify(updatedUser));
+
+            email = updated.email || nextEmail;
+            document.getElementById('profileEmail').textContent = email;
+
+            showMessage('Email updated successfully.', 'success');
+            hideEditForm();
+          } catch (err) {
+            showMessage(err.message || 'Failed to update email.', 'error');
           }
         });
 

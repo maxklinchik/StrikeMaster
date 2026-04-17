@@ -221,15 +221,15 @@ const TEAMS_CONFIG = {
     name: 'Pascack Valley High School',
     shortName: 'Pascack Valley',
     logo: 'pvLogo.png',
-    accentColor: '#388640', // Green
-    mainColor: '#FFFFFF'    // White
+    accentColor: '#FFFFFF'    // White
+    MainColor: '#388640', // Green
   },
   'pv': {
     name: 'Pascack Valley High School',
     shortName: 'Pascack Valley',
     logo: 'pvLogo.png',
-    accentColor: '#388640', // Green
-    mainColor: '#FFFFFF'
+    accentColor: '#FFFFFF', // White
+    mainColor: '#388640'
   },
   // Passaic County Technical Institute - Blue and Black
   'passaic county technical institute': {
@@ -259,8 +259,8 @@ const TEAMS_CONFIG = {
     name: 'Passaic Valley High School',
     shortName: 'Passaic Valley',
     logo: 'passaicvalLogo.png',
-    accentColor: '#2b4829', // Green
-    mainColor: '#FFFFFF'    // White
+    accentColor: '#FFFFFF', // White
+    mainColor: '#2b4829'    // Green
   },
   // Paterson Eastside High School - Orange and Blue
   'paterson eastside': {

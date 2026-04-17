@@ -161,6 +161,7 @@ CREATE TABLE records (
   game3 INTEGER CHECK (game3 >= 0 AND game3 <= 300),
   game4 INTEGER CHECK (game4 >= 0 AND game4 <= 300),
   total INTEGER GENERATED ALWAYS AS (COALESCE(game1, 0) + COALESCE(game2, 0) + COALESCE(game3, 0) + COALESCE(game4, 0)) STORED,
+  is_varsity BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(match_id, player_id)  -- One record per player per match
 );

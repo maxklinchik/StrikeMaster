@@ -2564,6 +2564,9 @@
         const recordsResponse = await fetch(`${API_BASE}/api/records?matchId=${matchId}`);
         const records = recordsResponse.ok ? await recordsResponse.json() : [];
         
+        // Fallback: if records is not an array, make it an array
+        const recordsArray = Array.isArray(records) ? records : [];
+        
         // Set editing state
         editingMatchId = matchId;
         editingMatchGender = match.gender;
@@ -2615,13 +2618,15 @@
           if (boysResponse.ok && girlsResponse.ok) {
             allPlayers.boys = await boysResponse.json();
             allPlayers.girls = await girlsResponse.json();
-            renderAllPlayersTableWithScores(records);
+            renderAllPlayersTableWithScores(recordsArray);
+            calculateTeamTotals();
           }
         } else {
           const playersResponse = await fetch(`${API_BASE}/api/players?coachId=${ownerCoachId}&gender=${match.gender}`);
           if (playersResponse.ok) {
             players = await playersResponse.json();
-            renderPlayersTableWithScores(records);
+            renderPlayersTableWithScores(recordsArray);
+            calculateTeamTotals();
           }
         }
         

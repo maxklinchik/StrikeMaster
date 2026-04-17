@@ -112,6 +112,7 @@ CREATE TABLE matches (
   opp_g3 INTEGER,
   team_g4 INTEGER,
   opp_g4 INTEGER,
+  comments TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

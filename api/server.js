@@ -1471,7 +1471,7 @@ app.post('/api/matches', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { coachId, gender, matchType, opponent, matchDate, location, result, ourScore, opponentScore, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, sharedCoaches } = req.body;
+    const { coachId, gender, matchType, opponent, matchDate, location, result, ourScore, opponentScore, comments, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, sharedCoaches } = req.body;
 
     if (!coachId || !gender || !opponent || !matchDate) {
       return res.status(400).json({ error: 'Required: coachId, gender, opponent, matchDate' });
@@ -1491,6 +1491,7 @@ app.post('/api/matches', async (req, res) => {
         result: result || null,
         our_score: ourScore ? parseInt(ourScore) : 0,
         opponent_score: opponentScore ? parseInt(opponentScore) : 0,
+        comments: comments || null,
         team_g1: teamG1 ? parseInt(teamG1) : null,
         team_g2: teamG2 ? parseInt(teamG2) : null,
         team_g3: teamG3 ? parseInt(teamG3) : null,
@@ -1535,7 +1536,7 @@ app.put('/api/matches/:id', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { coachId, opponent, matchDate, location, ourScore, opponentScore, result, isComplete, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, matchType, sharedCoaches } = req.body;
+    const { coachId, opponent, matchDate, location, ourScore, opponentScore, result, isComplete, comments, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, matchType, sharedCoaches } = req.body;
 
     if (coachId) {
       const { data: matchOwner, error: ownerError } = await supabase
@@ -1570,6 +1571,7 @@ app.put('/api/matches/:id', async (req, res) => {
     if (opponentScore !== undefined) updateData.opponent_score = parseInt(opponentScore);
     if (result !== undefined) updateData.result = result;
     if (isComplete !== undefined) updateData.is_complete = isComplete;
+    if (comments !== undefined) updateData.comments = comments;
     if (matchType !== undefined) updateData.match_type = matchType;
     if (teamG1 !== undefined) updateData.team_g1 = teamG1 ? parseInt(teamG1) : null;
     if (teamG2 !== undefined) updateData.team_g2 = teamG2 ? parseInt(teamG2) : null;

@@ -13,7 +13,7 @@ if (!process.env.SUPABASE_SERVICE_KEY) {
   console.warn('API endpoints requiring database will not work.');
 } else {
   supabase = createClient(
-    process.env.SUPABASE_URL || 'https://fxqddamrgadttkfxvjth.supabase.co',
+    process.env.SUPABASE_URL || 'https://mphwgkeplvqnqnlbaoha.supabase.co',
     process.env.SUPABASE_SERVICE_KEY
   );
 }
@@ -57,8 +57,13 @@ app.use(cors({
     'http://127.0.0.1:5500',
     'http://localhost:5500'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 app.use(express.json());
 

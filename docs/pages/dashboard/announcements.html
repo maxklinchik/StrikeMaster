@@ -215,7 +215,6 @@
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html">My Team</a>
       <a href="announcements.html" class="active">Announcements</a>
-      <a href="#" id="logoutBtn" style="color:#fca5a5;">Logout</a>
     </div>
   </div>
 
@@ -252,11 +251,6 @@
     }
 
     const currentUser = auth.getUser();
-
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      if (confirm('Are you sure you want to logout?')) auth.logout('../../index.html');
-    });
 
     let activeOwnerCoachId = currentUser?.id;
     let canEditTeam = true;

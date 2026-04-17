@@ -221,8 +221,8 @@ const TEAMS_CONFIG = {
     name: 'Pascack Valley High School',
     shortName: 'Pascack Valley',
     logo: 'pvLogo.png',
-    accentColor: '#FFFFFF'    // White
-    MainColor: '#388640', // Green
+    accentColor: '#FFFFFF',    // White
+    mainColor: '#388640', // Green
   },
   'pv': {
     name: 'Pascack Valley High School',

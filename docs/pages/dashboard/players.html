@@ -632,7 +632,6 @@
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html">My Team</a>
       <a href="announcements.html">Announcements</a>
-      <a href="#" id="logoutBtn" style="color:#fca5a5;">Logout</a>
     </div>
   </div>
 
@@ -1212,15 +1211,6 @@
         </tr>
       `).join('');
     }
-
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('supabase.auth.token');
-        localStorage.removeItem('bowling_user');
-        window.location.href = '../../index.html';
-      }
-    });
 
     async function loadPlayers() {
       const container = document.getElementById('playersList');

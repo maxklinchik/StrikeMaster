@@ -431,6 +431,7 @@
 
         <div class="button-row" id="profileActions">
           <button class="btn btn-primary" id="editProfileBtn" type="button">Edit Profile</button>
+          <button class="btn btn-primary" id="changePasswordBtn" type="button">Change Password</button>
         </div>
 
         <div id="editProfileForm" style="display: none;">
@@ -447,6 +448,28 @@
           <div class="inline-actions">
             <button class="btn btn-primary" id="saveProfileBtn" type="button">Save Changes</button>
             <button class="btn btn-secondary" id="cancelProfileBtn" type="button">Cancel</button>
+          </div>
+        </div>
+
+        <div id="passwordForm" style="display: none; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+          <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 600;">Change Password</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="oldPassword">Old Password</label>
+              <input type="password" id="oldPassword" placeholder="Enter old password">
+            </div>
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input type="password" id="newPassword" placeholder="Enter new password">
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirm New Password</label>
+              <input type="password" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+          </div>
+          <div class="inline-actions">
+            <button class="btn btn-primary" id="savePasswordBtn" type="button">Update Password</button>
+            <button class="btn btn-secondary" id="cancelPasswordBtn" type="button">Cancel</button>
           </div>
         </div>
 
@@ -472,42 +495,7 @@
         <div class="linked-pill" id="googleLinkedPill" style="display: none;">Google linked</div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="icon">
-            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m0-10v2m8 3a8 8 0 11-16 0 8 8 0 0116 0z" />
-            </svg>
-          </div>
-          <div>
-            <h2>Security</h2>
-            <p>Update your password</p>
-          </div>
-        </div>
 
-        <button class="btn btn-primary" id="changePasswordBtn" type="button">Change Password</button>
-
-        <div id="passwordForm" style="display: none; margin-top: 16px;">
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="oldPassword">Old Password</label>
-              <input type="password" id="oldPassword" placeholder="Enter old password">
-            </div>
-            <div class="form-group">
-              <label for="newPassword">New Password</label>
-              <input type="password" id="newPassword" placeholder="Enter new password">
-            </div>
-            <div class="form-group">
-              <label for="confirmPassword">Confirm New Password</label>
-              <input type="password" id="confirmPassword" placeholder="Confirm new password">
-            </div>
-          </div>
-          <div class="inline-actions">
-            <button class="btn btn-primary" id="savePasswordBtn" type="button">Update Password</button>
-            <button class="btn btn-secondary" id="cancelPasswordBtn" type="button">Cancel</button>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -622,6 +610,11 @@
         document.getElementById('confirmPassword').value = '';
       };
 
+      const showPasswordForm = () => {
+        if (passwordForm) passwordForm.style.display = 'block';
+        hideEditForm();
+      };
+
       if (isStudent) {
         if (editProfileBtn) editProfileBtn.style.display = 'none';
         if (changePasswordBtn) changePasswordBtn.style.display = 'none';
@@ -629,6 +622,7 @@
         syncEditFields();
         editProfileBtn?.addEventListener('click', () => {
           syncEditFields();
+          hidePasswordForm();
           showEditForm();
         });
 
@@ -677,7 +671,8 @@
         });
 
         changePasswordBtn?.addEventListener('click', () => {
-          passwordForm.style.display = 'block';
+          hideEditForm();
+          showPasswordForm();
         });
 
         cancelPasswordBtn?.addEventListener('click', hidePasswordForm);

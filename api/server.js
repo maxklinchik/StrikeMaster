@@ -1471,7 +1471,7 @@ app.post('/api/matches', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { coachId, gender, matchType, opponent, matchDate, location, result, ourScore, opponentScore, comments, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, sharedCoaches } = req.body;
+    const { coachId, gender, matchType, opponent, matchDate, location, result, ourScore, opponentScore, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, sharedCoaches } = req.body;
 
     if (!coachId || !gender || !opponent || !matchDate) {
       return res.status(400).json({ error: 'Required: coachId, gender, opponent, matchDate' });
@@ -1491,7 +1491,6 @@ app.post('/api/matches', async (req, res) => {
         result: result || null,
         our_score: ourScore ? parseInt(ourScore) : 0,
         opponent_score: opponentScore ? parseInt(opponentScore) : 0,
-        comments: comments || null,
         team_g1: teamG1 ? parseInt(teamG1) : null,
         team_g2: teamG2 ? parseInt(teamG2) : null,
         team_g3: teamG3 ? parseInt(teamG3) : null,

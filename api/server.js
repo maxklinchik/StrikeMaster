@@ -1535,7 +1535,7 @@ app.put('/api/matches/:id', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { coachId, opponent, matchDate, location, ourScore, opponentScore, result, isComplete, comments, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, matchType, sharedCoaches } = req.body;
+    const { coachId, opponent, matchDate, location, ourScore, opponentScore, result, isComplete, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, matchType, sharedCoaches } = req.body;
 
     if (coachId) {
       const { data: matchOwner, error: ownerError } = await supabase
@@ -1570,7 +1570,6 @@ app.put('/api/matches/:id', async (req, res) => {
     if (opponentScore !== undefined) updateData.opponent_score = parseInt(opponentScore);
     if (result !== undefined) updateData.result = result;
     if (isComplete !== undefined) updateData.is_complete = isComplete;
-    if (comments !== undefined) updateData.comments = comments;
     if (matchType !== undefined) updateData.match_type = matchType;
     if (teamG1 !== undefined) updateData.team_g1 = teamG1 ? parseInt(teamG1) : null;
     if (teamG2 !== undefined) updateData.team_g2 = teamG2 ? parseInt(teamG2) : null;

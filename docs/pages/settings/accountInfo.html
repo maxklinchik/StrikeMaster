@@ -444,12 +444,7 @@
             <span class="info-label">Email:</span>
             <span class="info-value" id="profileEmail">Loading...</span>
           </div>
-        </div>
-        <div class="info-row">
-          <div>
-            <span class="info-label">Coach Code:</span>
-            <span class="info-value" id="profileCoachCode">Loading...</span>
-          </div>
+          <button class="btn btn-primary" id="editEmailBtn" type="button" style="margin-left: auto;">Edit</button>
         </div>
         <div class="info-row">
           <div>
@@ -457,6 +452,12 @@
             <span class="info-value" id="profilePassword">••••••</span>
           </div>
           <button class="btn btn-primary" id="changePasswordBtn" type="button" style="margin-left: auto;">Change</button>
+        </div>
+        <div class="info-row">
+          <div>
+            <span class="info-label">Coach Code:</span>
+            <span class="info-value" id="profileCoachCode">Loading...</span>
+          </div>
         </div>
 
         <div id="editProfileForm" style="display: none;">
@@ -604,6 +605,7 @@
       document.getElementById('profileCoachCode').textContent = coachCode;
 
       const editProfileBtn = document.getElementById('editProfileBtn');
+      const editEmailBtn = document.getElementById('editEmailBtn');
       const editProfileForm = document.getElementById('editProfileForm');
       const saveProfileBtn = document.getElementById('saveProfileBtn');
       const cancelProfileBtn = document.getElementById('cancelProfileBtn');
@@ -642,6 +644,7 @@
 
       if (isStudent) {
         if (editProfileBtn) editProfileBtn.style.display = 'none';
+        if (editEmailBtn) editEmailBtn.style.display = 'none';
         if (changePasswordBtn) changePasswordBtn.style.display = 'none';
       } else {
         syncEditFields();
@@ -651,6 +654,11 @@
           showEditForm();
         });
 
+        editEmailBtn?.addEventListener('click', () => {
+          syncEditFields();
+          hidePasswordForm();
+          showEditForm();
+        });
 
 
         cancelProfileBtn?.addEventListener('click', () => {

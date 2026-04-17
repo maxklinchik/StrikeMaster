@@ -5,6 +5,9 @@
 
 const API_BASE_URL = 'https://strikemaster.up.railway.app';
 
+// Make it globally accessible
+window.API_BASE_URL = API_BASE_URL;
+
 // Helper function to make API calls
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;

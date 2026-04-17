@@ -488,11 +488,13 @@
 
         <div id="passwordForm" style="display: none; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
           <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 600;">Change Password</h3>
-          <div class="form-grid">
+          <div class="form-grid" style="grid-template-columns: 1fr;">
             <div class="form-group">
               <label for="oldPassword">Old Password</label>
               <input type="password" id="oldPassword" placeholder="Enter old password">
             </div>
+          </div>
+          <div class="form-grid">
             <div class="form-group">
               <label for="newPassword">New Password</label>
               <input type="password" id="newPassword" placeholder="Enter new password">

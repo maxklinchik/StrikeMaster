@@ -1,0 +1,2779 @@
+<!DOCTYPE html>
+<html lang="en" data-ui="cartoon">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home - </title>
+  <link rel="icon" type="image/png" href="../../assets/images/BowlingPinCartoon.png">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/cartoon-ui.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="../../assets/js/accent-loader.js"></script>
+  <script src="../../assets/js/season-context.js"></script>
+  <script src="../../assets/js/config/api.js"></script>
+  <script src="../../assets/js/config/teams.js"></script>
+  <script src="../../assets/js/auth-helper.js"></script>
+  <style>
+    :root {
+      --accent-color: #ff6b6b;
+      --main-color: #6ecbff;
+      --bg-color: #fff4c2;
+      --content-bg: #fff9e2;
+      --card-bg: #ffffff;
+      --text-color: #1f1f1f;
+      --text-muted: #4b4b4b;
+      --border-color: rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1f1f1f;
+      --content-bg: #2a2a2a;
+      --card-bg: #2f2f2f;
+      --text-color: #f8f8f8;
+      --text-muted: #c8c8c8;
+      --border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--main-color);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar .logo img { height: 46px; width: 46px; object-fit: contain; }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .season-select {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 2px solid rgba(0, 0, 0, 0.12);
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    .season-select label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--text-color);
+    }
+
+    .season-select select {
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-color);
+      font-family: inherit;
+    }
+
+    .season-select select:focus {
+      outline: none;
+    }
+
+    .nav-links { display: flex; gap: 8px; align-items: center; }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover { background: rgba(255,255,255,0.1); }
+    .nav-links a.active { background: var(--accent-color); color: var(--accent-text-color, white); }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+
+    .brand-name {
+      font-size: 40px;
+      letter-spacing: 1px;
+    }
+
+    .page-header p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .brand-logo {
+      display: flex;
+      justify-content: center;
+      margin: 0 0 10px 0;
+    }
+
+    .brand-logo svg {
+      width: min(380px, 100%);
+      height: auto;
+      background: transparent;
+      clip-path: inset(3px 0 0 3px);
+    }
+
+    .brand-logo svg [stroke] {
+      stroke: transparent !important;
+    }
+
+    .brand-logo svg path:first-of-type {
+      fill: transparent !important;
+    }
+
+    .brand-logo {
+      --logo-light: #f2f2f2;
+    }
+
+    .brand-logo svg [fill="#F3D3A8"],
+    .brand-logo svg [fill="#F4D5A9"],
+    .brand-logo svg [fill="#F5D4AA"],
+    .brand-logo svg [fill="#F4DEB8"],
+    .brand-logo svg [fill="#FBE7C0"],
+    .brand-logo svg [fill="#F8EDD5"],
+    .brand-logo svg [fill="#CFB78E"],
+    .brand-logo svg [fill="#CEB68E"],
+    .brand-logo svg [fill="#CCB48C"] {
+      fill: var(--logo-light) !important;
+    }
+
+    .brand-logo svg [fill="#EF6825"],
+    .brand-logo svg [fill="#ED792E"],
+    .brand-logo svg [fill="#EE792E"],
+    .brand-logo svg [fill="#EB6726"],
+    .brand-logo svg [fill="#EF8F32"] {
+      fill: var(--accent-color) !important;
+    }
+
+    .brand-logo svg [fill="#4D291C"],
+    .brand-logo svg [fill="#4B291B"],
+    .brand-logo svg [fill="#4E2E1E"],
+    .brand-logo svg [fill="#6E5C49"],
+    .brand-logo svg [fill="#766553"],
+    .brand-logo svg [fill="#954525"],
+    .brand-logo svg [fill="#BB5021"],
+    .brand-logo svg [fill="#64240C"],
+    .brand-logo svg [fill="#884224"],
+    .brand-logo svg [fill="#C57528"],
+    .brand-logo svg [fill="#804023"],
+    .brand-logo svg [fill="#884429"],
+    .brand-logo svg [fill="#5E2913"],
+    .brand-logo svg [fill="#4E2818"],
+    .brand-logo svg [fill="#4E2717"],
+    .brand-logo svg [fill="#C2511F"],
+    .brand-logo svg [fill="#B14C20"],
+    .brand-logo svg [fill="#6D3118"],
+    .brand-logo svg [fill="#6A2A11"],
+    .brand-logo svg [fill="#512A1D"],
+    .brand-logo svg [fill="#572D1E"],
+    .brand-logo svg [fill="#562C1D"],
+    .brand-logo svg [fill="#61321E"],
+    .brand-logo svg [fill="#CD5F26"] {
+      fill: var(--main-color) !important;
+    }
+
+    .brand-logo svg [stroke] {
+      stroke: var(--main-color) !important;
+    }
+
+    /* Team Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 10px 24px;
+      border: 2px solid var(--dashboard-button-border, var(--button-border-color, var(--border-color)));
+      background: var(--dashboard-button-bg, var(--card-bg));
+      color: var(--dashboard-button-text, var(--text-color));
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
+    }
+
+    .tab-btn:hover { border-color: var(--accent-color); }
+    .tab-btn.active { background: var(--accent-color); color: var(--accent-text-color, white); border-color: var(--accent-color); }
+
+    /* Log Match Button */
+    .log-match-btn {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.2));
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto 28px auto;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.18));
+    }
+
+    .log-match-btn:hover {
+      filter: brightness(0.95);
+      transform: translateY(-1px);
+    }
+
+    .match-type-content {
+      max-width: 420px;
+    }
+
+    .match-type-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 4px 0 8px;
+    }
+
+    .match-type-btn {
+      padding: 12px 20px;
+      border: 2px solid var(--dashboard-button-border, var(--button-border-color, rgba(0, 0, 0, 0.2)));
+      background: var(--dashboard-button-bg, var(--card-bg));
+      color: var(--dashboard-button-text, var(--text-color));
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.12));
+    }
+
+    .match-type-btn:hover { border-color: var(--accent-color); }
+
+    /* Match Entry Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: block;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      max-width: 900px;
+      margin: 20px auto;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .modal-header h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+
+    .close-modal:hover { background: var(--content-bg); }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input, .form-group select {
+      padding: 12px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    /* Player Scores Table */
+    .players-entry {
+      margin: 20px 0;
+    }
+
+    .players-entry h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    thead {
+      background: var(--content-bg);
+    }
+
+    th, td {
+      padding: 12px 8px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .score-input {
+      width: 60px;
+      padding: 10px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      text-align: center;
+      background: var(--content-bg);
+      color: var(--text-color);
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .score-input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .score-input.auto-calc {
+      background: var(--accent-color);
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: default;
+    }
+
+    .varsity-checkbox, .dnp-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--accent-color);
+    }
+
+    .player-row.dnp {
+      opacity: 0.4;
+      text-decoration: line-through;
+    }
+
+    .player-name-cell {
+      text-align: left;
+      font-weight: 500;
+    }
+
+    /* Share Match */
+    .share-section {
+      margin-top: 20px;
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background: var(--content-bg);
+    }
+
+    .share-section label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .share-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .share-row input[type="text"] {
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .share-row input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .share-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-color);
+      white-space: nowrap;
+    }
+
+    .share-toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-color);
+      cursor: pointer;
+    }
+
+    .share-add-btn {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.2));
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .share-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .share-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      font-size: 13px;
+    }
+
+    .share-item span {
+      font-weight: 600;
+    }
+
+    .share-item small {
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    .remove-share-btn {
+      border: none;
+      background: transparent;
+      color: #ef4444;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .share-hint {
+      margin: 10px 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Comments */
+    .comments-section {
+      margin-top: 20px;
+    }
+
+    .comments-section label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .comments-section textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .comments-section textarea:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .submit-match-btn {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.2));
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.18));
+    }
+
+    .submit-match-btn:hover {
+      filter: brightness(0.95);
+    }
+
+    /* Matches List */
+    .matches-section h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .match-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .match-card:hover { border-color: var(--accent-color); }
+
+    .match-header {
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .match-header:hover {
+      background: var(--content-bg);
+    }
+
+    .match-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .opponent-logo {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: white;
+      padding: 4px;
+    }
+
+    .match-text {
+      flex: 1;
+    }
+
+    .match-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .match-opponent {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .match-location {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .match-stats {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 8px 14px;
+      background: var(--content-bg);
+      border-radius: 8px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-color);
+    }
+
+    .result-badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .result-badge.win {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .result-badge.loss {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .result-badge.tie {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .expand-icon {
+      font-size: 18px;
+      color: var(--text-muted);
+      transition: transform 0.3s;
+      margin-left: 12px;
+    }
+
+    .match-card.expanded .expand-icon {
+      transform: rotate(180deg);
+    }
+
+    /* Match Details */
+    .match-details {
+      display: none;
+      padding: 0 20px 20px 20px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .match-card.expanded .match-details {
+      display: block;
+    }
+
+    .details-table {
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    .details-table th {
+      background: var(--content-bg);
+      color: var(--text-muted);
+      padding: 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .details-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .details-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .varsity-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: var(--accent-color);
+      color: white;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .team-totals {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--content-bg);
+      border-radius: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .total-item {
+      text-align: center;
+    }
+
+    .total-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .total-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent-color);
+    }
+
+    .match-comments {
+      margin-top: 16px;
+      padding: 14px;
+      background: var(--content-bg);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .no-matches {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-muted);
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+    }
+
+    .edit-match-btn {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.18));
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 10px;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
+    }
+
+    .edit-match-btn:hover {
+      filter: brightness(0.95);
+    }
+
+    .delete-match-btn {
+      background: transparent;
+      color: #ef4444;
+      border: 2px solid #ef4444;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 rgba(239, 68, 68, 0.2);
+    }
+
+    .delete-match-btn:hover {
+      background: #fef2f2;
+    }
+
+    .match-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .gender-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+
+    .gender-badge.boys {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .gender-badge.girls {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+
+    .gender-badge.coed {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .location-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    .location-wrapper select {
+      flex: 1;
+    }
+
+    .add-location-btn {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.18));
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.18));
+    }
+
+    .add-location-btn:hover {
+      filter: brightness(0.95);
+    }
+
+    .new-location-input {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .new-location-input input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .save-location-btn {
+      background: #22c55e;
+      color: white;
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.18));
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+    }
+
+    .cancel-location-btn {
+      background: var(--content-bg);
+      color: var(--text-muted);
+      border: 2px solid var(--button-border-color, var(--border-color));
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+    }
+
+    .player-gender-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    .player-gender-badge.boys {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .player-gender-badge.girls {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+
+    .gender-separator {
+      background: var(--accent-color);
+      color: white;
+      padding: 8px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .no-matches p {
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+
+    .message {
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.success {
+      background: #dcfce7;
+      color: #166534;
+      display: block;
+    }
+
+    .message.error {
+      background: #fef2f2;
+      color: #991b1b;
+      display: block;
+    }
+
+    /* Opponent Scores Section */
+    .opponent-scores-section {
+      margin: 20px 0;
+      padding: 20px;
+      background: var(--content-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .opponent-scores-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+
+    .scores-help {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0 0 16px;
+    }
+
+    .scores-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .scores-table thead {
+      background: var(--content-bg);
+    }
+
+    .scores-table th {
+      color: var(--text-muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .scores-table th, .scores-table td {
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .team-label {
+      font-weight: 600;
+      text-align: left !important;
+      padding-left: 15px !important;
+    }
+
+    .total-display {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--accent-color);
+    }
+
+    /* Points Result Card */
+    .points-result-card {
+      margin-top: 20px;
+      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .points-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .point-item {
+      text-align: center;
+      padding: 12px 20px;
+      background: var(--content-bg);
+      border-radius: 10px;
+      min-width: 60px;
+    }
+
+    .point-item.won {
+      background: #dcfce7;
+    }
+
+    .point-item.lost {
+      background: #fef2f2;
+    }
+
+    .point-label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .point-value {
+      display: block;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-color);
+    }
+
+    .point-item.won .point-value {
+      color: #166534;
+    }
+
+    .point-item.lost .point-value {
+      color: #991b1b;
+    }
+
+    .final-score {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .final-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .your-points {
+      color: var(--accent-color);
+    }
+
+    .score-separator {
+      color: var(--text-muted);
+    }
+
+    .opp-points {
+      color: var(--text-muted);
+    }
+
+    .result-badge-large {
+      text-align: center;
+      padding: 12px 32px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 700;
+      display: inline-block;
+      margin: 0 auto;
+      width: fit-content;
+    }
+
+    .points-result-card {
+      text-align: center;
+    }
+
+    .result-badge-large.win {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .result-badge-large.loss {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .result-badge-large.tie {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 12px 16px; }
+      .nav-left { gap: 10px; }
+      .season-select { padding: 4px 8px; }
+      .season-select label { display: none; }
+      .nav-links { gap: 4px; }
+      .nav-links a { padding: 8px 12px; font-size: 13px; }
+      .container { padding: 20px 16px; }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .match-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .match-stats {
+        flex-wrap: wrap;
+      }
+
+      .stat-box {
+        padding: 6px 12px;
+      }
+
+      .score-input {
+        width: 50px;
+      }
+
+      .score-input.auto-calc {
+        width: 50px;
+      }
+    }
+  </style>
+</head>
+<body class="dashboard">
+  <div class="navbar">
+    <div class="nav-left">
+      <a href="../../index.html" class="logo">
+        <img id="navLogo" src="../../assets/images/BowlingPinCartoon.png" alt="School logo" />
+      </a>
+      <div class="season-select">
+        <label for="seasonSelect">Season</label>
+        <select id="seasonSelect" data-season-select>
+          <option value="2025-2026">2025-26</option>
+          <option value="2024-2025">2024-25</option>
+          <option value="all">All Time</option>
+        </select>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="home.html" class="active">Home</a>
+      <a href="players.html">Players</a>
+      <a href="../settings/appearanceSettings.html">Settings</a>
+      <a href="myTeam.html">My Team</a>
+      <a href="announcements.html">Announcements</a>
+      <a href="#" id="logoutBtn" style="color:#fca5a5;">Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header" style="text-align:center;">
+      <div class="brand-logo" id="brandLogo" aria-label="Strike Master"></div>
+      <p style="font-size: 1.1rem; color: #4b4b4b; margin: 0 0 10px 0;">Match history and performance tracking</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-gender="all">All</button>
+      <button class="tab-btn" data-gender="boys">Boys Team</button>
+      <button class="tab-btn" data-gender="girls">Girls Team</button>
+    </div>
+
+    <button class="log-match-btn" id="logMatchBtn">+ Log New Match</button>
+
+    <div id="message" class="message"></div>
+
+    <div class="matches-section">
+      <h2 id="sectionTitle">All Recent Matches</h2>
+      <div id="matchesContainer">
+        <div class="no-matches">
+          <p>No matches recorded yet.</p>
+          <p>Click "Log New Match" to add your first match!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="matchTypeModal">
+    <div class="modal-content match-type-content">
+      <div class="modal-header">
+        <h2>Select Match Type</h2>
+        <button class="close-modal" id="closeMatchType">&times;</button>
+      </div>
+      <div class="match-type-buttons">
+        <button type="button" class="match-type-btn" data-gender="boys">Boys</button>
+        <button type="button" class="match-type-btn" data-gender="girls">Girls</button>
+        <button type="button" class="match-type-btn" data-gender="coed">Coed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Match Modal -->
+  <div class="modal-overlay" id="matchModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Log New Match</h2>
+        <button class="close-modal" id="closeModal">&times;</button>
+      </div>
+
+      <form id="matchForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="matchDate">Date</label>
+            <input type="date" id="matchDate" required>
+          </div>
+          <div class="form-group">
+            <label for="matchType">Match Type</label>
+            <select id="matchType">
+              <option value="team">Team (3 games)</option>
+              <option value="tournament">Tournament (4 games)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="opponent">Opponent</label>
+            <select id="opponent" required>
+              <option value="">Select opponent...</option>
+              <!-- Opponents will be populated by JavaScript -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="location">Location</label>
+            <div class="location-wrapper">
+              <select id="location">
+                <option value="">Select location...</option>
+                <!-- Locations will be populated from localStorage -->
+              </select>
+              <button type="button" class="add-location-btn" onclick="showAddLocation()">+</button>
+            </div>
+            <div id="newLocationInput" class="new-location-input" style="display: none;">
+              <input type="text" id="newLocation" placeholder="Enter new location...">
+              <button type="button" class="save-location-btn" onclick="saveNewLocation()">Save</button>
+              <button type="button" class="cancel-location-btn" onclick="hideAddLocation()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opponent Scores Section -->
+        <div class="opponent-scores-section">
+          <h3>Match Scores</h3>
+          <p class="scores-help">Your team totals are auto-calculated from varsity player scores. Enter opponent scores to calculate points.</p>
+          <table class="scores-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Game 1</th>
+                <th>Game 2</th>
+                <th>Game 3</th>
+                <th class="tournament-only" style="display: none;">Game 4</th>
+                <th>Total Pins</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="team-label">Your Team</td>
+                <td><input type="number" class="score-input auto-calc" id="teamG1" min="0" placeholder="-" readonly></td>
+                <td><input type="number" class="score-input auto-calc" id="teamG2" min="0" placeholder="-" readonly></td>
+                <td><input type="number" class="score-input auto-calc" id="teamG3" min="0" placeholder="-" readonly></td>
+                <td class="tournament-only" style="display: none;"><input type="number" class="score-input auto-calc" id="teamG4" min="0" placeholder="-" readonly></td>
+                <td><span id="teamTotal" class="total-display">0</span></td>
+              </tr>
+              <tr>
+                <td class="team-label">Opponent</td>
+                <td><input type="number" class="score-input" id="oppG1" min="0" placeholder="-" oninput="calculateMatchResult()"></td>
+                <td><input type="number" class="score-input" id="oppG2" min="0" placeholder="-" oninput="calculateMatchResult()"></td>
+                <td><input type="number" class="score-input" id="oppG3" min="0" placeholder="-" oninput="calculateMatchResult()"></td>
+                <td class="tournament-only" style="display: none;"><input type="number" class="score-input" id="oppG4" min="0" placeholder="-" oninput="calculateMatchResult()"></td>
+                <td><span id="oppTotal" class="total-display">0</span></td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <!-- Points Result Card -->
+          <div class="points-result-card" id="pointsResultCard" style="display: none;">
+            <div class="points-breakdown">
+              <div class="point-item" id="g1Point">
+                <span class="point-label">G1</span>
+                <span class="point-value">+0</span>
+              </div>
+              <div class="point-item" id="g2Point">
+                <span class="point-label">G2</span>
+                <span class="point-value">+0</span>
+              </div>
+              <div class="point-item" id="g3Point">
+                <span class="point-label">G3</span>
+                <span class="point-value">+0</span>
+              </div>
+              <div class="point-item tournament-only" id="g4Point" style="display: none;">
+                <span class="point-label">G4</span>
+                <span class="point-value">+0</span>
+              </div>
+              <div class="point-item" id="totalPoint">
+                <span class="point-label">Total</span>
+                <span class="point-value">+0</span>
+              </div>
+            </div>
+            <div class="final-score">
+              <span class="final-label">Final Score:</span>
+              <span class="your-points" id="yourPointsDisplay">0</span>
+              <span class="score-separator">-</span>
+              <span class="opp-points" id="oppPointsDisplay">0</span>
+            </div>
+            <div class="result-badge-large" id="resultBadgeLarge">-</div>
+          </div>
+        </div>
+        
+        <!-- Hidden fields to store calculated values -->
+        <input type="hidden" id="result" value="">
+        <input type="hidden" id="ourScore" value="0">
+        <input type="hidden" id="opponentScore" value="0">
+
+        <div class="players-entry">
+          <h3>Player Scores</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Game 1</th>
+                <th>Game 2</th>
+                <th>Game 3</th>
+                <th class="tournament-only" style="display: none;">Game 4</th>
+                <th>Varsity</th>
+                <th>DNP</th>
+              </tr>
+            </thead>
+            <tbody id="playersTableBody">
+              <tr><td colspan="6" style="text-align:center; color:#888;">Loading players...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="comments-section">
+          <label for="comments">Comments</label>
+          <textarea id="comments" placeholder="Add any notes about the match..."></textarea>
+        </div>
+
+        <div class="share-section">
+          <label>Share with other coaches</label>
+          <div class="share-row">
+            <input type="text" id="shareCoachIdentifier" placeholder="Coach email or coach code">
+            <label class="share-toggle">
+              <input type="checkbox" id="shareCanEdit">
+              <span>Can edit</span>
+            </label>
+            <button type="button" class="share-add-btn" id="addShareBtn">Add</button>
+          </div>
+          <div class="share-list" id="shareList"></div>
+          <p class="share-hint">Shared coaches can view this match. Enable edit to allow changes.</p>
+        </div>
+
+        <button type="submit" class="submit-match-btn">Save Match</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Load saved logo
+    const savedLogo = localStorage.getItem('teamLogo') || localStorage.getItem('selectedLogo');
+    if (savedLogo) {
+      const basePath = '../../assets/images/Team Logos/';
+      const navLogo = document.getElementById('navLogo');
+      if (navLogo) navLogo.src = basePath + savedLogo;
+      document.querySelectorAll('[data-team-logo]').forEach(img => {
+        img.src = basePath + savedLogo;
+      });
+    }
+
+    async function loadBrandLogo() {
+      const container = document.getElementById('brandLogo');
+      if (!container) return;
+      try {
+        const response = await fetch('../../assets/images/StrikeMasterLogo3.svg');
+        if (!response.ok) return;
+        const svgText = await response.text();
+        container.innerHTML = svgText;
+        const svg = container.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('role', 'img');
+          svg.setAttribute('aria-label', 'Strike Master');
+        }
+      } catch (error) {
+        console.warn('Failed to load brand logo:', error);
+      }
+    }
+
+    loadBrandLogo();
+
+    let currentGender = 'all';
+    let selectedMatchGender = 'boys';
+    let currentSeason = window.SeasonContext ? SeasonContext.getSeason() : '2025-2026';
+    let coachId = null;
+    let players = [];
+    let allPlayers = { boys: [], girls: [] };
+    let sharedCoachEntries = [];
+
+    // Calculate match result based on opponent scores
+    function calculateMatchResult() {
+      const matchType = document.getElementById('matchType')?.value || 'team';
+      const teamG1 = parseInt(document.getElementById('teamG1').value) || 0;
+      const teamG2 = parseInt(document.getElementById('teamG2').value) || 0;
+      const teamG3 = parseInt(document.getElementById('teamG3').value) || 0;
+      const teamG4 = parseInt(document.getElementById('teamG4')?.value) || 0;
+      const oppG1 = parseInt(document.getElementById('oppG1').value) || 0;
+      const oppG2 = parseInt(document.getElementById('oppG2').value) || 0;
+      const oppG3 = parseInt(document.getElementById('oppG3').value) || 0;
+      const oppG4 = parseInt(document.getElementById('oppG4')?.value) || 0;
+
+      const teamTotal = teamG1 + teamG2 + teamG3 + (matchType === 'tournament' ? teamG4 : 0);
+      const oppTotal = oppG1 + oppG2 + oppG3 + (matchType === 'tournament' ? oppG4 : 0);
+
+      // Update total displays
+      document.getElementById('teamTotal').textContent = teamTotal;
+      document.getElementById('oppTotal').textContent = oppTotal;
+
+      // Check if any scores entered
+      const hasScores = teamG1 || teamG2 || teamG3 || teamG4 || oppG1 || oppG2 || oppG3 || oppG4;
+      const resultCard = document.getElementById('pointsResultCard');
+      
+      if (!hasScores) {
+        resultCard.style.display = 'none';
+        document.getElementById('result').value = '';
+        document.getElementById('ourScore').value = '0';
+        document.getElementById('opponentScore').value = '0';
+        return;
+      }
+
+      resultCard.style.display = 'block';
+
+      // Calculate points: 2 for each game win, 1 for total win
+      let ourPoints = 0;
+      let oppPoints = 0;
+
+      // Game 1 (2 points)
+      const g1Point = document.getElementById('g1Point');
+      if (teamG1 > oppG1) {
+        ourPoints += 2;
+        g1Point.className = 'point-item won';
+        g1Point.querySelector('.point-value').textContent = '+2';
+      } else if (oppG1 > teamG1) {
+        oppPoints += 2;
+        g1Point.className = 'point-item lost';
+        g1Point.querySelector('.point-value').textContent = '+0';
+      } else {
+        g1Point.className = 'point-item';
+        g1Point.querySelector('.point-value').textContent = teamG1 || oppG1 ? '0' : '-';
+      }
+
+      // Game 2 (2 points)
+      const g2Point = document.getElementById('g2Point');
+      if (teamG2 > oppG2) {
+        ourPoints += 2;
+        g2Point.className = 'point-item won';
+        g2Point.querySelector('.point-value').textContent = '+2';
+      } else if (oppG2 > teamG2) {
+        oppPoints += 2;
+        g2Point.className = 'point-item lost';
+        g2Point.querySelector('.point-value').textContent = '+0';
+      } else {
+        g2Point.className = 'point-item';
+        g2Point.querySelector('.point-value').textContent = teamG2 || oppG2 ? '0' : '-';
+      }
+
+      // Game 3 (2 points)
+      const g3Point = document.getElementById('g3Point');
+      if (teamG3 > oppG3) {
+        ourPoints += 2;
+        g3Point.className = 'point-item won';
+        g3Point.querySelector('.point-value').textContent = '+2';
+      } else if (oppG3 > teamG3) {
+        oppPoints += 2;
+        g3Point.className = 'point-item lost';
+        g3Point.querySelector('.point-value').textContent = '+0';
+      } else {
+        g3Point.className = 'point-item';
+        g3Point.querySelector('.point-value').textContent = teamG3 || oppG3 ? '0' : '-';
+      }
+
+      // Game 4 (2 points) for tournaments
+      const g4Point = document.getElementById('g4Point');
+      if (matchType === 'tournament' && g4Point) {
+        if (teamG4 > oppG4) {
+          ourPoints += 2;
+          g4Point.className = 'point-item won tournament-only';
+          g4Point.querySelector('.point-value').textContent = '+2';
+        } else if (oppG4 > teamG4) {
+          oppPoints += 2;
+          g4Point.className = 'point-item lost tournament-only';
+          g4Point.querySelector('.point-value').textContent = '+0';
+        } else {
+          g4Point.className = 'point-item tournament-only';
+          g4Point.querySelector('.point-value').textContent = teamG4 || oppG4 ? '0' : '-';
+        }
+      }
+
+      // Total (1 point)
+      const totalPoint = document.getElementById('totalPoint');
+      if (teamTotal > oppTotal) {
+        ourPoints += 1;
+        totalPoint.className = 'point-item won';
+        totalPoint.querySelector('.point-value').textContent = '+1';
+      } else if (oppTotal > teamTotal) {
+        oppPoints += 1;
+        totalPoint.className = 'point-item lost';
+        totalPoint.querySelector('.point-value').textContent = '+0';
+      } else {
+        totalPoint.className = 'point-item';
+        totalPoint.querySelector('.point-value').textContent = teamTotal || oppTotal ? '0' : '-';
+      }
+
+      // Update final score display
+      document.getElementById('yourPointsDisplay').textContent = ourPoints;
+      document.getElementById('oppPointsDisplay').textContent = oppPoints;
+
+      // Determine result
+      const resultBadge = document.getElementById('resultBadgeLarge');
+      let result = '';
+      if (ourPoints > oppPoints) {
+        result = 'win';
+        resultBadge.textContent = 'WIN';
+        resultBadge.className = 'result-badge-large win';
+      } else if (oppPoints > ourPoints) {
+        result = 'loss';
+        resultBadge.textContent = 'LOSS';
+        resultBadge.className = 'result-badge-large loss';
+      } else {
+        result = 'tie';
+        resultBadge.textContent = 'TIE';
+        resultBadge.className = 'result-badge-large tie';
+      }
+
+      // Update hidden fields
+      document.getElementById('result').value = result;
+      document.getElementById('ourScore').value = ourPoints;
+      document.getElementById('opponentScore').value = oppPoints;
+    }
+
+    function applyMatchTypeUI() {
+      const matchType = document.getElementById('matchType')?.value || 'team';
+      document.querySelectorAll('.tournament-only').forEach(el => {
+        el.style.display = matchType === 'tournament' ? '' : 'none';
+      });
+      calculateTeamTotals();
+    }
+
+    // Team logo mapping for opponents - uses centralized teams.js config
+    // getTeamLogo function is provided by teams.js
+
+    // Get opponent logo (wrapper for backward compatibility)
+    function getOpponentLogo(opponentName) {
+      return getTeamLogo(opponentName, '../../assets/images/Team Logos/');
+    }
+
+    // Populate opponent dropdown from SCHOOLS_LIST
+    function populateOpponentDropdown() {
+      const opponentSelect = document.getElementById('opponent');
+      SCHOOLS_LIST.forEach(school => {
+        const option = document.createElement('option');
+        option.value = school.value;
+        option.textContent = school.name;
+        opponentSelect.appendChild(option);
+      });
+      // Add "Other" option at the end
+      const otherOption = document.createElement('option');
+      otherOption.value = 'Other';
+      otherOption.textContent = 'Other';
+      opponentSelect.appendChild(otherOption);
+    }
+
+    // Initialize opponent dropdown
+    populateOpponentDropdown();
+
+    // ==================== LOCATION MANAGEMENT ====================
+    
+    let savedLocations = ['Montvale Lanes', 'Bowler City', 'Lodi Lanes', 'Parkway Lanes', 'Holiday Bowl'];
+
+    // Load saved locations from Supabase
+    async function loadSavedLocations() {
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const response = await fetch(`${API_BASE}/api/locations?coachId=${coachId}`);
+        if (response.ok) {
+          savedLocations = await response.json();
+        }
+      } catch (error) {
+        console.error('Error loading locations:', error);
+      }
+      populateLocationDropdown();
+    }
+
+    // Populate location dropdown
+    function populateLocationDropdown(selectedValue = '') {
+      const locationSelect = document.getElementById('location');
+      
+      // Clear existing options except first
+      locationSelect.innerHTML = '<option value="">Select location...</option>';
+      
+      savedLocations.sort().forEach(loc => {
+        const option = document.createElement('option');
+        option.value = loc;
+        option.textContent = loc;
+        if (loc === selectedValue) option.selected = true;
+        locationSelect.appendChild(option);
+      });
+    }
+
+    // Show add location input
+    function showAddLocation() {
+      document.getElementById('newLocationInput').style.display = 'flex';
+      document.getElementById('newLocation').focus();
+    }
+
+    // Hide add location input
+    function hideAddLocation() {
+      document.getElementById('newLocationInput').style.display = 'none';
+      document.getElementById('newLocation').value = '';
+    }
+
+    // Save new location to Supabase
+    async function saveNewLocation() {
+      const newLocation = document.getElementById('newLocation').value.trim();
+      if (!newLocation) return;
+
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const response = await fetch(`${API_BASE}/api/locations`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            coachId: coachId,
+            location: newLocation
+          })
+        });
+        
+        if (response.ok) {
+          savedLocations = await response.json();
+        } else {
+          // Fallback: add locally
+          if (!savedLocations.includes(newLocation)) {
+            savedLocations.push(newLocation);
+          }
+        }
+      } catch (error) {
+        console.error('Error saving location:', error);
+        // Fallback: add locally
+        if (!savedLocations.includes(newLocation)) {
+          savedLocations.push(newLocation);
+        }
+      }
+      
+      populateLocationDropdown(newLocation);
+      hideAddLocation();
+    }
+
+    // Check authentication
+    async function checkAuth() {
+      const userData = localStorage.getItem('bowling_user');
+      if (!userData) {
+        window.location.href = '../auth/login.html';
+        return null;
+      }
+      try {
+        const user = JSON.parse(userData);
+        coachId = user.id;
+        return user;
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        window.location.href = '../auth/login.html';
+        return null;
+      }
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentGender = btn.dataset.gender;
+        if (currentGender !== 'all') {
+          selectedMatchGender = currentGender;
+        }
+        document.getElementById('sectionTitle').textContent = 
+          currentGender === 'boys' ? 'Boys Recent Matches' : 
+          currentGender === 'girls' ? 'Girls Recent Matches' : 'All Recent Matches';
+        loadMatches();
+        if (currentGender !== 'all') loadPlayers();
+      });
+    });
+
+    function openMatchModal(gender) {
+      resetModal();
+      document.getElementById('matchModal').classList.add('active');
+      document.getElementById('matchDate').valueAsDate = new Date();
+      loadPlayers(gender);
+      applyMatchTypeUI();
+    }
+
+    // Modal controls
+    document.getElementById('logMatchBtn').addEventListener('click', () => {
+      if (isStudentMode()) return;
+      const matchTypeModal = document.getElementById('matchTypeModal');
+      if (matchTypeModal) matchTypeModal.classList.add('active');
+    });
+
+    document.querySelectorAll('.match-type-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedMatchGender = btn.dataset.gender;
+        document.getElementById('matchTypeModal').classList.remove('active');
+        openMatchModal(selectedMatchGender);
+      });
+    });
+
+    document.getElementById('closeMatchType').addEventListener('click', () => {
+      document.getElementById('matchTypeModal').classList.remove('active');
+    });
+
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('matchModal').classList.remove('active');
+      resetModal();
+    });
+
+    document.getElementById('matchType').addEventListener('change', applyMatchTypeUI);
+
+    // Modal click-to-close handler removed as requested
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('bowling_user');
+      localStorage.removeItem('bowling_role');
+      localStorage.removeItem('bowling_token');
+      window.location.href = '../auth/login.html';
+    });
+
+    // Load players for the form
+    async function loadPlayers(genderOverride) {
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const activeGender = genderOverride || currentGender;
+
+        if (activeGender === 'all' || activeGender === 'coed') {
+          // Load both boys and girls players
+          const [boysResponse, girlsResponse] = await Promise.all([
+            fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=boys`),
+            fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=girls`)
+          ]);
+          
+          if (!boysResponse.ok || !girlsResponse.ok) throw new Error('Failed to fetch players');
+          
+          allPlayers.boys = await boysResponse.json();
+          allPlayers.girls = await girlsResponse.json();
+          players = [...allPlayers.boys, ...allPlayers.girls];
+          renderAllPlayersTable();
+        } else {
+          const response = await fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=${activeGender}`);
+          
+          if (!response.ok) throw new Error('Failed to fetch players');
+          
+          players = await response.json();
+          renderPlayersTable();
+        }
+      } catch (error) {
+        console.error('Error loading players:', error);
+        document.getElementById('playersTableBody').innerHTML = 
+          '<tr><td colspan="7" style="text-align:center; color:#dc3545;">Error loading players</td></tr>';
+      }
+    }
+
+    // Render players table in modal (single gender)
+    function renderPlayersTable() {
+      const tbody = document.getElementById('playersTableBody');
+      
+      if (!players || players.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found. Add players in the Players tab first.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = players.map(player => `
+        <tr class="player-row" data-player-id="${player.id}">
+          <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
+          <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+          <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+          <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+          <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+          <td><input type="checkbox" class="varsity-checkbox" checked onchange="calculateTeamTotals()"></td>
+          <td><input type="checkbox" class="dnp-checkbox" onchange="toggleDNP(this)"></td>
+        </tr>
+      `).join('');
+    }
+
+    // Render all players table (both genders with separators)
+    function renderAllPlayersTable() {
+      const tbody = document.getElementById('playersTableBody');
+      
+      if (allPlayers.boys.length === 0 && allPlayers.girls.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found. Add players in the Players tab first.</td></tr>';
+        return;
+      }
+
+      let html = '';
+      
+      // Boys section
+      if (allPlayers.boys.length > 0) {
+        html += '<tr><td colspan="7" class="gender-separator">Boys Team</td></tr>';
+        html += allPlayers.boys.map(player => `
+          <tr class="player-row" data-player-id="${player.id}" data-gender="boys">
+            <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
+            <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+            <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+            <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+            <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+            <td><input type="checkbox" class="varsity-checkbox" checked onchange="calculateTeamTotals()"></td>
+            <td><input type="checkbox" class="dnp-checkbox" onchange="toggleDNP(this)"></td>
+          </tr>
+        `).join('');
+      }
+      
+      // Girls section
+      if (allPlayers.girls.length > 0) {
+        html += '<tr><td colspan="7" class="gender-separator">Girls Team</td></tr>';
+        html += allPlayers.girls.map(player => `
+          <tr class="player-row" data-player-id="${player.id}" data-gender="girls">
+            <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
+            <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+            <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+            <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+            <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" oninput="calculateTeamTotals()"></td>
+            <td><input type="checkbox" class="varsity-checkbox" checked onchange="calculateTeamTotals()"></td>
+            <td><input type="checkbox" class="dnp-checkbox" onchange="toggleDNP(this)"></td>
+          </tr>
+        `).join('');
+      }
+      
+      tbody.innerHTML = html;
+    }
+
+    function renderAllPlayersTableWithScores(records) {
+      const tbody = document.getElementById('playersTableBody');
+      
+      if (allPlayers.boys.length === 0 && allPlayers.girls.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found.</td></tr>';
+        return;
+      }
+
+      const recordMap = {};
+      records.forEach(record => {
+        recordMap[record.player_id] = record;
+      });
+
+      let html = '';
+      if (allPlayers.boys.length > 0) {
+        html += '<tr><td colspan="7" class="gender-separator">Boys Team</td></tr>';
+        html += allPlayers.boys.map(player => {
+          const record = recordMap[player.id];
+          const hasRecord = !!record;
+          const isDNP = !hasRecord;
+          return `
+            <tr class="player-row ${isDNP ? 'dnp' : ''}" data-player-id="${player.id}" data-gender="boys">
+              <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
+              <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" value="${record?.game1 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" value="${record?.game2 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" value="${record?.game3 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" value="${record?.game4 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="checkbox" class="varsity-checkbox" ${record?.is_varsity ? 'checked' : ''} ${isDNP ? 'disabled' : ''} onchange="calculateTeamTotals()"></td>
+              <td><input type="checkbox" class="dnp-checkbox" ${isDNP ? 'checked' : ''} onchange="toggleDNP(this)"></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (allPlayers.girls.length > 0) {
+        html += '<tr><td colspan="7" class="gender-separator">Girls Team</td></tr>';
+        html += allPlayers.girls.map(player => {
+          const record = recordMap[player.id];
+          const hasRecord = !!record;
+          const isDNP = !hasRecord;
+          return `
+            <tr class="player-row ${isDNP ? 'dnp' : ''}" data-player-id="${player.id}" data-gender="girls">
+              <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
+              <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" value="${record?.game1 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" value="${record?.game2 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" value="${record?.game3 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" value="${record?.game4 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+              <td><input type="checkbox" class="varsity-checkbox" ${record?.is_varsity ? 'checked' : ''} ${isDNP ? 'disabled' : ''} onchange="calculateTeamTotals()"></td>
+              <td><input type="checkbox" class="dnp-checkbox" ${isDNP ? 'checked' : ''} onchange="toggleDNP(this)"></td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      tbody.innerHTML = html;
+      setTimeout(() => calculateTeamTotals(), 100);
+    }
+
+    // Calculate team totals from varsity player scores
+    function calculateTeamTotals() {
+      let teamG1 = 0, teamG2 = 0, teamG3 = 0, teamG4 = 0;
+      const matchType = document.getElementById('matchType')?.value || 'team';
+      
+      document.querySelectorAll('.player-row').forEach(row => {
+        const isVarsity = row.querySelector('.varsity-checkbox')?.checked;
+        const isDNP = row.querySelector('.dnp-checkbox')?.checked;
+        
+        if (isVarsity && !isDNP) {
+          const g1 = parseInt(row.querySelector('.game1')?.value) || 0;
+          const g2 = parseInt(row.querySelector('.game2')?.value) || 0;
+          const g3 = parseInt(row.querySelector('.game3')?.value) || 0;
+          const g4 = parseInt(row.querySelector('.game4')?.value) || 0;
+          teamG1 += g1;
+          teamG2 += g2;
+          teamG3 += g3;
+          if (matchType === 'tournament') teamG4 += g4;
+        }
+      });
+      
+      // Update team score inputs
+      document.getElementById('teamG1').value = teamG1 || '';
+      document.getElementById('teamG2').value = teamG2 || '';
+      document.getElementById('teamG3').value = teamG3 || '';
+      const teamG4Input = document.getElementById('teamG4');
+      if (teamG4Input) teamG4Input.value = matchType === 'tournament' ? (teamG4 || '') : '';
+      
+      // Recalculate match result
+      calculateMatchResult();
+    }
+
+    // Toggle DNP (Did Not Play)
+    function toggleDNP(checkbox) {
+      const row = checkbox.closest('tr');
+      if (checkbox.checked) {
+        row.classList.add('dnp');
+        row.querySelectorAll('.score-input').forEach(input => {
+          input.disabled = true;
+          input.value = '';
+        });
+        row.querySelector('.varsity-checkbox').disabled = true;
+        row.querySelector('.varsity-checkbox').checked = false;
+      } else {
+        row.classList.remove('dnp');
+        row.querySelectorAll('.score-input').forEach(input => input.disabled = false);
+        row.querySelector('.varsity-checkbox').disabled = false;
+      }
+      calculateTeamTotals();
+    }
+
+    function parseLocalDate(value) {
+      if (!value) return null;
+      if (value instanceof Date) return value;
+      if (typeof value === 'string') {
+        const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (match) {
+          const year = Number(match[1]);
+          const month = Number(match[2]) - 1;
+          const day = Number(match[3]);
+          return new Date(year, month, day);
+        }
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return null;
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function formatDateInputValue(value) {
+      const date = parseLocalDate(value);
+      if (!date) return '';
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function normalizeIdentifier(value) {
+      return value.trim().toLowerCase();
+    }
+
+    function renderShareList() {
+      const list = document.getElementById('shareList');
+      if (!list) return;
+      if (!sharedCoachEntries.length) {
+        list.innerHTML = '';
+        return;
+      }
+      list.innerHTML = sharedCoachEntries.map((entry, index) => {
+        const label = entry.display || entry.identifier || 'Unknown';
+        const permission = entry.canEdit ? 'Can edit' : 'View only';
+        return `
+          <div class="share-item">
+            <div>
+              <span>${label}</span>
+              <small>${permission}</small>
+            </div>
+            <button type="button" class="remove-share-btn" onclick="removeSharedCoach(${index})">Remove</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addSharedCoach() {
+      const input = document.getElementById('shareCoachIdentifier');
+      const canEditToggle = document.getElementById('shareCanEdit');
+      if (!input) return;
+      const identifier = input.value.trim();
+      if (!identifier) {
+        showMessage('Enter a coach email or code to share.', 'error');
+        return;
+      }
+      const normalized = normalizeIdentifier(identifier);
+      const alreadyAdded = sharedCoachEntries.some(entry => normalizeIdentifier(entry.identifier || entry.display || '') === normalized);
+      if (alreadyAdded) {
+        showMessage('That coach is already added.', 'error');
+        return;
+      }
+      sharedCoachEntries.push({ identifier, canEdit: !!canEditToggle?.checked });
+      input.value = '';
+      if (canEditToggle) canEditToggle.checked = false;
+      renderShareList();
+    }
+
+    function removeSharedCoach(index) {
+      sharedCoachEntries.splice(index, 1);
+      renderShareList();
+    }
+
+    function getSharedCoachesPayload() {
+      return sharedCoachEntries.map(entry => {
+        if (entry.coachId) {
+          return { coachId: entry.coachId, canEdit: !!entry.canEdit };
+        }
+        return { identifier: entry.identifier, canEdit: !!entry.canEdit };
+      });
+    }
+
+    document.getElementById('addShareBtn')?.addEventListener('click', addSharedCoach);
+
+    // Submit match form
+    document.getElementById('matchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const isEditing = editingMatchId !== null;
+      const selectedGender = selectedMatchGender || currentGender;
+      
+      const baseMatchData = {
+        coachId: coachId,
+        opponent: document.getElementById('opponent').value,
+        matchDate: document.getElementById('matchDate').value,
+        location: document.getElementById('location').value,
+        result: document.getElementById('result').value || null,
+        ourScore: parseInt(document.getElementById('ourScore').value) || 0,
+        opponentScore: parseInt(document.getElementById('opponentScore').value) || 0,
+        comments: document.getElementById('comments').value,
+        matchType: document.getElementById('matchType').value,
+        // Team game scores
+        teamG1: parseInt(document.getElementById('teamG1').value) || 0,
+        teamG2: parseInt(document.getElementById('teamG2').value) || 0,
+        teamG3: parseInt(document.getElementById('teamG3').value) || 0,
+        teamG4: parseInt(document.getElementById('teamG4')?.value) || 0,
+        oppG1: parseInt(document.getElementById('oppG1').value) || 0,
+        oppG2: parseInt(document.getElementById('oppG2').value) || 0,
+        oppG3: parseInt(document.getElementById('oppG3').value) || 0,
+        oppG4: parseInt(document.getElementById('oppG4')?.value) || 0,
+        sharedCoaches: getSharedCoachesPayload()
+      };
+
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        
+        if (isEditing) {
+          // Update existing match (single gender)
+          const matchData = { ...baseMatchData, gender: editingMatchGender };
+          
+          const matchResponse = await fetch(`${API_BASE}/api/matches/${editingMatchId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(matchData)
+          });
+
+          if (!matchResponse.ok) throw new Error('Failed to update match');
+          
+          // Delete existing records for this match (we'll recreate them)
+          await fetch(`${API_BASE}/api/records/match/${editingMatchId}`, {
+            method: 'DELETE'
+          });
+          
+          // Save player records for this single match and get total wood
+          const totalWood = await savePlayerRecords(editingMatchId, null);
+          
+          // Update match with recalculated total wood
+          await fetch(`${API_BASE}/api/matches/${editingMatchId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ourScore: totalWood })
+          });
+          
+          showMessage('Match updated successfully!', 'success');
+        } else {
+          // Create single match (boys, girls, or coed)
+          const matchData = { ...baseMatchData, gender: selectedGender };
+          
+          const matchResponse = await fetch(`${API_BASE}/api/matches`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(matchData)
+          });
+
+          if (!matchResponse.ok) throw new Error('Failed to create match');
+          
+          const match = await matchResponse.json();
+          const totalWood = await savePlayerRecords(match.id, null);
+          
+          // Update match with total wood
+          await fetch(`${API_BASE}/api/matches/${match.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ourScore: totalWood })
+          });
+          
+          showMessage('Match saved successfully!', 'success');
+        }
+        
+        document.getElementById('matchModal').classList.remove('active');
+        resetModal();
+        loadMatches();
+
+      } catch (error) {
+        console.error('Error saving match:', error);
+        showMessage('Error saving match. Please try again.', 'error');
+      }
+    });
+
+    // Helper function to save player records and return total wood
+    async function savePlayerRecords(matchId, genderFilter) {
+      const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+      const rows = document.querySelectorAll('.player-row');
+      let totalWood = 0;
+      const matchType = document.getElementById('matchType')?.value || 'team';
+      
+      for (const row of rows) {
+        // Skip rows that don't match the gender filter (if specified)
+        if (genderFilter && row.dataset.gender !== genderFilter) continue;
+        
+        const dnp = row.querySelector('.dnp-checkbox').checked;
+        if (dnp) continue;
+
+        const playerId = row.dataset.playerId;
+        const game1 = row.querySelector('.game1').value;
+        const game2 = row.querySelector('.game2').value;
+        const game3 = row.querySelector('.game3').value;
+        const game4 = row.querySelector('.game4')?.value;
+        const isVarsity = row.querySelector('.varsity-checkbox').checked;
+
+        // Only save if at least one score is entered
+        if (game1 || game2 || game3 || game4) {
+          const g1 = game1 ? parseInt(game1) : 0;
+          const g2 = game2 ? parseInt(game2) : 0;
+          const g3 = game3 ? parseInt(game3) : 0;
+          const g4 = game4 ? parseInt(game4) : 0;
+          
+          // Add to total wood if varsity
+          if (isVarsity) {
+            totalWood += g1 + g2 + g3 + (matchType === 'tournament' ? g4 : 0);
+          }
+          
+          await fetch(`${API_BASE}/api/records`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              matchId: matchId,
+              playerId: playerId,
+              game1: game1 ? parseInt(game1) : null,
+              game2: game2 ? parseInt(game2) : null,
+              game3: game3 ? parseInt(game3) : null,
+              game4: matchType === 'tournament' ? (game4 ? parseInt(game4) : null) : null,
+              isVarsity: isVarsity
+            })
+          });
+        }
+      }
+      
+      return totalWood;
+    }
+
+    function isMatchInSeason(matchDate, season) {
+      if (season === 'all' || !matchDate) return true;
+      const [startYear, endYear] = season.split('-').map(Number);
+      const date = parseLocalDate(matchDate);
+      if (!date) return true;
+      const month = date.getMonth();
+      const year = date.getFullYear();
+      if (month >= 8) {
+        return year === startYear;
+      }
+      return year === endYear;
+    }
+
+    function filterMatchesBySeason(matches, season) {
+      return matches.filter(match => isMatchInSeason(match.match_date, season));
+    }
+
+    function updateSeasonTitle() {
+      const title = document.getElementById('sectionTitle');
+      if (!title) return;
+      if (currentSeason === 'all') {
+        title.textContent = 'All Seasons Matches';
+        return;
+      }
+      title.textContent = `${currentSeason} Season Matches`;
+    }
+
+    // Load matches
+    async function loadMatches() {
+      const container = document.getElementById('matchesContainer');
+      
+      try {
+        updateSeasonTitle();
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        let url = `${API_BASE}/api/matches?coachId=${coachId}`;
+        if (currentGender !== 'all') {
+          url += `&gender=${currentGender}`;
+        }
+        const response = await fetch(url);
+        
+        if (!response.ok) throw new Error('Failed to fetch matches');
+        
+        const matches = await response.json();
+        const filteredMatches = filterMatchesBySeason(matches || [], currentSeason);
+
+        if (!filteredMatches || filteredMatches.length === 0) {
+          container.innerHTML = `
+            <div class="no-matches">
+              <p>No matches for this season yet.</p>
+              <p>Click "Log New Match" to add your first match!</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Sort matches by date (newest first)
+        filteredMatches.sort((a, b) => {
+          const dateA = parseLocalDate(a.match_date);
+          const dateB = parseLocalDate(b.match_date);
+          return (dateB ? dateB.getTime() : 0) - (dateA ? dateA.getTime() : 0);
+        });
+
+        // Build HTML
+        let html = '';
+        for (const match of filteredMatches) {
+          // Fetch records for this match
+          let records = [];
+          try {
+            const recordsResponse = await fetch(`${API_BASE}/api/records?matchId=${match.id}`);
+            if (recordsResponse.ok) {
+              records = await recordsResponse.json();
+            }
+          } catch (err) {
+            console.error('Error fetching records:', err);
+          }
+
+          // Calculate varsity-only stats
+          const varsityRecords = records.filter(r => r.is_varsity);
+          const totalWood = varsityRecords.reduce((sum, r) => sum + (r.total || 0), 0);
+          const avgWood = varsityRecords.length > 0 ? (totalWood / varsityRecords.length).toFixed(1) : '0.0';
+
+          // Calculate points from stored game scores (2 per game win, 1 for total)
+          const isTournament = match.match_type === 'tournament';
+          const teamG1 = match.team_g1 || 0;
+          const teamG2 = match.team_g2 || 0;
+          const teamG3 = match.team_g3 || 0;
+          const teamG4 = match.team_g4 || 0;
+          const oppG1 = match.opp_g1 || 0;
+          const oppG2 = match.opp_g2 || 0;
+          const oppG3 = match.opp_g3 || 0;
+          const oppG4 = match.opp_g4 || 0;
+          const teamTotal = teamG1 + teamG2 + teamG3 + (isTournament ? teamG4 : 0);
+          const oppTotal = oppG1 + oppG2 + oppG3 + (isTournament ? oppG4 : 0);
+          
+          let ourPoints = 0;
+          let oppPoints = 0;
+          if (teamG1 > oppG1) ourPoints += 2; else if (oppG1 > teamG1) oppPoints += 2;
+          if (teamG2 > oppG2) ourPoints += 2; else if (oppG2 > teamG2) oppPoints += 2;
+          if (teamG3 > oppG3) ourPoints += 2; else if (oppG3 > teamG3) oppPoints += 2;
+          if (isTournament) {
+            if (teamG4 > oppG4) ourPoints += 2; else if (oppG4 > teamG4) oppPoints += 2;
+          }
+          if (teamTotal > oppTotal) ourPoints += 1; else if (oppTotal > teamTotal) oppPoints += 1;
+
+          // Format date
+          const date = parseLocalDate(match.match_date);
+          const formattedDate = (date || new Date()).toLocaleDateString('en-US', { 
+            weekday: 'short',
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+          });
+
+          // Determine result from calculated points (not stored result)
+          const hasGameScores = teamG1 || teamG2 || teamG3 || teamG4 || oppG1 || oppG2 || oppG3 || oppG4;
+          let result, resultClass, resultText;
+          if (hasGameScores) {
+            if (ourPoints > oppPoints) {
+              result = 'win'; resultClass = 'win'; resultText = 'Win';
+            } else if (oppPoints > ourPoints) {
+              result = 'loss'; resultClass = 'loss'; resultText = 'Loss';
+            } else {
+              result = 'tie'; resultClass = 'tie'; resultText = 'Tie';
+            }
+          } else {
+            result = match.result || 'pending';
+            resultClass = result === 'win' ? 'win' : result === 'loss' ? 'loss' : result === 'tie' ? 'tie' : '';
+            resultText = result === 'win' ? 'Win' : result === 'loss' ? 'Loss' : result === 'tie' ? 'Tie' : 'Pending';
+          }
+
+          // Get opponent logo
+          const opponentLogo = getOpponentLogo(match.opponent);
+
+          const badgeText = match.gender === 'coed' ? 'Coed' : match.gender === 'boys' ? 'Boys' : 'Girls';
+          const genderBadge = currentGender === 'all' ? `<span class="gender-badge ${match.gender || ''}">${badgeText}</span>` : '';
+
+          html += `
+            <div class="match-card" data-match-id="${match.id}">
+              <div class="match-header" onclick="toggleMatch('${match.id}')">
+                <div class="match-info">
+                  ${opponentLogo ? `<img src="${opponentLogo}" alt="${match.opponent}" class="opponent-logo">` : ''}
+                  <div class="match-text">
+                    <div class="match-date">${formattedDate}${genderBadge}</div>
+                    <div class="match-opponent">vs ${match.opponent}</div>
+                    ${match.location ? `<div class="match-location">📍 ${match.location}</div>` : ''}
+                  </div>
+                </div>
+                <div class="match-stats">
+                  <span class="result-badge ${resultClass}">${resultText}</span>
+                  <div class="stat-box">
+                    <div class="stat-label">Final Score</div>
+                    <div class="stat-value">${ourPoints} - ${oppPoints}</div>
+                  </div>
+                  <div class="stat-box">
+                    <div class="stat-label">Total Wood</div>
+                    <div class="stat-value">${totalWood}</div>
+                  </div>
+                  <div class="stat-box">
+                    <div class="stat-label">Avg Wood</div>
+                    <div class="stat-value">${avgWood}</div>
+                  </div>
+                  <span class="expand-icon">▼</span>
+                </div>
+              </div>
+              <div class="match-details">
+                ${records.length > 0 ? `
+                  <table class="details-table">
+                    <thead>
+                      <tr>
+                        <th>Player</th>
+                        <th>Game 1</th>
+                        <th>Game 2</th>
+                        <th>Game 3</th>
+                        ${isTournament ? '<th>Game 4</th>' : ''}
+                        <th>Total</th>
+                        <th>Average</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${records.map(record => {
+                        const g1 = record.game1 || 0;
+                        const g2 = record.game2 || 0;
+                        const g3 = record.game3 || 0;
+                        const g4 = record.game4 || 0;
+                        const total = g1 + g2 + g3 + (isTournament ? g4 : 0);
+                        const gamesPlayed = (record.game1 ? 1 : 0) + (record.game2 ? 1 : 0) + (record.game3 ? 1 : 0) + (isTournament && record.game4 ? 1 : 0);
+                        const avg = gamesPlayed > 0 ? (total / gamesPlayed).toFixed(1) : '0.0';
+                        return `
+                          <tr>
+                            <td style="text-align:left;">
+                              ${record.player_name || 'Unknown'}
+                              ${record.is_varsity ? '<span class="varsity-badge">V</span>' : ''}
+                            </td>
+                            <td>${record.game1 || '-'}</td>
+                            <td>${record.game2 || '-'}</td>
+                            <td>${record.game3 || '-'}</td>
+                            ${isTournament ? `<td>${record.game4 || '-'}</td>` : ''}
+                            <td><strong>${total}</strong></td>
+                            <td>${avg}</td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                  <div class="team-totals">
+                    <div class="total-item">
+                      <div class="total-label">Varsity Players</div>
+                      <div class="total-value">${varsityRecords.length}</div>
+                    </div>
+                    <div class="total-item">
+                      <div class="total-label">Team Total (Varsity)</div>
+                      <div class="total-value">${totalWood}</div>
+                    </div>
+                    <div class="total-item">
+                      <div class="total-label">Team Average (Varsity)</div>
+                      <div class="total-value">${avgWood}</div>
+                    </div>
+                  </div>
+                ` : '<p style="text-align: center; color: #888; padding: 20px;">No player scores recorded</p>'}
+                ${match.comments ? `<div class="match-comments"><strong>Notes:</strong> ${match.comments}</div>` : ''}
+                ${!isStudentMode() && match.can_edit ? `<div class="match-actions">
+                  <button class="edit-match-btn" onclick="event.stopPropagation(); editMatch('${match.id}')">Edit Match</button>
+                  ${match.is_owner ? `<button class="delete-match-btn" onclick="event.stopPropagation(); deleteMatch('${match.id}')">Delete</button>` : ''}
+                </div>` : ''}
+              </div>
+            </div>
+          `;
+        }
+
+        container.innerHTML = html;
+
+      } catch (error) {
+        console.error('Error loading matches:', error);
+        container.innerHTML = `
+          <div class="no-matches">
+            <p>Error loading matches. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Toggle match details
+    function toggleMatch(matchId) {
+      const card = document.querySelector(`[data-match-id="${matchId}"]`);
+      card.classList.toggle('expanded');
+    }
+
+    // Show message
+    function showMessage(text, type) {
+      const msg = document.getElementById('message');
+      msg.textContent = text;
+      msg.className = `message ${type}`;
+      setTimeout(() => { msg.className = 'message'; }, 4000);
+    }
+
+    // Track if we're editing
+    let editingMatchId = null;
+    let editingMatchGender = null;
+
+    // Edit match
+    async function editMatch(matchId) {
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        
+        // Fetch match details
+        const matchResponse = await fetch(`${API_BASE}/api/matches/${matchId}?coachId=${coachId}`);
+        if (!matchResponse.ok) throw new Error('Failed to fetch match');
+        const match = await matchResponse.json();
+
+        if (match.can_edit === false) {
+          showMessage('You only have view access for this match.', 'error');
+          return;
+        }
+        
+        // Fetch records for this match
+        const recordsResponse = await fetch(`${API_BASE}/api/records?matchId=${matchId}`);
+        const records = recordsResponse.ok ? await recordsResponse.json() : [];
+        
+        // Set editing state
+        editingMatchId = matchId;
+        editingMatchGender = match.gender;
+        selectedMatchGender = match.gender;
+        
+        // Update modal title
+        document.querySelector('.modal-header h2').textContent = 'Edit Match';
+        document.querySelector('.submit-match-btn').textContent = 'Update Match';
+        
+        // Fill in form fields
+        document.getElementById('matchDate').value = formatDateInputValue(match.match_date);
+        document.getElementById('opponent').value = match.opponent;
+        document.getElementById('matchType').value = match.match_type || 'team';
+        populateLocationDropdown(match.location || '');
+        document.getElementById('comments').value = match.comments || '';
+
+        sharedCoachEntries = (match.shared_coaches || []).map(entry => ({
+          coachId: entry.coach_id || entry.coachId,
+          identifier: entry.email || entry.team_code || entry.identifier || '',
+          display: entry.email || entry.team_code || entry.identifier || 'Coach',
+          canEdit: !!entry.can_edit
+        }));
+        renderShareList();
+        
+        // Fill in team game scores (if stored)
+        document.getElementById('teamG1').value = match.team_g1 || '';
+        document.getElementById('teamG2').value = match.team_g2 || '';
+        document.getElementById('teamG3').value = match.team_g3 || '';
+        const teamG4Input = document.getElementById('teamG4');
+        if (teamG4Input) teamG4Input.value = match.team_g4 || '';
+        document.getElementById('oppG1').value = match.opp_g1 || '';
+        document.getElementById('oppG2').value = match.opp_g2 || '';
+        document.getElementById('oppG3').value = match.opp_g3 || '';
+        const oppG4Input = document.getElementById('oppG4');
+        if (oppG4Input) oppG4Input.value = match.opp_g4 || '';
+        applyMatchTypeUI();
+        
+        // Recalculate the result display
+        calculateMatchResult();
+        
+        // Load players for this match's gender
+        const ownerCoachId = match.coach_id || coachId;
+
+        if (match.gender === 'coed') {
+          const [boysResponse, girlsResponse] = await Promise.all([
+            fetch(`${API_BASE}/api/players?coachId=${ownerCoachId}&gender=boys`),
+            fetch(`${API_BASE}/api/players?coachId=${ownerCoachId}&gender=girls`)
+          ]);
+          if (boysResponse.ok && girlsResponse.ok) {
+            allPlayers.boys = await boysResponse.json();
+            allPlayers.girls = await girlsResponse.json();
+            renderAllPlayersTableWithScores(records);
+          }
+        } else {
+          const playersResponse = await fetch(`${API_BASE}/api/players?coachId=${ownerCoachId}&gender=${match.gender}`);
+          if (playersResponse.ok) {
+            players = await playersResponse.json();
+            renderPlayersTableWithScores(records);
+          }
+        }
+        
+        // Show modal
+        document.getElementById('matchModal').classList.add('active');
+        
+      } catch (error) {
+        console.error('Error editing match:', error);
+        showMessage('Error loading match data. Please try again.', 'error');
+      }
+    }
+
+    // Render players table with existing scores
+    function renderPlayersTableWithScores(records) {
+      const tbody = document.getElementById('playersTableBody');
+      
+      if (!players || players.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found.</td></tr>';
+        return;
+      }
+
+      // Create a map of player records
+      const recordMap = {};
+      records.forEach(record => {
+        recordMap[record.player_id] = record;
+      });
+
+      tbody.innerHTML = players.map(player => {
+        const record = recordMap[player.id];
+        const hasRecord = !!record;
+        const isDNP = !hasRecord;
+        
+        return `
+          <tr class="player-row ${isDNP ? 'dnp' : ''}" data-player-id="${player.id}" data-record-id="${record ? record.id : ''}">
+            <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
+            <td><input type="number" class="score-input game1" min="0" max="300" placeholder="-" value="${record?.game1 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+            <td><input type="number" class="score-input game2" min="0" max="300" placeholder="-" value="${record?.game2 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+            <td><input type="number" class="score-input game3" min="0" max="300" placeholder="-" value="${record?.game3 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+            <td class="tournament-only" style="display: none;"><input type="number" class="score-input game4" min="0" max="300" placeholder="-" value="${record?.game4 || ''}" ${isDNP ? 'disabled' : ''} oninput="calculateTeamTotals()"></td>
+            <td><input type="checkbox" class="varsity-checkbox" ${record?.is_varsity ? 'checked' : ''} ${isDNP ? 'disabled' : ''} onchange="calculateTeamTotals()"></td>
+            <td><input type="checkbox" class="dnp-checkbox" ${isDNP ? 'checked' : ''} onchange="toggleDNP(this)"></td>
+          </tr>
+        `;
+      }).join('');
+      
+      // Recalculate team totals after loading existing scores
+      setTimeout(() => calculateTeamTotals(), 100);
+    }
+
+    // Delete match
+    async function deleteMatch(matchId) {
+      if (!confirm('Are you sure you want to delete this match? This will also delete all player records for this match.')) {
+        return;
+      }
+
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const response = await fetch(`${API_BASE}/api/matches/${matchId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) throw new Error('Failed to delete match');
+
+        showMessage('Match deleted successfully!', 'success');
+        loadMatches();
+
+      } catch (error) {
+        console.error('Error deleting match:', error);
+        showMessage('Error deleting match. Please try again.', 'error');
+      }
+    }
+
+    // Reset modal for new match
+    function resetModal() {
+      editingMatchId = null;
+      editingMatchGender = null;
+      document.querySelector('.modal-header h2').textContent = 'Log New Match';
+      document.querySelector('.submit-match-btn').textContent = 'Save Match';
+      document.getElementById('matchForm').reset();
+      populateLocationDropdown();
+      hideAddLocation();
+      
+      // Reset opponent scores section
+      document.getElementById('teamG1').value = '';
+      document.getElementById('teamG2').value = '';
+      document.getElementById('teamG3').value = '';
+      const teamG4Input = document.getElementById('teamG4');
+      if (teamG4Input) teamG4Input.value = '';
+      document.getElementById('oppG1').value = '';
+      document.getElementById('oppG2').value = '';
+      document.getElementById('oppG3').value = '';
+      const oppG4Input = document.getElementById('oppG4');
+      if (oppG4Input) oppG4Input.value = '';
+      document.getElementById('teamTotal').textContent = '0';
+      document.getElementById('oppTotal').textContent = '0';
+      document.getElementById('pointsResultCard').style.display = 'none';
+      const matchTypeSelect = document.getElementById('matchType');
+      if (matchTypeSelect) matchTypeSelect.value = 'team';
+      applyMatchTypeUI();
+
+      sharedCoachEntries = [];
+      const shareInput = document.getElementById('shareCoachIdentifier');
+      const shareToggle = document.getElementById('shareCanEdit');
+      if (shareInput) shareInput.value = '';
+      if (shareToggle) shareToggle.checked = false;
+      renderShareList();
+
+      const tbody = document.getElementById('playersTableBody');
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">Loading players...</td></tr>';
+      }
+    }
+
+    // Check if user is a student (read-only access)
+    function isStudentMode() {
+      return localStorage.getItem('bowling_role') === 'student';
+    }
+
+    // Apply student mode restrictions (hide edit controls)
+    function applyStudentMode() {
+      if (isStudentMode()) {
+        // Hide "Log New Match" button
+        const logBtn = document.getElementById('logMatchBtn');
+        if (logBtn) logBtn.style.display = 'none';
+
+        const shareSection = document.querySelector('.share-section');
+        if (shareSection) shareSection.style.display = 'none';
+
+        // Add a read-only notice
+        const noticeDiv = document.createElement('div');
+        noticeDiv.style.cssText = 'text-align: center; padding: 10px; background: #f0f0f0; color: #666; margin-bottom: 20px; border-radius: 8px;';
+        noticeDiv.textContent = 'Student View (Read-Only)';
+        document.querySelector('.tabs').after(noticeDiv);
+      }
+    }
+
+    if (window.SeasonContext) {
+      SeasonContext.onChange((season) => {
+        currentSeason = season;
+        loadMatches();
+      });
+    }
+
+    // Initialize
+    checkAuth().then(user => {
+      if (user) {
+        applyStudentMode();
+        loadSavedLocations();
+        loadMatches();
+        loadPlayers();
+      }
+    });
+  </script>
+</body>
+</html>

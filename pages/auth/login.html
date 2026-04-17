@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Log In - Strike Master</title>
+  <link rel="icon" type="image/png" href="../../assets/images/BowlingPinCartoon.png">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="../../assets/js/accent-loader.js"></script>
+  <script src="../../assets/js/config/api.js"></script>
+  <style>
+    :root {
+      --ink: #2b2b2b;
+      --ink-soft: #4f4f4f;
+      --cream: #fff5e6;
+      --sky: #cfe9ff;
+      --mint: #b9f5d8;
+      --sun: #ffd166;
+      --coral: #ff8a5b;
+      --peach: #ffe0cc;
+      --white: #ffffff;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Nunito', 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(255, 209, 102, 0.4), transparent 45%),
+        radial-gradient(circle at 82% 16%, rgba(185, 245, 216, 0.5), transparent 45%),
+        radial-gradient(circle at 20% 85%, rgba(255, 138, 91, 0.3), transparent 40%),
+        linear-gradient(160deg, #fff7e6, #e9f6ff 60%, #fff7f0);
+      color: var(--ink);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      background: var(--white);
+      padding: 42px;
+      border-radius: 24px;
+      width: min(420px, 92vw);
+      box-shadow: 0 18px 40px rgba(43, 43, 43, 0.18), 0 8px 0 rgba(43, 43, 43, 0.18);
+      border: 3px solid var(--ink);
+      position: relative;
+      z-index: 1;
+      animation: popIn 0.5s ease;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .logo img {
+      width: 130px;
+      height: 130px;
+      object-fit: contain;
+    }
+    .brand-name {
+      text-align: center;
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0 0 4px;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-name span {
+      color: var(--coral);
+      font-weight: 500;
+    }
+    .subtitle {
+      text-align: center;
+      color: var(--ink-soft);
+      margin-bottom: 28px;
+      font-size: 14px;
+    }
+    label {
+      display: block;
+      margin-top: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      font-size: 14px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      margin-top: 6px;
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #fffef9;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--coral);
+      box-shadow: 0 0 0 4px rgba(255, 138, 91, 0.25);
+    }
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 24px;
+      background: var(--coral);
+      color: var(--ink);
+      font-weight: 700;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: 0 6px 0 var(--ink);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 var(--ink);
+    }
+    button:disabled {
+      background: #f1d5c4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .message {
+      margin-top: 16px;
+      text-align: center;
+      font-weight: 600;
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 14px;
+      border: 2px solid transparent;
+    }
+    .message.error {
+      background: #fff0ee;
+      color: #dc2626;
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+    .message.success {
+      background: #ecfff5;
+      color: #16a34a;
+      border-color: rgba(22, 163, 74, 0.3);
+    }
+    .message.loading {
+      background: #fff7e6;
+      color: var(--ink-soft);
+      border-color: rgba(43, 43, 43, 0.15);
+    }
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: var(--ink-soft);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .back:hover {
+      color: var(--ink);
+    }
+    .signup-link {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px dashed rgba(43, 43, 43, 0.3);
+      font-size: 14px;
+      color: var(--ink-soft);
+    }
+    .signup-link a {
+      color: var(--ink);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .signup-link a:hover {
+      text-decoration: underline;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      color: var(--ink-soft);
+      font-size: 13px;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: rgba(43, 43, 43, 0.2);
+    }
+    .divider span {
+      padding: 0 16px;
+    }
+    .google-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--white);
+      color: var(--ink);
+      font-weight: 700;
+      border: 2px dashed var(--ink);
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .google-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 var(--ink);
+    }
+    .google-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    body::before {
+      width: 180px;
+      height: 180px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 4px solid var(--ink);
+      top: -50px;
+      right: -40px;
+    }
+    body::after {
+      width: 220px;
+      height: 220px;
+      background: rgba(255, 209, 102, 0.35);
+      border: 4px solid var(--ink);
+      bottom: -80px;
+      left: -60px;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo" style="display:flex;justify-content:center;align-items:center;margin-bottom:16px;">
+      <img src="../../assets/images/BowlingPinCartoon.png" alt="BowlingPinCartoon" />
+    </div>
+    <h2 class="brand-name">Strike<span>Master</span></h2>
+    <p class="subtitle">Log in to access your team dashboard</p>
+    
+    <!-- Google Sign In Button -->
+    <button type="button" class="google-btn" id="googleSignIn">
+      <svg viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Sign in with Google
+    </button>
+    
+    <div class="divider"><span>or</span></div>
+    
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="you@example.com" required>
+      
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter your password" required>
+      
+      <button type="submit" id="submitBtn">Log In</button>
+    </form>
+    
+    <div class="message" id="message" style="display: none;"></div>
+    
+    <div class="signup-link">
+      Don't have an account? <a href="signup.html">Sign Up</a>
+    </div>
+    
+    <a class="back" href="../../index.html">← Back to Home</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM elements
+      const form = document.getElementById('loginForm');
+      const msgEl = document.getElementById('message');
+      const submitBtn = document.getElementById('submitBtn');
+
+      // Show message helper
+      function showMessage(text, type) {
+        msgEl.textContent = text;
+        msgEl.className = `message ${type}`;
+        msgEl.style.display = 'block';
+      }
+
+      // Initialize Supabase (only if available)
+      let supabase = null;
+      if (window.supabase) {
+        const supabaseUrl = 'https://fxqddamrgadttkfxvjth.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cWRkYW1yZ2FkdHRrZnh2anRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTc5NjYsImV4cCI6MjA2MTY5Mzk2Nn0.SRMsJlBzJlBwC7S8F-4JvK-rqRB91qcCiOt0ycqXbZQ';
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      }
+
+      // Google Sign In handler
+      const googleBtn = document.getElementById('googleSignIn');
+      if (googleBtn) {
+        googleBtn.addEventListener('click', async () => {
+          if (!supabase) {
+            showMessage('Google Sign-In is not available. Please use email login.', 'error');
+            return;
+          }
+          try {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+              provider: 'google',
+              options: {
+                redirectTo: window.location.origin + '/StrikeMaster/docs/pages/auth/callback.html'
+              }
+            });
+            
+            if (error) {
+              console.error('Google sign in error:', error);
+              showMessage('Failed to sign in with Google. Please try again.', 'error');
+            }
+          } catch (err) {
+            console.error('Google OAuth error:', err);
+            showMessage('Failed to connect to Google. Please try again.', 'error');
+          }
+        });
+      }
+
+      // Form submit handler
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging in...';
+        showMessage('Checking credentials...', 'loading');
+
+        // Try coach login first
+        try {
+          const coachRes = await api.post('/api/auth/login', { email, password });
+          const coachData = await coachRes.json();
+          
+          if (coachRes.ok && coachData.user) {
+            // Coach login successful
+            if (coachData.token) {
+              localStorage.setItem('bowling_token', coachData.token);
+            }
+            localStorage.setItem('bowling_user', JSON.stringify(coachData.user));
+            localStorage.setItem('bowling_role', 'coach');
+            
+            showMessage('Welcome back, Coach! Redirecting...', 'success');
+            setTimeout(() => {
+              window.location.href = '../dashboard/home.html';
+            }, 1000);
+            return;
+          }
+        } catch (err) {
+          console.log('Coach login failed, trying student...');
+        }
+
+        // Try student login
+        try {
+          const studentRes = await api.post('/api/auth/student-login', { email, password });
+          const studentData = await studentRes.json();
+          
+          if (studentRes.ok && studentData.user) {
+            // Student login successful
+            localStorage.setItem('bowling_user', JSON.stringify(studentData.user));
+            localStorage.setItem('bowling_role', 'student');
+            
+            showMessage('Welcome! Redirecting...', 'success');
+            setTimeout(() => {
+              window.location.href = '../dashboard/home.html';
+            }, 1000);
+            return;
+          }
+        } catch (err) {
+          console.log('Student login also failed');
+        }
+
+        // Both failed
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Log In';
+        showMessage('Invalid email or password. Please try again.', 'error');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en" data-ui="cartoon">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Girls Players - Strike Master</title>
+  <link rel="icon" type="image/png" href="../../assets/images/BowlingPinCartoon.png">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/cartoon-ui.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="../../assets/js/accent-loader.js"></script>
+  <script src="../../assets/js/config/api.js"></script>
+  <script src="../../assets/js/config/teams.js"></script>
+  <script src="../../assets/js/auth-helper.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .page-header {
+      text-align: center;
+      padding: 30px 0;
+    }
+
+    .page-header h1 {
+      color: var(--accent-color);
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    /* Gender Toggle */
+    .gender-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .gender-btn {
+      padding: 12px 36px;
+      border: none;
+      background: var(--card-bg);
+      color: var(--text-color);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .gender-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .gender-btn.active {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    /* Add Player Section */
+    .add-player-section {
+      background: var(--card-bg);
+      border: 2px solid var(--accent-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .add-player-section h3 {
+      color: var(--accent-color);
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .add-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+      gap: 15px;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .form-group input, .form-group select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .add-btn {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: none;
+      padding: 10px 25px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      height: 42px;
+    }
+
+    .add-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* Players List */
+    .players-section {
+      background: var(--card-bg);
+      border: 2px solid var(--accent-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .players-section h3 {
+      color: var(--accent-color);
+      padding: 15px 20px;
+      margin: 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .player-card {
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .player-card:last-child {
+      border-bottom: none;
+    }
+
+    .player-card:hover {
+      background: rgba(0,0,0,0.03);
+    }
+
+    .player-card.selected {
+      background: rgba(var(--accent-color-rgb, 255, 165, 0), 0.1);
+      border-left: 4px solid var(--accent-color);
+    }
+
+    .player-info h4 {
+      margin: 0 0 5px 0;
+      font-size: 18px;
+      color: var(--text-color);
+    }
+
+    .player-info span {
+      font-size: 13px;
+      color: #888;
+    }
+
+    .player-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .edit-btn {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .edit-btn:hover { opacity: 0.9; }
+
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .delete-btn:hover {
+      background: #c82333;
+    }
+
+    .no-players {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 2px solid var(--accent-color);
+      padding: 20px;
+    }
+
+    .modal-content h3 { margin-top: 0; }
+
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn-secondary {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    /* Player Stats Modal */
+    .stats-panel {
+      display: none;
+      background: var(--card-bg);
+      border: 2px solid var(--accent-color);
+      border-radius: 12px;
+      margin-top: 25px;
+      overflow: hidden;
+    }
+
+    .stats-panel.active {
+      display: block;
+    }
+
+    .stats-header {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stats-header h2 {
+      margin: 0;
+      color: var(--accent-color);
+    }
+
+    .close-stats {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #888;
+      padding: 0 10px;
+    }
+
+    /* Filter Section */
+    .stats-filter {
+      padding: 15px 20px;
+      background: var(--content-bg);
+      border-bottom: 1px solid #eee;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--accent-color);
+      background: transparent;
+      color: var(--accent-color);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .filter-btn.active {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+    }
+
+    .filter-row {
+      padding: 10px 20px;
+      background: var(--content-bg);
+      border-bottom: 1px solid #eee;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-row select {
+      padding: 8px 12px;
+      border: 1px solid var(--accent-color);
+      border-radius: 5px;
+      background: var(--card-bg);
+      color: var(--text-color);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Stats Summary */
+    .stats-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      padding: 20px;
+      background: var(--content-bg);
+    }
+
+    .summary-box {
+      text-align: center;
+      padding: 15px;
+      background: var(--card-bg);
+      border-radius: 8px;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .summary-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent-color);
+    }
+
+    /* Match History Table */
+    .match-history {
+      padding: 20px;
+    }
+
+    .match-history h3 {
+      color: var(--text-color);
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history-table th {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      padding: 12px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .history-table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    .opponent-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .opponent-logo-small {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .history-table tr:hover {
+      background: rgba(0,0,0,0.02);
+    }
+
+    .varsity-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #ffc107;
+      color: #000;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .no-stats {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+    }
+
+    .message {
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: 600;
+      display: none;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      display: block;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .add-form {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-summary {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .history-table {
+        font-size: 13px;
+      }
+
+      .history-table th,
+      .history-table td {
+        padding: 8px 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="../../index.html" class="logo">
+      <img src="../../assets/images/Team Logos/phLogo.png" alt="Strike Master Logo">
+    </a>
+    <div class="nav-links">
+      <a href="home.html">Home</a>
+      <a href="players.html">Players</a>
+      <a href="../settings/appearanceSettings.html">Settings</a>
+      <a href="myTeam.html">My Team</a>
+      <a href="announcements.html">Announcements</a>
+      <a href="#" id="logoutBtn" style="color:#dc3545;">Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>Players</h1>
+      <p>Manage players and view individual statistics</p>
+    </div>
+
+    <div class="gender-toggle">
+      <button class="gender-btn active" data-gender="all">All</button>
+      <button class="gender-btn" data-gender="boys">Boys</button>
+      <button class="gender-btn" data-gender="girls">Girls</button>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div class="add-player-section">
+      <h3>Add New Player</h3>
+      <div class="add-form">
+        <div class="form-group">
+          <label>First Name *</label>
+          <input type="text" id="firstName" placeholder="First name">
+        </div>
+        <div class="form-group">
+          <label>Last Name *</label>
+          <input type="text" id="lastName" placeholder="Last name">
+        </div>
+        <div class="form-group">
+          <label>Grad Year *</label>
+          <select id="gradYear">
+            <option value="">Select</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Gender *</label>
+          <select id="playerGender">
+            <option value="boys">M</option>
+            <option value="girls">F</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Email (optional)</label>
+          <input type="email" id="playerEmail" placeholder="student@email.com">
+        </div>
+        <button class="add-btn" id="addPlayerBtn">Add Player</button>
+      </div>
+    </div>
+
+    <div class="players-section">
+      <h3 id="playersTitle">All Players</h3>
+      <div id="playersList">
+        <div class="no-players">Loading players...</div>
+      </div>
+    </div>
+
+    <!-- Player Stats Panel -->
+    <div class="stats-panel" id="statsPanel">
+      <div class="stats-header">
+        <h2 id="statsPlayerName">Player Stats</h2>
+        <button class="close-stats" id="closeStats">&times;</button>
+      </div>
+
+      <div class="stats-filter">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" data-filter="all">All Matches</button>
+        <button class="filter-btn" data-filter="varsity">Varsity Only</button>
+        <button class="filter-btn" data-filter="jv">JV Only</button>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">Location:</span>
+        <select id="locationFilter">
+          <option value="all">All Locations</option>
+        </select>
+        <span class="filter-label">Game:</span>
+        <select id="gameFilter">
+          <option value="all">All Games</option>
+          <option value="game1">Game 1 Only</option>
+          <option value="game2">Game 2 Only</option>
+          <option value="game3">Game 3 Only</option>
+          <option value="game4">Game 4 Only</option>
+        </select>
+      </div>
+
+      <div class="stats-summary" id="statsSummary">
+        <div class="summary-box">
+          <div class="summary-label">Matches</div>
+          <div class="summary-value" id="totalMatches">0</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">Avg Game 1</div>
+          <div class="summary-value" id="avgGame1">0.0</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">Avg Game 2</div>
+          <div class="summary-value" id="avgGame2">0.0</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">Avg Game 3</div>
+          <div class="summary-value" id="avgGame3">0.0</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">Avg Game 4</div>
+          <div class="summary-value" id="avgGame4">0.0</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">Total Avg</div>
+          <div class="summary-value" id="totalAvg">0.0</div>
+        </div>
+      </div>
+
+      <div class="match-history">
+        <h3>Match History</h3>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Opponent</th>
+              <th>Game 1</th>
+              <th>Game 2</th>
+              <th>Game 3</th>
+              <th>Game 4</th>
+              <th>Total</th>
+              <th>Avg</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="matchHistoryBody">
+            <tr><td colspan="9" class="no-stats">No match data available</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="modal" id="editPlayerModal">
+      <div class="modal-content">
+        <h3>Edit Player</h3>
+        <div class="modal-grid">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" id="editFirstName">
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" id="editLastName">
+          </div>
+          <div class="form-group">
+            <label>Grad Year *</label>
+            <select id="editGradYear">
+              <option value="">Select</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Gender *</label>
+            <select id="editGender">
+              <option value="boys">M</option>
+              <option value="girls">F</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label>Email (optional)</label>
+            <input type="email" id="editEmail" placeholder="student@email.com">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="editCancelBtn" type="button">Cancel</button>
+          <button class="add-btn" id="editSaveBtn" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentGender = 'all';
+    let coachId = null;
+    let players = [];
+    let selectedPlayerId = null;
+    let playerRecords = [];
+    let currentFilter = 'all';
+    let currentLocationFilter = 'all';
+    let currentGameFilter = 'all';
+
+    function parseLocalDate(value) {
+      if (!value) return null;
+      if (value instanceof Date) return value;
+      if (typeof value === 'string') {
+        const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (match) {
+          const year = Number(match[1]);
+          const month = Number(match[2]) - 1;
+          const day = Number(match[3]);
+          return new Date(year, month, day);
+        }
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return null;
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function syncAddPlayerGender() {
+      const genderSelect = document.getElementById('playerGender');
+      if (!genderSelect) return;
+      if (currentGender === 'boys' || currentGender === 'girls') {
+        genderSelect.value = currentGender;
+      } else if (!genderSelect.value) {
+        genderSelect.value = 'boys';
+      }
+    }
+
+    // Team logo mapping for opponents - uses centralized teams.js config
+    // getTeamLogo function is provided by teams.js
+
+    // Get opponent logo (wrapper for backward compatibility)
+    function getOpponentLogo(opponentName) {
+      return getTeamLogo(opponentName, '../../assets/images/Team Logos/');
+    }
+
+    // Check authentication
+    async function checkAuth() {
+      const userData = localStorage.getItem('bowling_user');
+      if (!userData) {
+        window.location.href = '../auth/login.html';
+        return null;
+      }
+      try {
+        const user = JSON.parse(userData);
+        coachId = user.id;
+        return user;
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        window.location.href = '../auth/login.html';
+        return null;
+      }
+    }
+
+    // Gender toggle
+    document.querySelectorAll('.gender-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentGender = btn.dataset.gender;
+        syncAddPlayerGender();
+        document.getElementById('playersTitle').textContent = 
+          currentGender === 'all' ? 'All Players' : 
+          currentGender === 'boys' ? 'Boys Players' : 'Girls Players';
+        closeStatsPanel();
+        loadPlayers();
+      });
+    });
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        displayPlayerStats();
+      });
+    });
+
+    // Location filter
+    document.getElementById('locationFilter').addEventListener('change', (e) => {
+      currentLocationFilter = e.target.value;
+      displayPlayerStats();
+    });
+
+    // Game filter
+    document.getElementById('gameFilter').addEventListener('change', (e) => {
+      currentGameFilter = e.target.value;
+      displayPlayerStats();
+    });
+
+    // Close stats panel
+    document.getElementById('closeStats').addEventListener('click', closeStatsPanel);
+
+    function closeStatsPanel() {
+      document.getElementById('statsPanel').classList.remove('active');
+      document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
+      selectedPlayerId = null;
+    }
+
+    // Populate location filter dropdown
+    function populateLocationFilter() {
+      const locationSelect = document.getElementById('locationFilter');
+      const locations = new Set();
+      
+      playerRecords.forEach(r => {
+        if (r.match && r.match.location) {
+          locations.add(r.match.location);
+        }
+      });
+      
+      locationSelect.innerHTML = '<option value="all">All Locations</option>';
+      Array.from(locations).sort().forEach(loc => {
+        const option = document.createElement('option');
+        option.value = loc;
+        option.textContent = loc;
+        locationSelect.appendChild(option);
+      });
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('bowling_user');
+      window.location.href = '../auth/login.html';
+    });
+
+    // Load players
+    async function loadPlayers() {
+      const container = document.getElementById('playersList');
+      
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        
+        // If "all" is selected, load both boys and girls
+        let allPlayers = [];
+        if (currentGender === 'all') {
+          const [boysRes, girlsRes] = await Promise.all([
+            fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=boys`),
+            fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=girls`)
+          ]);
+          
+          if (boysRes.ok) {
+            const boysPlayers = await boysRes.json();
+            allPlayers = [...allPlayers, ...boysPlayers.map(p => ({...p, _gender: 'boys'}))];
+          }
+          if (girlsRes.ok) {
+            const girlsPlayers = await girlsRes.json();
+            allPlayers = [...allPlayers, ...girlsPlayers.map(p => ({...p, _gender: 'girls'}))];
+          }
+          players = allPlayers;
+        } else {
+          const response = await fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=${currentGender}`);
+          if (!response.ok) throw new Error('Failed to fetch players');
+          players = await response.json();
+        }
+
+        if (!players || players.length === 0) {
+          container.innerHTML = '<div class="no-players">No players yet. Add your first player above!</div>';
+          return;
+        }
+
+        container.innerHTML = players.map(player => `
+          <div class="player-card" data-player-id="${player.id}" onclick="selectPlayer('${player.id}')">
+            <div class="player-info">
+              <h4>${player.first_name} ${player.last_name}</h4>
+              <span>Class of ${player.grad_year || 'N/A'}${player.email ? ` • ${player.email}` : ''}</span>
+            </div>
+            <div class="player-actions">
+              <button class="edit-btn" onclick="event.stopPropagation(); openEditPlayer('${player.id}')">Edit</button>
+              <button class="delete-btn" onclick="event.stopPropagation(); deletePlayer('${player.id}')">Remove</button>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        console.error('Error loading players:', error);
+        container.innerHTML = '<div class="no-players">Error loading players. Please try again.</div>';
+      }
+    }
+
+    // Select player and show stats
+    async function selectPlayer(playerId) {
+      selectedPlayerId = playerId;
+      
+      // Highlight selected player
+      document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
+      document.querySelector(`[data-player-id="${playerId}"]`).classList.add('selected');
+
+      const player = players.find(p => p.id === playerId);
+      document.getElementById('statsPlayerName').textContent = `${player.first_name} ${player.last_name}'s Stats`;
+
+      // Load player records
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const response = await fetch(`${API_BASE}/api/players/${playerId}/records`);
+        
+        if (response.ok) {
+          playerRecords = await response.json();
+        } else {
+          playerRecords = [];
+        }
+
+        // Populate location filter dropdown
+        populateLocationFilter();
+        
+        // Reset filters
+        currentLocationFilter = 'all';
+        currentGameFilter = 'all';
+        document.getElementById('locationFilter').value = 'all';
+        document.getElementById('gameFilter').value = 'all';
+
+        displayPlayerStats();
+        document.getElementById('statsPanel').classList.add('active');
+        
+        // Scroll to stats panel
+        document.getElementById('statsPanel').scrollIntoView({ behavior: 'smooth' });
+
+      } catch (error) {
+        console.error('Error loading player records:', error);
+        playerRecords = [];
+        displayPlayerStats();
+        document.getElementById('statsPanel').classList.add('active');
+      }
+    }
+
+    // Display player stats based on filter
+    function displayPlayerStats() {
+      let filteredRecords = playerRecords;
+
+      // Apply varsity/JV filter
+      if (currentFilter === 'varsity') {
+        filteredRecords = filteredRecords.filter(r => r.is_varsity === true);
+      } else if (currentFilter === 'jv') {
+        filteredRecords = filteredRecords.filter(r => r.is_varsity === false);
+      }
+
+      // Apply location filter
+      if (currentLocationFilter !== 'all') {
+        filteredRecords = filteredRecords.filter(r => r.match && r.match.location === currentLocationFilter);
+      }
+
+      // Calculate averages based on game filter
+      const matchCount = filteredRecords.length;
+      let totalG1 = 0, totalG2 = 0, totalG3 = 0, totalG4 = 0, totalAll = 0;
+      let countG1 = 0, countG2 = 0, countG3 = 0, countG4 = 0, countAll = 0;
+
+      filteredRecords.forEach(r => {
+        if (currentGameFilter === 'all' || currentGameFilter === 'game1') {
+          if (r.game1) { totalG1 += r.game1; countG1++; }
+        }
+        if (currentGameFilter === 'all' || currentGameFilter === 'game2') {
+          if (r.game2) { totalG2 += r.game2; countG2++; }
+        }
+        if (currentGameFilter === 'all' || currentGameFilter === 'game3') {
+          if (r.game3) { totalG3 += r.game3; countG3++; }
+        }
+        if (currentGameFilter === 'all' || currentGameFilter === 'game4') {
+          if (r.game4) { totalG4 += r.game4; countG4++; }
+        }
+        
+        // Calculate overall average based on game filter
+        let gameTotal = 0, gamesPlayed = 0;
+        if (currentGameFilter === 'all') {
+          if (r.game1) { gameTotal += r.game1; gamesPlayed++; }
+          if (r.game2) { gameTotal += r.game2; gamesPlayed++; }
+          if (r.game3) { gameTotal += r.game3; gamesPlayed++; }
+          if (r.game4) { gameTotal += r.game4; gamesPlayed++; }
+        } else if (currentGameFilter === 'game1' && r.game1) {
+          gameTotal = r.game1; gamesPlayed = 1;
+        } else if (currentGameFilter === 'game2' && r.game2) {
+          gameTotal = r.game2; gamesPlayed = 1;
+        } else if (currentGameFilter === 'game3' && r.game3) {
+          gameTotal = r.game3; gamesPlayed = 1;
+        } else if (currentGameFilter === 'game4' && r.game4) {
+          gameTotal = r.game4; gamesPlayed = 1;
+        }
+        if (gamesPlayed > 0) {
+          totalAll += gameTotal / gamesPlayed;
+          countAll++;
+        }
+      });
+
+      document.getElementById('totalMatches').textContent = matchCount;
+      document.getElementById('avgGame1').textContent = countG1 > 0 ? (totalG1 / countG1).toFixed(1) : '0.0';
+      document.getElementById('avgGame2').textContent = countG2 > 0 ? (totalG2 / countG2).toFixed(1) : '0.0';
+      document.getElementById('avgGame3').textContent = countG3 > 0 ? (totalG3 / countG3).toFixed(1) : '0.0';
+      document.getElementById('avgGame4').textContent = countG4 > 0 ? (totalG4 / countG4).toFixed(1) : '0.0';
+      document.getElementById('totalAvg').textContent = countAll > 0 ? (totalAll / countAll).toFixed(1) : '0.0';
+
+      // Build match history table
+      const tbody = document.getElementById('matchHistoryBody');
+      
+      if (filteredRecords.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="no-stats">No match data available for this filter</td></tr>';
+        return;
+      }
+
+      // Sort by date (newest first)
+      filteredRecords.sort((a, b) => {
+        const dateA = a.match ? parseLocalDate(a.match.match_date) : null;
+        const dateB = b.match ? parseLocalDate(b.match.match_date) : null;
+        return (dateB ? dateB.getTime() : 0) - (dateA ? dateA.getTime() : 0);
+      });
+
+      tbody.innerHTML = filteredRecords.map(record => {
+        const match = record.match || {};
+        const dateValue = match.match_date ? parseLocalDate(match.match_date) : null;
+        const date = dateValue ? dateValue.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }) : 'N/A';
+        
+        const g1 = record.game1 || 0;
+        const g2 = record.game2 || 0;
+        const g3 = record.game3 || 0;
+        const g4 = record.game4 || 0;
+        const total = g1 + g2 + g3 + g4;
+        const gamesPlayed = (record.game1 ? 1 : 0) + (record.game2 ? 1 : 0) + (record.game3 ? 1 : 0) + (record.game4 ? 1 : 0);
+        const avg = gamesPlayed > 0 ? (total / gamesPlayed).toFixed(1) : '0.0';
+
+        const opponentLogo = getOpponentLogo(match.opponent);
+        const opponentDisplay = opponentLogo 
+          ? `<div class="opponent-cell"><img src="${opponentLogo}" alt="${match.opponent}" class="opponent-logo-small">${match.opponent || 'Unknown'}</div>`
+          : (match.opponent || 'Unknown');
+
+        return `
+          <tr>
+            <td>${date}</td>
+            <td>${opponentDisplay}</td>
+            <td>${record.game1 || '-'}</td>
+            <td>${record.game2 || '-'}</td>
+            <td>${record.game3 || '-'}</td>
+            <td>${record.game4 || '-'}</td>
+            <td><strong>${total}</strong></td>
+            <td>${avg}</td>
+            <td>${record.is_varsity ? '<span class="varsity-badge">V</span>' : 'JV'}</td>
+          </tr>
+        `;
+      }).join('');
+    
+
+    let editPlayerId = null;
+
+    function openEditPlayer(playerId) {
+      const player = players.find(p => p.id === playerId);
+      if (!player) return;
+      editPlayerId = playerId;
+      document.getElementById('editFirstName').value = player.first_name || '';
+      document.getElementById('editLastName').value = player.last_name || '';
+      document.getElementById('editGradYear').value = player.grad_year || '';
+      document.getElementById('editGender').value = player.gender || 'boys';
+      document.getElementById('editEmail').value = player.email || '';
+      document.getElementById('editPlayerModal').classList.add('active');
+    }
+
+    function closeEditPlayer() {
+      editPlayerId = null;
+      document.getElementById('editPlayerModal').classList.remove('active');
+    }
+
+    document.getElementById('editCancelBtn').addEventListener('click', closeEditPlayer);
+    document.getElementById('editPlayerModal').addEventListener('click', (event) => {
+      if (event.target.id === 'editPlayerModal') closeEditPlayer();
+    });
+
+    document.getElementById('editSaveBtn').addEventListener('click', async () => {
+      if (!editPlayerId) return;
+      const firstName = document.getElementById('editFirstName').value.trim();
+      const lastName = document.getElementById('editLastName').value.trim();
+      const gradYear = document.getElementById('editGradYear').value;
+      const gender = document.getElementById('editGender').value;
+      const email = document.getElementById('editEmail').value.trim();
+      if (!firstName || !lastName || !gradYear) {
+        showMessage('Please fill in all required fields.', 'error');
+        return;
+      }
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const response = await fetch(`${API_BASE}/api/players/${editPlayerId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ coachId, firstName, lastName, gradYear: parseInt(gradYear), gender, email })
+        });
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to update player');
+        }
+        closeEditPlayer();
+        showMessage('Player updated.', 'success');
+        loadPlayers();
+      } catch (error) {
+        showMessage(error.message || 'Failed to update player.', 'error');
+      }
+    });
+
+    // Add player
+    document.getElementById('addPlayerBtn').addEventListener('click', async () => {
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const gradYear = document.getElementById('gradYear').value;
+      const email = document.getElementById('playerEmail').value.trim();
+      const genderSelect = document.getElementById('playerGender');
+      const selectedGender = genderSelect ? genderSelect.value : (currentGender === 'girls' ? 'girls' : 'boys');
+
+      if (!firstName || !lastName || !gradYear) {
+        showMessage('Please fill in all required fields.', 'error');
+        return;
+      }
+
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const response = await fetch(`${API_BASE}/api/players`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            coachId: coachId,
+            firstName,
+            lastName,
+            gradYear: parseInt(gradYear),
+            gender: selectedGender,
+            email
+          })
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to add player');
+        }
+
+        const data = await response.json();
+
+        // Clear form
+        document.getElementById('firstName').value = '';
+        document.getElementById('lastName').value = '';
+        document.getElementById('gradYear').value = '';
+        document.getElementById('playerEmail').value = '';
+        if (genderSelect) genderSelect.value = currentGender === 'girls' ? 'girls' : 'boys';
+
+        if (data.emailStatus && !data.emailStatus.sent && email) {
+          showMessage(`${firstName} ${lastName} added, but email not sent: ${data.emailStatus.error || 'unknown error'}`, 'error');
+        } else {
+          showMessage(`${firstName} ${lastName} added successfully!`, 'success');
+        }
+        loadPlayers();
+
+      } catch (error) {
+        console.error('Error adding player:', error);
+        showMessage(error.message || 'Failed to add player.', 'error');
+      }
+    });
+
+    // Delete player
+    async function deletePlayer(playerId) {
+      if (!confirm('Are you sure you want to remove this player? This will also delete all their records.')) {
+        return;
+      }
+
+      try {
+        const API_BASE = window.API_BASE_URL || 'https://strikemaster-production.up.railway.app';
+        const response = await fetch(`${API_BASE}/api/players/${playerId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to remove player');
+        }
+
+        showMessage('Player removed.', 'success');
+        closeStatsPanel();
+        loadPlayers();
+
+      } catch (error) {
+        console.error('Error deleting player:', error);
+        showMessage(error.message || 'Failed to remove player.', 'error');
+      }
+    }
+
+    // Check if user is a student (read-only access)
+    function isStudentMode() {
+      return localStorage.getItem('bowling_role') === 'student';
+    }
+
+    // Apply student mode restrictions
+    function applyStudentMode() {
+      if (isStudentMode()) {
+        // Hide add player section
+        const addSection = document.querySelector('.add-player-section');
+        if (addSection) addSection.style.display = 'none';
+
+        // Hide remove player buttons in stats panel
+        const removeBtn = document.getElementById('removePlayerBtn');
+        if (removeBtn) removeBtn.style.display = 'none';
+
+        document.querySelectorAll('.delete-btn').forEach(btn => btn.style.display = 'none');
+        document.querySelectorAll('.edit-btn').forEach(btn => btn.style.display = 'none');
+      }
+    }
+
+    // Show message
+    function showMessage(text, type) {
+      const msg = document.getElementById('message');
+      msg.textContent = text;
+      msg.className = `message ${type}`;
+      setTimeout(() => { msg.className = 'message'; }, 4000);
+    }
+
+    // Initialize
+    checkAuth().then(user => {
+      if (user) {
+        applyStudentMode();
+        syncAddPlayerGender();
+        loadPlayers();
+      }
+    });
+  </script>
+</body>
+</html>

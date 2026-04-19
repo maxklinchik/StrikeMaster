@@ -393,6 +393,77 @@
       border-color: var(--accent-color);
     }
 
+    /* Searchable Opponent Dropdown */
+    .opponent-search-wrapper {
+      position: relative;
+    }
+
+    .opponent-search-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--content-bg);
+      color: var(--text-color);
+      transition: border-color 0.2s;
+    }
+
+    .opponent-search-input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .opponent-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .opponent-dropdown.open {
+      display: block;
+    }
+
+    .opponent-option {
+      padding: 12px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-color);
+      transition: background 0.2s;
+      font-size: 14px;
+    }
+
+    .opponent-option:last-child {
+      border-bottom: none;
+    }
+
+    .opponent-option:hover {
+      background: var(--content-bg);
+    }
+
+    .opponent-option.selected {
+      background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+
+    .opponent-no-results {
+      padding: 12px 14px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
     /* Player Scores Table */
     .players-entry {
       margin: 20px 0;
@@ -1326,11 +1397,12 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="opponent">Opponent</label>
-            <select id="opponent" required>
-              <option value="">Select opponent...</option>
-              <!-- Opponents will be populated by JavaScript -->
-            </select>
+            <label for="opponentSearch">Opponent</label>
+            <div class="opponent-search-wrapper">
+              <input type="text" id="opponentSearch" class="opponent-search-input" placeholder="Search for opponent..." autocomplete="off">
+              <div class="opponent-dropdown" id="opponentDropdown"></div>
+            </div>
+            <input type="hidden" id="opponent" required>
           </div>
           <div class="form-group">
             <label for="location">Location</label>
@@ -1665,23 +1737,69 @@
     }
 
     // Populate opponent dropdown from SCHOOLS_LIST
+    let allOpponents = [];
+    
     function populateOpponentDropdown() {
-      const opponentSelect = document.getElementById('opponent');
-      SCHOOLS_LIST.forEach(school => {
-        const option = document.createElement('option');
-        option.value = school.value;
-        option.textContent = school.name;
-        opponentSelect.appendChild(option);
-      });
-      // Add "Other" option at the end
-      const otherOption = document.createElement('option');
-      otherOption.value = 'Other';
-      otherOption.textContent = 'Other';
-      opponentSelect.appendChild(otherOption);
+      // Build all opponents list from SCHOOLS_LIST
+      allOpponents = SCHOOLS_LIST.map(school => ({
+        value: school.value,
+        name: school.name
+      }));
+      // Add "Other" option
+      allOpponents.push({ value: 'Other', name: 'Other' });
     }
 
     // Initialize opponent dropdown
     populateOpponentDropdown();
+
+    // Searchable opponent dropdown handlers
+    const opponentSearchInput = document.getElementById('opponentSearch');
+    const opponentDropdown = document.getElementById('opponentDropdown');
+    const opponentHiddenInput = document.getElementById('opponent');
+
+    function renderOpponentDropdown(filter = '') {
+      const filtered = allOpponents.filter(opp => 
+        opp.name.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      if (filtered.length === 0) {
+        opponentDropdown.innerHTML = '<div class="opponent-no-results">No opponents found</div>';
+        return;
+      }
+
+      opponentDropdown.innerHTML = filtered.map(opp => `
+        <div class="opponent-option" data-value="${opp.value}" data-name="${opp.name}">
+          ${opp.name}
+        </div>
+      `).join('');
+
+      // Add click handlers to options
+      opponentDropdown.querySelectorAll('.opponent-option').forEach(option => {
+        option.addEventListener('click', () => {
+          opponentSearchInput.value = option.dataset.name;
+          opponentHiddenInput.value = option.dataset.value;
+          opponentDropdown.classList.remove('open');
+          opponentSearchInput.focus();
+        });
+      });
+    }
+
+    opponentSearchInput.addEventListener('focus', () => {
+      opponentDropdown.classList.add('open');
+      renderOpponentDropdown(opponentSearchInput.value);
+    });
+
+    opponentSearchInput.addEventListener('input', (e) => {
+      opponentDropdown.classList.add('open');
+      renderOpponentDropdown(e.target.value);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.opponent-search-wrapper')) {
+        opponentDropdown.classList.remove('open');
+      }
+    });
 
     // ==================== LOCATION MANAGEMENT ====================
     
@@ -2157,6 +2275,12 @@
     // Submit match form
     document.getElementById('matchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      // Validate opponent is selected
+      if (!document.getElementById('opponent').value) {
+        showMessage('Please select an opponent', 'error');
+        return;
+      }
       
       const isEditing = editingMatchId !== null;
       const selectedGender = selectedMatchGender || currentGender;
@@ -2662,7 +2786,12 @@
         
         // Fill in form fields
         document.getElementById('matchDate').value = formatDateInputValue(match.match_date);
+        
+        // Set opponent - update both the hidden input and search display
         document.getElementById('opponent').value = match.opponent;
+        const opponentName = allOpponents.find(opp => opp.value === match.opponent)?.name || match.opponent;
+        document.getElementById('opponentSearch').value = opponentName;
+        
         document.getElementById('matchType').value = match.match_type || 'team';
         populateLocationDropdown(match.location || '');
         document.getElementById('comments').value = match.comments || '';
@@ -2790,6 +2919,7 @@
       document.querySelector('.modal-header h2').textContent = 'Log New Match';
       document.querySelector('.submit-match-btn').textContent = 'Save Match';
       document.getElementById('matchForm').reset();
+      document.getElementById('opponentDropdown').classList.remove('open');
       populateLocationDropdown();
       hideAddLocation();
       

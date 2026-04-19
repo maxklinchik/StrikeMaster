@@ -233,6 +233,34 @@
       color: var(--ink-soft);
       margin-top: 6px;
     }
+    .password-group {
+      margin-top: 16px;
+    }
+    .password-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    .password-toggle input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+    .password-toggle label {
+      margin: 0;
+      font-weight: 400;
+      cursor: pointer;
+      user-select: none;
+    }
+    .password-mismatch {
+      color: #dc2626;
+      font-size: 12px;
+      margin-top: 6px;
+      display: none;
+    }
     .divider {
       display: flex;
       align-items: center;
@@ -391,11 +419,27 @@
       <label for="studentEmail">Email</label>
       <input type="email" id="studentEmail" placeholder="you@example.com" required>
       
-      <label for="studentPassword">Password</label>
-      <input type="password" id="studentPassword" placeholder="Create a password" required minlength="6">
+      <div class="password-group">
+        <label for="studentPassword">Password</label>
+        <input type="password" id="studentPassword" placeholder="Create a password" required minlength="6">
+        <div class="password-toggle">
+          <input type="checkbox" id="studentShowPassword">
+          <label for="studentShowPassword">Show password</label>
+        </div>
+      </div>
+      
+      <div class="password-group">
+        <label for="studentConfirmPassword">Confirm Password</label>
+        <input type="password" id="studentConfirmPassword" placeholder="Re-enter your password" required minlength="6">
+        <div class="password-toggle">
+          <input type="checkbox" id="studentShowConfirmPassword">
+          <label for="studentShowConfirmPassword">Show password</label>
+        </div>
+      </div>
+      <div class="password-mismatch" id="studentPasswordMismatch">Passwords do not match</div>
       
       <label for="teamCode">Team Code</label>
-      <input type="text" id="teamCode" placeholder="Enter code from your coach" required maxlength="6" style="text-transform: uppercase;">
+      <input type="text" id="teamCode" placeholder="Enter code from your coach" required maxlength="6">
       <p class="hint">Get this 6-character code from your coach</p>
       
       <button type="submit" id="studentSubmitBtn">Create Student Account</button>
@@ -412,8 +456,24 @@
       <label for="coachEmail">Email</label>
       <input type="email" id="coachEmail" placeholder="you@example.com" required>
       
-      <label for="coachPassword">Password</label>
-      <input type="password" id="coachPassword" placeholder="Create a password" required minlength="6">
+      <div class="password-group">
+        <label for="coachPassword">Password</label>
+        <input type="password" id="coachPassword" placeholder="Create a password" required minlength="6">
+        <div class="password-toggle">
+          <input type="checkbox" id="coachShowPassword">
+          <label for="coachShowPassword">Show password</label>
+        </div>
+      </div>
+      
+      <div class="password-group">
+        <label for="coachConfirmPassword">Confirm Password</label>
+        <input type="password" id="coachConfirmPassword" placeholder="Re-enter your password" required minlength="6">
+        <div class="password-toggle">
+          <input type="checkbox" id="coachShowConfirmPassword">
+          <label for="coachShowConfirmPassword">Show password</label>
+        </div>
+      </div>
+      <div class="password-mismatch" id="coachPasswordMismatch">Passwords do not match</div>
       
       <label for="schoolSelect">School</label>
       <select id="schoolSelect" required>
@@ -457,6 +517,71 @@
       let selectedRole = 'student';
       let pendingGoogleUser = null;
       let selectedSchoolColors = null;
+
+      // Password visibility toggle handlers
+      const studentShowPasswordCheckbox = document.getElementById('studentShowPassword');
+      const studentShowConfirmPasswordCheckbox = document.getElementById('studentShowConfirmPassword');
+      const studentPasswordInput = document.getElementById('studentPassword');
+      const studentConfirmPasswordInput = document.getElementById('studentConfirmPassword');
+      const coachShowPasswordCheckbox = document.getElementById('coachShowPassword');
+      const coachShowConfirmPasswordCheckbox = document.getElementById('coachShowConfirmPassword');
+      const coachPasswordInput = document.getElementById('coachPassword');
+      const coachConfirmPasswordInput = document.getElementById('coachConfirmPassword');
+
+      // Toggle password visibility for student form
+      studentShowPasswordCheckbox.addEventListener('change', () => {
+        const type = studentShowPasswordCheckbox.checked ? 'text' : 'password';
+        studentPasswordInput.type = type;
+      });
+
+      // Toggle confirm password visibility for student form
+      studentShowConfirmPasswordCheckbox.addEventListener('change', () => {
+        const type = studentShowConfirmPasswordCheckbox.checked ? 'text' : 'password';
+        studentConfirmPasswordInput.type = type;
+      });
+
+      // Toggle password visibility for coach form
+      coachShowPasswordCheckbox.addEventListener('change', () => {
+        const type = coachShowPasswordCheckbox.checked ? 'text' : 'password';
+        coachPasswordInput.type = type;
+      });
+
+      // Toggle confirm password visibility for coach form
+      coachShowConfirmPasswordCheckbox.addEventListener('change', () => {
+        const type = coachShowConfirmPasswordCheckbox.checked ? 'text' : 'password';
+        coachConfirmPasswordInput.type = type;
+      });
+
+      // Validate student passwords match
+      const validateStudentPasswords = () => {
+        const mismatchEl = document.getElementById('studentPasswordMismatch');
+        const submitBtn = document.getElementById('studentSubmitBtn');
+        if (studentPasswordInput.value && studentConfirmPasswordInput.value && studentPasswordInput.value !== studentConfirmPasswordInput.value) {
+          mismatchEl.style.display = 'block';
+          submitBtn.disabled = true;
+        } else {
+          mismatchEl.style.display = 'none';
+          submitBtn.disabled = false;
+        }
+      };
+
+      // Validate coach passwords match
+      const validateCoachPasswords = () => {
+        const mismatchEl = document.getElementById('coachPasswordMismatch');
+        const submitBtn = document.getElementById('coachSubmitBtn');
+        if (coachPasswordInput.value && coachConfirmPasswordInput.value && coachPasswordInput.value !== coachConfirmPasswordInput.value) {
+          mismatchEl.style.display = 'block';
+          submitBtn.disabled = true;
+        } else {
+          mismatchEl.style.display = 'none';
+          submitBtn.disabled = false;
+        }
+      };
+
+      studentPasswordInput.addEventListener('input', validateStudentPasswords);
+      studentConfirmPasswordInput.addEventListener('input', validateStudentPasswords);
+      coachPasswordInput.addEventListener('input', validateCoachPasswords);
+      coachConfirmPasswordInput.addEventListener('input', validateCoachPasswords);
 
       // Populate school dropdown
       if (typeof SCHOOLS_LIST !== 'undefined') {
@@ -588,10 +713,16 @@
         
         const email = document.getElementById('studentEmail').value.trim();
         const password = document.getElementById('studentPassword').value;
+        const confirmPassword = document.getElementById('studentConfirmPassword').value;
         const teamCode = document.getElementById('teamCode').value.trim().toUpperCase();
         
-        if (!email || !password || !teamCode) {
+        if (!email || !password || !confirmPassword || !teamCode) {
           showMessage('Please fill in all fields', 'error');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          showMessage('Passwords do not match', 'error');
           return;
         }
 
@@ -656,6 +787,7 @@
         const lastName = document.getElementById('coachLastName').value.trim();
         const email = document.getElementById('coachEmail').value.trim();
         const password = document.getElementById('coachPassword').value;
+        const confirmPassword = document.getElementById('coachConfirmPassword').value;
         const schoolValue = schoolSelect.value;
         const customTeamName = document.getElementById('teamName').value.trim();
         
@@ -669,8 +801,13 @@
           finalTeamName = customTeamName;
         }
         
-        if (!firstName || !lastName || !email || !password) {
+        if (!firstName || !lastName || !email || !password || !confirmPassword) {
           showMessage('Please fill in all required fields', 'error');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          showMessage('Passwords do not match', 'error');
           return;
         }
         

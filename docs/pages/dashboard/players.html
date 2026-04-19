@@ -407,6 +407,18 @@
       background: var(--content-bg);
     }
 
+    .spreadsheet-table tbody td.player-name {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--accent-color);
+      user-select: none;
+      transition: opacity 0.2s;
+    }
+
+    .spreadsheet-table tbody td.player-name:hover {
+      opacity: 0.8;
+    }
+
     /* Stats Panel */
     .stats-panel {
       display: none;
@@ -1225,8 +1237,8 @@
 
       tbody.innerHTML = sortedData.map(({ player, stats }) => `
         <tr>
-          <td>${player.first_name} ${player.last_name}</td>
-          ${showGender ? `<td>${player._gender || currentGender}</td>` : ''}
+          <td class="player-name" onclick="selectPlayer('${player.id}');">${player.first_name} ${player.last_name}</td>
+          ${showGender ? `<td>${(player._gender || currentGender) === 'boys' ? 'M' : 'F'}</td>` : ''}
           <td>${stats.matches}</td>
           <td>${stats.avgG1}</td>
           <td>${stats.avgG2}</td>

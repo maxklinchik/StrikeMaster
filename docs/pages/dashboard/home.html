@@ -9,10 +9,10 @@
   <link rel="stylesheet" type="text/css" href="../../assets/css/cartoon-ui.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/season-context.js"></script>
   <script src="../../assets/js/config/api.js"></script>
-  <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/auth-helper.js"></script>
   <style>
     :root {
@@ -1237,14 +1237,6 @@
       <a href="../../index.html" class="logo">
         <img id="navLogo" src="../../assets/images/BowlingPinCartoon.png" alt="School logo" />
       </a>
-      <div class="season-select">
-        <label for="seasonSelect">Season</label>
-        <select id="seasonSelect" data-season-select>
-          <option value="2025-2026">2025-26</option>
-          <option value="2024-2025">2024-25</option>
-          <option value="all">All Time</option>
-        </select>
-      </div>
     </div>
     <div class="nav-links">
       <a href="home.html" class="active">Home</a>
@@ -1252,7 +1244,6 @@
       <a href="../settings/appearanceSettings.html">Settings</a>
       <a href="myTeam.html">My Team</a>
       <a href="announcements.html">Announcements</a>
-      <a href="#" id="logoutBtn" style="color:#fca5a5;">Logout</a>
     </div>
   </div>
 
@@ -1776,6 +1767,24 @@
       }
     }
 
+    // Load team logo based on user's school affiliation
+    function loadTeamLogo() {
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.team_name && typeof getTeamLogo === 'function') {
+            const logoPath = getTeamLogo(user.team_name, '../../assets/images/Team Logos/');
+            if (logoPath) {
+              document.getElementById('navLogo').src = logoPath;
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Team logo loading not available:', e.message);
+      }
+    }
+
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1828,16 +1837,6 @@
     document.getElementById('matchType').addEventListener('change', applyMatchTypeUI);
 
     // Modal click-to-close handler removed as requested
-
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('bowling_user');
-      localStorage.removeItem('bowling_role');
-      localStorage.removeItem('bowling_token');
-      window.location.href = '../auth/login.html';
-    });
 
     // Load players for the form
     async function loadPlayers(genderOverride) {
@@ -2156,6 +2155,7 @@
         opponentScore: parseInt(document.getElementById('opponentScore').value) || 0,
         comments: document.getElementById('comments').value,
         matchType: document.getElementById('matchType').value,
+        season: localStorage.getItem('bowling_season') || '2025-2026',
         // Team game scores
         teamG1: parseInt(document.getElementById('teamG1').value) || 0,
         teamG2: parseInt(document.getElementById('teamG2').value) || 0,
@@ -2320,7 +2320,8 @@
       try {
         updateSeasonTitle();
         const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
-        let url = `${API_BASE}/api/matches?coachId=${coachId}`;
+        const season = localStorage.getItem('bowling_season') || '2025-2026';
+        let url = `${API_BASE}/api/matches?coachId=${coachId}&season=${season}`;
         if (currentGender !== 'all') {
           url += `&gender=${currentGender}`;
         }
@@ -2773,6 +2774,7 @@
     // Initialize
     checkAuth().then(user => {
       if (user) {
+        loadTeamLogo();
         applyStudentMode();
         loadSavedLocations();
         loadMatches();

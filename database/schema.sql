@@ -113,6 +113,7 @@ CREATE TABLE matches (
   team_g4 INTEGER,
   opp_g4 INTEGER,
   comments TEXT,
+  season VARCHAR(20) DEFAULT '2025-2026',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -120,6 +121,8 @@ CREATE TABLE matches (
 CREATE INDEX idx_matches_coach ON matches(coach_id);
 CREATE INDEX idx_matches_gender ON matches(gender);
 CREATE INDEX idx_matches_date ON matches(match_date);
+CREATE INDEX idx_matches_season ON matches(season);
+CREATE INDEX idx_matches_coach_season ON matches(coach_id, season);
 
 -- =====================================================
 -- 3C. ANNOUNCEMENTS

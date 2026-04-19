@@ -9,9 +9,9 @@
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
   <link rel="stylesheet" type="text/css" href="../../assets/css/cartoon-ui.css">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/config/api.js"></script>
-  <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/auth-helper.js"></script>
   <style>
     body {
@@ -733,6 +733,27 @@
       }
     }
 
+    // Load team logo based on user's school affiliation
+    function loadTeamLogo() {
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.team_name && typeof getTeamLogo === 'function') {
+            const logoPath = getTeamLogo(user.team_name, '../../assets/images/Team Logos/');
+            if (logoPath) {
+              const navLogoImg = document.querySelector('.navbar img');
+              if (navLogoImg) {
+                navLogoImg.src = logoPath;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Team logo loading not available:', e.message);
+      }
+    }
+
     // Gender toggle
     document.querySelectorAll('.gender-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1192,6 +1213,7 @@
     // Initialize
     checkAuth().then(user => {
       if (user) {
+        loadTeamLogo();
         applyStudentMode();
         syncAddPlayerGender();
         loadPlayers();

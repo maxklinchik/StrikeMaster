@@ -8,6 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
   <link rel="stylesheet" type="text/css" href="../../assets/css/cartoon-ui.css">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/accent-loader.js"></script>
   <script src="../../assets/js/season-context.js"></script>
   <script src="../../assets/js/config/api.js"></script>
@@ -200,14 +201,6 @@
       <a href="../../index.html" class="logo">
         <img id="navLogo" src="../../assets/images/BowlingPinCartoon.png" alt="School logo">
       </a>
-      <div class="season-select">
-        <label for="seasonSelect">Season</label>
-        <select id="seasonSelect" data-season-select>
-          <option value="2025-2026">2025-26</option>
-          <option value="2024-2025">2024-25</option>
-          <option value="all">All Time</option>
-        </select>
-      </div>
     </div>
     <div class="nav-links">
       <a href="home.html">Home</a>
@@ -254,6 +247,26 @@
 
     let activeOwnerCoachId = currentUser?.id;
     let canEditTeam = true;
+
+    // Load team logo based on user's school affiliation
+    function loadTeamLogo() {
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.team_name && typeof getTeamLogo === 'function') {
+            const logoPath = getTeamLogo(user.team_name, '../../assets/images/Team Logos/');
+            if (logoPath) {
+              document.getElementById('navLogo').src = logoPath;
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Team logo loading not available:', e.message);
+      }
+    }
+
+    loadTeamLogo();
 
     async function loadOwnerTeams() {
       const ownerSelectGroup = document.getElementById('ownerSelectGroup');

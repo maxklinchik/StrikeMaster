@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="../../assets/images/2.png">
     <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
     <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+    <script src="../../assets/js/config/teams.js"></script>
     <script src="../../assets/js/accent-loader.js"></script>
     <script src="../../assets/js/config/api.js"></script>
   <style>
@@ -79,7 +80,7 @@
   <div class="navbar">
     <!-- Logo image that links to index.html -->
     <a href="../../index.html" class="logo">
-      <img src="../../assets/images/images/phLogo.png" alt="Strike Master Logo">
+      <img id="navLogo" src="../../assets/images/images/phLogo.png" alt="Strike Master Logo">
     </a>
 
     <div class="nav-links">
@@ -99,6 +100,26 @@
   </div>
 
   <script>
+    // Load team logo based on user's school affiliation
+    function loadTeamLogo() {
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.team_name && typeof getTeamLogo === 'function') {
+            const logoPath = getTeamLogo(user.team_name, '../../assets/images/Team Logos/');
+            if (logoPath) {
+              document.getElementById('navLogo').src = logoPath;
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Team logo loading not available:', e.message);
+      }
+    }
+
+    loadTeamLogo();
+
     async function loadPlayer() {
       // Get ?name= from URL
       const params = new URLSearchParams(window.location.search);

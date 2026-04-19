@@ -1,4 +1,29 @@
 
+// Load default school colors based on user's affiliated school
+(function () {
+  try {
+    // Check if user is logged in and has a team
+    const userStr = localStorage.getItem("bowling_user");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user.team_name && typeof getTeamColors === 'function') {
+        const teamColors = getTeamColors(user.team_name);
+        if (teamColors) {
+          // Only apply school colors if no custom colors are already saved
+          if (!localStorage.getItem("mainColor")) {
+            document.documentElement.style.setProperty("--main-color", teamColors.mainColor);
+          }
+          if (!localStorage.getItem("accentColor")) {
+            document.documentElement.style.setProperty("--accent-color", teamColors.accentColor);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.log('School color loading not available:', e.message);
+  }
+})();
+
 (function () {
   const saved = localStorage.getItem("accentColor");
   if (saved) {

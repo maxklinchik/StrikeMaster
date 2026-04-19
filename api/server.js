@@ -1301,7 +1301,7 @@ app.get('/api/matches', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { coachId, gender } = req.query;
+    const { coachId, gender, season } = req.query;
 
     if (!coachId) {
       return res.status(400).json({ error: 'coachId is required' });
@@ -1323,6 +1323,11 @@ app.get('/api/matches', async (req, res) => {
       ownerQuery = ownerQuery.eq('gender', gender);
     }
 
+    // Filter by season if provided
+    if (season) {
+      ownerQuery = ownerQuery.eq('season', season);
+    }
+
     const { data: ownerMatches, error: ownerError } = await ownerQuery;
     if (ownerError) throw ownerError;
 
@@ -1341,6 +1346,10 @@ app.get('/api/matches', async (req, res) => {
         .in('id', sharedMatchIds);
       if (gender) {
         sharedQuery = sharedQuery.eq('gender', gender);
+      }
+      // Filter by season if provided
+      if (season) {
+        sharedQuery = sharedQuery.eq('season', season);
       }
       const { data: sharedData, error: sharedError } = await sharedQuery;
       if (sharedError) throw sharedError;
@@ -1471,7 +1480,7 @@ app.post('/api/matches', async (req, res) => {
       return res.status(500).json({ error: 'Database not configured' });
     }
 
-    const { coachId, gender, matchType, opponent, matchDate, location, result, ourScore, opponentScore, comments, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, sharedCoaches } = req.body;
+    const { coachId, gender, matchType, opponent, matchDate, location, result, ourScore, opponentScore, comments, teamG1, teamG2, teamG3, teamG4, oppG1, oppG2, oppG3, oppG4, sharedCoaches, season } = req.body;
 
     if (!coachId || !gender || !opponent || !matchDate) {
       return res.status(400).json({ error: 'Required: coachId, gender, opponent, matchDate' });
@@ -1500,6 +1509,7 @@ app.post('/api/matches', async (req, res) => {
         opp_g2: oppG2 ? parseInt(oppG2) : null,
         opp_g3: oppG3 ? parseInt(oppG3) : null,
         opp_g4: oppG4 ? parseInt(oppG4) : null,
+        season: season || '2025-2026',
         is_complete: false
       }])
       .select()
@@ -1639,6 +1649,117 @@ app.delete('/api/matches/:id', async (req, res) => {
 
   } catch (error) {
     console.error('Delete match error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// ==================== SEASON MANAGEMENT ENDPOINTS ====================
+
+// Get all unique seasons for a coach
+app.get('/api/seasons', async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(500).json({ error: 'Database not configured' });
+    }
+
+    const { coachId } = req.query;
+
+    if (!coachId) {
+      return res.status(400).json({ error: 'coachId is required' });
+    }
+
+    // Get all unique seasons for matches belonging to this coach
+    const { data, error } = await supabase
+      .from('matches')
+      .select('season')
+      .eq('coach_id', coachId)
+      .is('season', 'not.is', null);
+
+    if (error) throw error;
+
+    // Extract unique seasons and sort in descending order (newest first)
+    const seasons = [...new Set((data || []).map(m => m.season))].sort().reverse();
+
+    res.json({ seasons, count: seasons.length });
+
+  } catch (error) {
+    console.error('Get seasons error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete all matches for a specific season
+app.delete('/api/seasons/:season', async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(500).json({ error: 'Database not configured' });
+    }
+
+    const { coachId } = req.query;
+    const { season } = req.params;
+
+    if (!coachId) {
+      return res.status(400).json({ error: 'coachId is required' });
+    }
+
+    if (!season) {
+      return res.status(400).json({ error: 'season is required' });
+    }
+
+    // First, verify the coach owns these matches
+    const { data: matchCount, error: countError } = await supabase
+      .from('matches')
+      .select('id', { count: 'exact', head: true })
+      .eq('coach_id', coachId)
+      .eq('season', season);
+
+    if (countError) throw countError;
+
+    // Delete all records associated with these matches first (foreign key constraint)
+    const { data: matchIds } = await supabase
+      .from('matches')
+      .select('id')
+      .eq('coach_id', coachId)
+      .eq('season', season);
+
+    if (matchIds && matchIds.length > 0) {
+      const ids = matchIds.map(m => m.id);
+      
+      // Delete records
+      const { error: recordError } = await supabase
+        .from('records')
+        .delete()
+        .in('match_id', ids);
+
+      if (recordError) throw recordError;
+
+      // Delete match permissions
+      const { error: permError } = await supabase
+        .from('match_permissions')
+        .delete()
+        .in('match_id', ids);
+
+      if (permError) throw permError;
+    }
+
+    // Delete all matches for this season
+    const { error: deleteError } = await supabase
+      .from('matches')
+      .delete()
+      .eq('coach_id', coachId)
+      .eq('season', season);
+
+    if (deleteError) throw deleteError;
+
+    const deletedCount = matchCount || 0;
+    res.json({ 
+      success: true, 
+      message: `Deleted ${deletedCount} matches for season ${season}`,
+      deletedCount 
+    });
+
+  } catch (error) {
+    console.error('Delete season error:', error);
     res.status(400).json({ error: error.message });
   }
 });

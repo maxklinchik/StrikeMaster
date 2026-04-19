@@ -2316,21 +2316,13 @@
     // Load matches
     async function loadMatches() {
       const container = document.getElementById('matchesContainer');
+      const season = localStorage.getItem('bowling_season') || '2025-2026';
+      const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
+      const cacheKey = `matches_cache_${coachId}_${season}`;
       
-      try {
-        updateSeasonTitle();
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
-        const season = localStorage.getItem('bowling_season') || '2025-2026';
-        let url = `${API_BASE}/api/matches?coachId=${coachId}&season=${season}`;
-        if (currentGender !== 'all') {
-          url += `&gender=${currentGender}`;
-        }
-        const response = await fetch(url);
-        
-        if (!response.ok) throw new Error('Failed to fetch matches');
-        
-        const matches = await response.json();
-        const filteredMatches = filterMatchesBySeason(matches || [], currentSeason);
+      // Helper function to render matches
+      const renderMatches = (matchesWithRecords) => {
+        const filteredMatches = filterMatchesBySeason(matchesWithRecords || [], currentSeason);
 
         if (!filteredMatches || filteredMatches.length === 0) {
           container.innerHTML = `
@@ -2352,16 +2344,7 @@
         // Build HTML
         let html = '';
         for (const match of filteredMatches) {
-          // Fetch records for this match
-          let records = [];
-          try {
-            const recordsResponse = await fetch(`${API_BASE}/api/records?matchId=${match.id}`);
-            if (recordsResponse.ok) {
-              records = await recordsResponse.json();
-            }
-          } catch (err) {
-            console.error('Error fetching records:', err);
-          }
+          const records = match.records || [];
 
           // Calculate varsity-only stats
           const varsityRecords = records.filter(r => r.is_varsity);
@@ -2517,14 +2500,98 @@
         }
 
         container.innerHTML = html;
+      };
+
+      try {
+        updateSeasonTitle();
+
+        // Step 1: Show cached data instantly (if available)
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          try {
+            const cachedMatches = JSON.parse(cachedData);
+            renderMatches(cachedMatches);
+          } catch (err) {
+            console.error('Error parsing cached matches:', err);
+          }
+        }
+
+        // Step 2: Fetch fresh data in the background
+        let url = `${API_BASE}/api/matches-with-records?coachId=${coachId}&season=${season}`;
+        if (currentGender !== 'all') {
+          url += `&gender=${currentGender}`;
+        }
+
+        console.log('Fetching matches from:', url);
+        let response = await fetch(url);
+        console.log('Response status:', response.status);
+        
+        // Fallback to old endpoint if new one doesn't exist (404)
+        if (response.status === 404) {
+          console.log('New endpoint not available, falling back to old endpoint');
+          url = `${API_BASE}/api/matches?coachId=${coachId}&season=${season}`;
+          if (currentGender !== 'all') {
+            url += `&gender=${currentGender}`;
+          }
+          response = await fetch(url);
+        }
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Response error text:', errorText);
+          throw new Error(`Failed to fetch matches: ${response.status}`);
+        }
+        
+        let matchesData = await response.json();
+        
+        // If using old endpoint, fetch records separately for each match
+        let matchesWithRecords = matchesData;
+        if (!matchesData[0]?.records) {
+          // Old endpoint doesn't have records, fetch them separately
+          const recordsMap = {};
+          try {
+            const recordsFetches = matchesData.map(match =>
+              fetch(`${API_BASE}/api/records?matchId=${match.id}`)
+                .then(res => res.ok ? res.json() : [])
+                .then(records => { recordsMap[match.id] = records; })
+                .catch(err => { 
+                  console.error(`Error fetching records for match ${match.id}:`, err);
+                  recordsMap[match.id] = [];
+                })
+            );
+            await Promise.all(recordsFetches);
+          } catch (err) {
+            console.error('Error fetching records:', err);
+          }
+          
+          // Attach records to matches
+          matchesWithRecords = matchesData.map(match => ({
+            ...match,
+            records: recordsMap[match.id] || []
+          }));
+        }
+        
+        console.log('Fetched matches:', matchesWithRecords);
+        
+        // Step 3: Update cache with fresh data
+        localStorage.setItem(cacheKey, JSON.stringify(matchesWithRecords));
+        
+        // Step 4: Render fresh data (will replace cached if different)
+        renderMatches(matchesWithRecords);
 
       } catch (error) {
         console.error('Error loading matches:', error);
-        container.innerHTML = `
-          <div class="no-matches">
-            <p>Error loading matches. Please try again.</p>
-          </div>
-        `;
+        
+        // If we have cached data, keep it visible
+        const cachedData = localStorage.getItem(cacheKey);
+        if (!cachedData) {
+          // Only show error if we don't have any cached data
+          container.innerHTML = `
+            <div class="no-matches">
+              <p>Error loading matches. Please try again.</p>
+            </div>
+          `;
+        }
       }
     }
 

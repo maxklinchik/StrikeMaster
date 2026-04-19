@@ -1008,21 +1008,36 @@ app.get('/api/locations', async (req, res) => {
       return res.status(400).json({ error: 'coachId is required' });
     }
 
-    const { data, error } = await supabase
-      .from('users')
-      .select('saved_locations')
-      .eq('id', coachId)
-      .single();
-
-    if (error) throw error;
-    
-    // Return default locations if none saved
+    // Default locations (fallback if column doesn't exist)
     const defaultLocations = ['Montvale Lanes', 'Bowler City', 'Lodi Lanes', 'Parkway Lanes', 'Holiday Bowl'];
-    res.json(data?.saved_locations || defaultLocations);
+    
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('saved_locations')
+        .eq('id', coachId)
+        .single();
+
+      if (error) {
+        // If column doesn't exist, return defaults
+        if (error.message.includes('does not exist')) {
+          return res.json(defaultLocations);
+        }
+        throw error;
+      }
+      
+      // Return saved locations if they exist, otherwise return defaults
+      res.json(data?.saved_locations || defaultLocations);
+    } catch (err) {
+      // Fallback to defaults on any error
+      console.warn('Could not fetch locations, using defaults:', err.message);
+      res.json(defaultLocations);
+    }
 
   } catch (error) {
     console.error('Get locations error:', error);
-    res.status(500).json({ error: error.message });
+    const defaultLocations = ['Montvale Lanes', 'Bowler City', 'Lodi Lanes', 'Parkway Lanes', 'Holiday Bowl'];
+    res.json(defaultLocations);
   }
 });
 
@@ -1388,6 +1403,135 @@ app.get('/api/matches', async (req, res) => {
 
   } catch (error) {
     console.error('Get matches error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get matches with records pre-joined (optimized for instant loading)
+app.get('/api/matches-with-records', async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(500).json({ error: 'Database not configured' });
+    }
+
+    const { coachId, gender, season } = req.query;
+
+    if (!coachId) {
+      return res.status(400).json({ error: 'coachId is required' });
+    }
+
+    const ownerCoachIds = await getOwnerCoachIds(coachId);
+    const { data: accessList } = await supabase
+      .from('coach_access')
+      .select('owner_coach_id, can_edit')
+      .eq('coach_id', coachId);
+    const accessMap = new Map((accessList || []).map(entry => [entry.owner_coach_id, entry.can_edit]));
+
+    let ownerQuery = supabase
+      .from('matches')
+      .select('*')
+      .in('coach_id', ownerCoachIds);
+
+    if (gender) {
+      ownerQuery = ownerQuery.eq('gender', gender);
+    }
+
+    if (season) {
+      ownerQuery = ownerQuery.eq('season', season);
+    }
+
+    const { data: ownerMatches, error: ownerError } = await ownerQuery;
+    if (ownerError) throw ownerError;
+
+    const { data: permissions, error: permError } = await supabase
+      .from('match_permissions')
+      .select('match_id, can_edit')
+      .eq('coach_id', coachId);
+    if (permError) throw permError;
+
+    const sharedMatchIds = (permissions || []).map(p => p.match_id);
+    let sharedMatches = [];
+    if (sharedMatchIds.length > 0) {
+      let sharedQuery = supabase
+        .from('matches')
+        .select('*')
+        .in('id', sharedMatchIds);
+      if (gender) {
+        sharedQuery = sharedQuery.eq('gender', gender);
+      }
+      if (season) {
+        sharedQuery = sharedQuery.eq('season', season);
+      }
+      const { data: sharedData, error: sharedError } = await sharedQuery;
+      if (sharedError) throw sharedError;
+      sharedMatches = sharedData || [];
+    }
+
+    const permissionMap = new Map((permissions || []).map(p => [p.match_id, p.can_edit]));
+    const matchMap = new Map();
+
+    (ownerMatches || []).forEach(match => {
+      const isOwner = match.coach_id === coachId;
+      matchMap.set(match.id, {
+        ...match,
+        can_edit: isOwner ? true : !!accessMap.get(match.coach_id),
+        is_owner: isOwner
+      });
+    });
+
+    sharedMatches.forEach(match => {
+      if (!matchMap.has(match.id)) {
+        matchMap.set(match.id, {
+          ...match,
+          can_edit: !!permissionMap.get(match.id),
+          is_owner: false
+        });
+      }
+    });
+
+    const merged = Array.from(matchMap.values()).sort((a, b) => {
+      const dateA = a.match_date ? new Date(a.match_date) : new Date(0);
+      const dateB = b.match_date ? new Date(b.match_date) : new Date(0);
+      return dateB - dateA;
+    });
+
+    // Fetch all records for these matches in parallel
+    const matchIds = merged.map(m => m.id);
+    let allRecords = [];
+    if (matchIds.length > 0) {
+      const { data: recordsData, error: recordsError } = await supabase
+        .from('records')
+        .select(`
+          *,
+          player:players(id, first_name, last_name, gender)
+        `)
+        .in('match_id', matchIds);
+      if (recordsError) throw recordsError;
+      allRecords = recordsData || [];
+    }
+
+    // Organize records by match_id for easy lookup
+    const recordsByMatchId = {};
+    allRecords.forEach(record => {
+      if (!recordsByMatchId[record.match_id]) {
+        recordsByMatchId[record.match_id] = [];
+      }
+      recordsByMatchId[record.match_id].push({
+        ...record,
+        player_name: record.player ? `${record.player.first_name} ${record.player.last_name}` : 'Unknown Player'
+      });
+    });
+
+    // Attach records to each match
+    const matchesWithRecords = merged.map(match => ({
+      ...match,
+      records: recordsByMatchId[match.id] || []
+    }));
+
+    res.json(matchesWithRecords);
+
+  } catch (error) {
+    console.error('Get matches with records error:', error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -1,22 +1,27 @@
 
-// Load default school colors based on user's affiliated school
+// Load school colors IMMEDIATELY and completely bypass Strike Master defaults
 (function () {
   try {
-    // Check if user is logged in and has a team
-    const userStr = localStorage.getItem("bowling_user");
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      if (user.team_name && typeof getTeamColors === 'function') {
-        const teamColors = getTeamColors(user.team_name);
-        if (teamColors) {
-          // Only apply school colors if no custom colors are already saved
-          if (!localStorage.getItem("mainColor")) {
-            document.documentElement.style.setProperty("--main-color", teamColors.mainColor);
-          }
-          if (!localStorage.getItem("accentColor")) {
-            document.documentElement.style.setProperty("--accent-color", teamColors.accentColor);
-          }
-        }
+    // Try to get team name from user data or from data attribute
+    let teamName = null;
+    const dataTeam = document.documentElement.getAttribute('data-school-team');
+    if (dataTeam) {
+      teamName = dataTeam;
+    } else {
+      const userStr = localStorage.getItem("bowling_user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        teamName = user.team_name;
+      }
+    }
+    
+    if (teamName && typeof getTeamColors === 'function') {
+      const teamColors = getTeamColors(teamName);
+      if (teamColors) {
+        // IMMEDIATELY set school colors as CSS variables
+        // This overrides any :root defaults
+        document.documentElement.style.setProperty("--main-color", teamColors.mainColor, "important");
+        document.documentElement.style.setProperty("--accent-color", teamColors.accentColor, "important");
       }
     }
   } catch (e) {
@@ -24,17 +29,18 @@
   }
 })();
 
+// Load custom colors if they exist (user's personalization)
 (function () {
   const saved = localStorage.getItem("accentColor");
   if (saved) {
-    document.documentElement.style.setProperty("--accent-color", saved);
+    document.documentElement.style.setProperty("--accent-color", saved, "important");
   }
 })();
 
 (function () {
   const savedMain = localStorage.getItem("mainColor");
   if (savedMain) {
-    document.documentElement.style.setProperty("--main-color", savedMain);
+    document.documentElement.style.setProperty("--main-color", savedMain, "important");
   }
 
   const mainColor = savedMain

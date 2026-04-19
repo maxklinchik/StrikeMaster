@@ -3,12 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    // Load school colors IMMEDIATELY before any CSS or content renders
+    (function() {
+      try {
+        const userStr = localStorage.getItem("bowling_user");
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.team_name) {
+            // Store school team name for later color lookup
+            document.documentElement.setAttribute('data-school-team', user.team_name);
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
   <title>County Rankings - Strike Master</title>
   <link rel="icon" type="image/png" href="../../assets/images/2.png">
   <link rel="stylesheet" type="text/css" href="../../assets/css/style.css">
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
   <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/accent-loader.js"></script>
+  <script src="../../assets/js/logo-loader.js"></script>
   <script src="../../assets/js/auth-helper.js"></script>
 
   <style>

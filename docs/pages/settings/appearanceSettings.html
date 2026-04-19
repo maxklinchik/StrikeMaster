@@ -3,6 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    // Load school colors IMMEDIATELY before any CSS or content renders
+    (function() {
+      try {
+        const userStr = localStorage.getItem("bowling_user");
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.team_name) {
+            // Store school team name for later color lookup
+            document.documentElement.setAttribute('data-school-team', user.team_name);
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
   <link rel="icon" type="image/png" href="../../assets/images/BowlingPinCartoon.png">
   <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
   <link rel="stylesheet" type="text/css" href="../../assets/css/cartoon-ui.css">
@@ -10,6 +25,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/accent-loader.js"></script>
+  <script src="../../assets/js/logo-loader.js"></script>
   <script src="../../assets/js/season-context.js"></script>
   <script src="../../assets/js/config/api.js"></script>
   <script src="../../assets/js/auth-helper.js"></script>
@@ -412,6 +428,48 @@
       text-overflow: ellipsis;
     }
 
+    /* Logo Display Options */
+    .logo-display-option {
+      background: var(--content-bg);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-display-option:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .logo-display-option.selected {
+      border-color: var(--accent-color);
+      background: color-mix(in srgb, var(--accent-color) 10%, var(--content-bg));
+    }
+
+    .logo-display-preview {
+      width: 100%;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+    }
+
+    .logo-display-option span {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
     /* Current logo preview */
     .current-preview {
       display: flex;
@@ -619,106 +677,154 @@
         </div>
       </div>
 
-      <!-- Team Logo Card -->
+      <!-- Logo Display Card -->
       <div class="card">
         <div class="card-header">
           <div class="icon">
             <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
           </div>
           <div>
-            <h2>Team Logo</h2>
-            <p>Select your school's logo</p>
+            <h2>Logo Display</h2>
+            <p>Choose which logo to display in navigation</p>
           </div>
         </div>
-        <div class="current-preview">
-          <img id="currentLogoImg" src="../../assets/images/Team Logos/phLogo.png" alt="Current Logo">
-          <div class="info">
-            <h4 id="currentLogoName">Current Logo</h4>
-            <p>Displayed in navigation across all pages</p>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+          <!-- Strike Master Logo -->
+          <div class="logo-display-option" data-logo="strikemaster" onclick="selectLogoDisplay('strikemaster')">
+            <div class="logo-display-preview">
+              <img src="../../assets/images/BowlingPinCartoon.png" alt="Strike Master Logo" style="width: 60px; height: 60px; object-fit: contain;">
+            </div>
+            <span>Strike Master Logo</span>
+          </div>
+          <!-- School Logo -->
+          <div class="logo-display-option" data-logo="school" onclick="selectLogoDisplay('school')">
+            <div class="logo-display-preview">
+              <img id="schoolLogoPreview" src="../../assets/images/Team Logos/phLogo.png" alt="School Logo" style="width: 60px; height: 60px; object-fit: contain;">
+            </div>
+            <span>School Logo</span>
+          </div>
+          <!-- No Logo -->
+          <div class="logo-display-option" data-logo="none" onclick="selectLogoDisplay('none')">
+            <div class="logo-display-preview" style="background: var(--content-bg); display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 2px dashed var(--border-color);">
+              <span style="font-size: 24px; color: var(--text-muted);">—</span>
+            </div>
+            <span>No Logo</span>
           </div>
         </div>
-        <div class="logo-grid" id="logoGrid">
-          <!-- Logos will be loaded here -->
+      </div>
+
+      <!-- Colors Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+          </div>
+          <div>
+            <h2>Colors</h2>
+            <p>Customize your app's color scheme</p>
+          </div>
+        </div>
+        
+        <!-- Main Color -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>Sidebar Color</h3>
+            <p>The main navigation bar color</p>
+          </div>
+          <div class="color-picker-wrapper">
+            <input type="color" id="mainColorPicker" value="#6ecbff">
+          </div>
+        </div>
+        
+        <!-- Accent Color -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>Accent Color</h3>
+            <p>Highlights and active elements</p>
+          </div>
+          <div class="color-picker-wrapper">
+            <input type="color" id="accentColorPicker" value="#ff6b6b">
+          </div>
+        </div>
+
+        <!-- Reset Buttons -->
+        <div style="display: flex; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-secondary" id="resetMain">Reset Sidebar Color</button>
+          <button class="btn btn-secondary" id="resetAccent">Reset Accent Color</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Available team logos
-    const availableLogos = getAvailableLogos();
-    let currentLogo = localStorage.getItem('teamLogo') || 'phLogo.png';
+    let currentLogoDisplay = localStorage.getItem('logoDisplay') || 'school';
 
     // Initialize
     function init() {
-      initLogoGrid();
+      initLogoDisplay();
       initTheme();
       initUiMode();
       initColors();
     }
 
-    // Logo Grid
-    function initLogoGrid() {
-      const grid = document.getElementById('logoGrid');
-      grid.innerHTML = availableLogos.map(logo => `
-        <div class="logo-option ${logo.file === currentLogo ? 'selected' : ''}" 
-             data-logo="${logo.file}" 
-             data-accent="${logo.accentColor}" 
-             data-main="${logo.mainColor}">
-          <img src="../../assets/images/Team Logos/${logo.file}" alt="${logo.name}">
-          <span>${logo.name}</span>
-        </div>
-      `).join('');
-
-      grid.querySelectorAll('.logo-option').forEach(option => {
-        option.addEventListener('click', () => {
-          selectLogo(option.dataset.logo, option.dataset.accent, option.dataset.main);
-        });
+    // Logo Display
+    function initLogoDisplay() {
+      document.querySelectorAll('.logo-display-option').forEach(option => {
+        const logoType = option.dataset.logo;
+        if (logoType === currentLogoDisplay) {
+          option.classList.add('selected');
+        }
       });
-
-      updateCurrentLogoPreview();
     }
 
-    function selectLogo(logoFile, accentColor, mainColor) {
-      currentLogo = logoFile;
-      localStorage.setItem('teamLogo', logoFile);
-      updateTeamLogoImages(logoFile);
-
-      document.querySelectorAll('.logo-option').forEach(opt => {
-        opt.classList.toggle('selected', opt.dataset.logo === logoFile);
+    function selectLogoDisplay(logoType) {
+      currentLogoDisplay = logoType;
+      localStorage.setItem('logoDisplay', logoType);
+      
+      // Update selection UI
+      document.querySelectorAll('.logo-display-option').forEach(option => {
+        option.classList.toggle('selected', option.dataset.logo === logoType);
       });
 
-      if (accentColor) {
-        document.getElementById('accentColorPicker').value = accentColor;
-        localStorage.setItem("accentColor", accentColor);
-        document.documentElement.style.setProperty("--accent-color", accentColor);
-        updatePresetSelection('accentPresets', accentColor);
-        updateAccentTextColor(accentColor);
-      }
-      if (mainColor) {
-        document.getElementById('mainColorPicker').value = mainColor;
-        localStorage.setItem("mainColor", mainColor);
-        document.documentElement.style.setProperty("--main-color", mainColor);
-        updatePresetSelection('mainPresets', mainColor);
-        updateSidebarTextColor(mainColor);
-      }
-
-      updateDashboardButtonStyles(mainColor, accentColor);
-      updateCurrentLogoPreview();
-      showMessage('Theme updated! Changes apply across all pages.', 'success');
+      // Update all logo images on the page
+      updateTeamLogoImages();
+      showMessage(`Logo display changed to ${logoType === 'strikemaster' ? 'Strike Master' : logoType === 'school' ? 'School' : 'None'}`, 'success');
     }
 
-    function updateTeamLogoImages(logoFile) {
+    function updateTeamLogoImages() {
       const logoImgs = document.querySelectorAll('[data-team-logo]');
       if (!logoImgs.length) return;
 
       const currentPath = window.location.pathname;
       const basePath = currentPath.includes('/pages/')
-        ? '../../assets/images/Team Logos/'
-        : 'assets/images/Team Logos/';
+        ? '../../assets/images/'
+        : 'assets/images/';
 
       logoImgs.forEach(img => {
-        img.src = `${basePath}${logoFile}`;
+        if (currentLogoDisplay === 'strikemaster') {
+          img.src = `${basePath}BowlingPinCartoon.png`;
+        } else if (currentLogoDisplay === 'school') {
+          // Get the school logo from user data if available
+          try {
+            const userStr = localStorage.getItem('bowling_user');
+            if (userStr) {
+              const user = JSON.parse(userStr);
+              if (user.team_name && typeof getTeamLogo === 'function') {
+                const schoolLogo = getTeamLogo(user.team_name, `${basePath}Team Logos/`);
+                if (schoolLogo) {
+                  img.src = schoolLogo;
+                  return;
+                }
+              }
+            }
+          } catch (e) {
+            console.log('Could not load school logo:', e.message);
+          }
+          // Fallback to default school logo
+          img.src = `${basePath}Team Logos/phLogo.png`;
+        } else if (currentLogoDisplay === 'none') {
+          img.style.display = 'none';
+        }
       });
     }
     
@@ -767,12 +873,6 @@
       }
     }
 
-    function updateCurrentLogoPreview() {
-      const logo = availableLogos.find(l => l.file === currentLogo);
-      document.getElementById('currentLogoImg').src = `../../assets/images/Team Logos/${currentLogo}`;
-      document.getElementById('currentLogoName').textContent = logo ? logo.name : currentLogo;
-    }
-
     // Theme
     function initTheme() {
       const savedTheme = localStorage.getItem("theme") || "light";
@@ -804,45 +904,46 @@
       const accentPicker = document.getElementById('accentColorPicker');
       const mainPicker = document.getElementById('mainColorPicker');
 
+      // Get school colors if available
+      let schoolMainColor = "#6ecbff";
+      let schoolAccentColor = "#ff6b6b";
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.team_name && typeof getTeamColors === 'function') {
+            const teamColors = getTeamColors(user.team_name);
+            if (teamColors) {
+              schoolMainColor = teamColors.mainColor;
+              schoolAccentColor = teamColors.accentColor;
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Could not load school colors:', e.message);
+      }
+
       // Load saved colors
-      const savedAccent = localStorage.getItem("accentColor");
-      const savedMain = localStorage.getItem("mainColor");
+      const savedAccent = localStorage.getItem("accentColor") || schoolAccentColor;
+      const savedMain = localStorage.getItem("mainColor") || schoolMainColor;
 
-      if (savedAccent) {
-        accentPicker.value = savedAccent;
-        document.documentElement.style.setProperty("--accent-color", savedAccent);
-        updateAccentTextColor(savedAccent);
-      }
-      if (savedMain) {
-        mainPicker.value = savedMain;
-        document.documentElement.style.setProperty("--main-color", savedMain);
-        updateSidebarTextColor(savedMain);
-      }
-      updateDashboardButtonStyles(mainPicker.value, accentPicker.value);
-
-      updatePresetSelection('accentPresets', savedAccent || "#ffa500");
-      updatePresetSelection('mainPresets', savedMain || "#5f371c");
+      accentPicker.value = savedAccent;
+      mainPicker.value = savedMain;
+      
+      document.documentElement.style.setProperty("--accent-color", savedAccent);
+      document.documentElement.style.setProperty("--main-color", savedMain);
+      
+      updateAccentTextColor(savedAccent);
+      updateSidebarTextColor(savedMain);
+      updateDashboardButtonStyles(savedMain, savedAccent);
 
       // Accent color events
       accentPicker.addEventListener("input", (e) => {
         const color = e.target.value;
         localStorage.setItem("accentColor", color);
         document.documentElement.style.setProperty("--accent-color", color);
-        updatePresetSelection('accentPresets', color);
         updateAccentTextColor(color);
         updateDashboardButtonStyles(mainPicker.value, color);
-      });
-
-      document.querySelectorAll('#accentPresets .preset-color').forEach(preset => {
-        preset.addEventListener('click', () => {
-          const color = preset.dataset.color;
-          accentPicker.value = color;
-          localStorage.setItem("accentColor", color);
-          document.documentElement.style.setProperty("--accent-color", color);
-          updatePresetSelection('accentPresets', color);
-          updateAccentTextColor(color);
-          updateDashboardButtonStyles(mainPicker.value, color);
-        });
       });
 
       // Main color events
@@ -851,47 +952,26 @@
         localStorage.setItem("mainColor", color);
         document.documentElement.style.setProperty("--main-color", color);
         updateSidebarTextColor(color);
-        updatePresetSelection('mainPresets', color);
         updateDashboardButtonStyles(color, accentPicker.value);
       });
 
-      document.querySelectorAll('#mainPresets .preset-color').forEach(preset => {
-        preset.addEventListener('click', () => {
-          const color = preset.dataset.color;
-          mainPicker.value = color;
-          localStorage.setItem("mainColor", color);
-          document.documentElement.style.setProperty("--main-color", color);
-          updateSidebarTextColor(color);
-          updatePresetSelection('mainPresets', color);
-          updateDashboardButtonStyles(color, accentPicker.value);
-        });
-      });
-
-      // Reset buttons - reset to current team's colors (from selected logo)
+      // Reset buttons - reset to school colors
       document.getElementById("resetAccent").addEventListener("click", () => {
-        // Get current team's accent color from the selected logo
-        const selectedLogo = availableLogos.find(l => l.file === currentLogo);
-        const defaultColor = selectedLogo ? selectedLogo.accentColor : "#ffa500";
-        accentPicker.value = defaultColor;
-        document.documentElement.style.setProperty("--accent-color", defaultColor);
-        localStorage.setItem("accentColor", defaultColor);
-        updatePresetSelection('accentPresets', defaultColor);
-        updateAccentTextColor(defaultColor);
-        updateDashboardButtonStyles(mainPicker.value, defaultColor);
-        showMessage('Accent color reset to team default', 'success');
+        accentPicker.value = schoolAccentColor;
+        document.documentElement.style.setProperty("--accent-color", schoolAccentColor);
+        localStorage.setItem("accentColor", schoolAccentColor);
+        updateAccentTextColor(schoolAccentColor);
+        updateDashboardButtonStyles(mainPicker.value, schoolAccentColor);
+        showMessage('Accent color reset to school default', 'success');
       });
 
       document.getElementById("resetMain").addEventListener("click", () => {
-        // Get current team's main color from the selected logo
-        const selectedLogo = availableLogos.find(l => l.file === currentLogo);
-        const defaultColor = selectedLogo ? selectedLogo.mainColor : "#5f371c";
-        mainPicker.value = defaultColor;
-        document.documentElement.style.setProperty("--main-color", defaultColor);
-        localStorage.setItem("mainColor", defaultColor);
-        updatePresetSelection('mainPresets', defaultColor);
-        updateSidebarTextColor(defaultColor);
-        updateDashboardButtonStyles(defaultColor, accentPicker.value);
-        showMessage('Main color reset to team default', 'success');
+        mainPicker.value = schoolMainColor;
+        document.documentElement.style.setProperty("--main-color", schoolMainColor);
+        localStorage.setItem("mainColor", schoolMainColor);
+        updateSidebarTextColor(schoolMainColor);
+        updateDashboardButtonStyles(schoolMainColor, accentPicker.value);
+        showMessage('Sidebar color reset to school default', 'success');
       });
     }
 
@@ -909,34 +989,6 @@
         document.documentElement.style.setProperty("--sidebar-text-color", "#ffffff");
         document.documentElement.classList.remove('light-sidebar');
       }
-    }
-    
-    // Ensure accent color has good contrast with backgrounds
-    function ensureAccentContrast(accentHex, mainHex) {
-      // Check if accent and main are too similar
-      const getColorValues = (hex) => {
-        const c = hex.replace('#', '').trim();
-        return {
-          r: parseInt(c.substr(0, 2), 16),
-          g: parseInt(c.substr(2, 2), 16),
-          b: parseInt(c.substr(4, 2), 16)
-        };
-      };
-      
-      const accent = getColorValues(accentHex);
-      const main = getColorValues(mainHex);
-      
-      // Calculate color difference
-      const diff = Math.abs(accent.r - main.r) + Math.abs(accent.g - main.g) + Math.abs(accent.b - main.b);
-      
-      // If colors are too similar (diff < 100), return a warning
-      return diff >= 100;
-    }
-
-    function updatePresetSelection(containerId, selectedColor) {
-      document.querySelectorAll(`#${containerId} .preset-color`).forEach(preset => {
-        preset.classList.toggle('selected', preset.dataset.color === selectedColor);
-      });
     }
 
     function showMessage(text, type) {

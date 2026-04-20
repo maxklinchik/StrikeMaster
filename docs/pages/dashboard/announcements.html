@@ -200,6 +200,59 @@
       white-space: pre-wrap;
     }
 
+    .announcement-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .reaction-container {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .reaction-btn {
+      background: var(--content-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .reaction-btn:hover {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border-color: var(--accent-color);
+    }
+
+    .reaction-btn.active {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border-color: var(--accent-color);
+    }
+
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .delete-btn:hover {
+      background: #c82333;
+    }
+
     .message {
       padding: 12px;
       margin-bottom: 15px;
@@ -209,6 +262,217 @@
 
     .message.success { background: #d4edda; color: #155724; display: block; }
     .message.error { background: #f8d7da; color: #721c24; display: block; }
+
+    /* Tabs for Announcements and Polls */
+    .content-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .tab-btn {
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-muted);
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--accent-color);
+      border-bottom-color: var(--accent-color);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .poll-item {
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 0;
+    }
+
+    .poll-item:last-child { border-bottom: none; }
+
+    .poll-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+
+    .poll-description {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .poll-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .poll-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .poll-option:hover {
+      background: var(--content-bg);
+    }
+
+    .poll-option.voted {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border-color: var(--accent-color);
+    }
+
+    .poll-option input {
+      cursor: pointer;
+      accent-color: var(--accent-color);
+    }
+
+    .poll-option-text {
+      flex: 1;
+    }
+
+    .poll-option-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 10px;
+    }
+
+    .poll-option.voted .poll-option-count {
+      color: var(--accent-text-color, white);
+    }
+
+    .poll-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .poll-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .poll-btn {
+      padding: 8px 16px;
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .poll-btn:hover {
+      opacity: 0.9;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      padding: 12px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .poll-options-input {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .poll-option-input {
+      display: flex;
+      gap: 10px;
+    }
+
+    .poll-option-input input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .poll-option-input button {
+      padding: 8px 16px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .add-option-btn {
+      padding: 8px 16px;
+      background: var(--content-bg);
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.2s;
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+    }
   </style>
 </head>
 <body class="dashboard">
@@ -229,29 +493,82 @@
 
   <div class="container">
     <div class="page-header">
-      <h1>Announcements</h1>
-      <p>Share updates with your team</p>
+      <h1>Announcements & Polls</h1>
+      <p>Share updates and gather feedback from your team</p>
     </div>
 
     <div id="message" class="message"></div>
 
-    <div class="card" id="announcementFormCard">
-      <div class="form-group">
-        <label for="announcementTitle">Title</label>
-        <input type="text" id="announcementTitle" placeholder="Announcement title">
-      </div>
-      <div class="form-group">
-        <label for="announcementBody">Message</label>
-        <textarea id="announcementBody" placeholder="Write your announcement..."></textarea>
-      </div>
-      <div class="form-group" id="ownerSelectGroup" style="display: none;">
-        <label for="ownerSelect">Post to team</label>
-        <select id="ownerSelect"></select>
-      </div>
-      <button class="btn" id="postAnnouncementBtn">Post Announcement</button>
+    <!-- Content Tabs -->
+    <div class="content-tabs">
+      <button class="tab-btn active" data-tab="announcements">Announcements</button>
+      <button class="tab-btn" data-tab="polls">Polls</button>
     </div>
 
-    <div class="card" id="announcementList"></div>
+    <!-- ANNOUNCEMENTS TAB -->
+    <div id="announcementsTab" class="tab-content active">
+      <div class="card" id="announcementFormCard">
+        <h3>Post an Announcement</h3>
+        <div class="form-group">
+          <label for="announcementTitle">Title</label>
+          <input type="text" id="announcementTitle" placeholder="Announcement title">
+        </div>
+        <div class="form-group">
+          <label for="announcementBody">Message</label>
+          <textarea id="announcementBody" placeholder="Write your announcement..."></textarea>
+        </div>
+        <div class="form-group" id="ownerSelectGroup" style="display: none;">
+          <label for="ownerSelect">Post to team</label>
+          <select id="ownerSelect"></select>
+        </div>
+        <button class="btn" id="postAnnouncementBtn">Post Announcement</button>
+      </div>
+
+      <div class="card" id="announcementList"></div>
+    </div>
+
+    <!-- POLLS TAB -->
+    <div id="pollsTab" class="tab-content">
+      <div class="card" id="pollFormCard">
+        <h3>Create a Poll</h3>
+        <div class="form-group">
+          <label for="pollTitle">Poll Question</label>
+          <input type="text" id="pollTitle" placeholder="What's your question?">
+        </div>
+        <div class="form-group">
+          <label for="pollDescription">Description (optional)</label>
+          <textarea id="pollDescription" placeholder="Add more context..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="pollType">Poll Type</label>
+          <select id="pollType">
+            <option value="single">Single Choice</option>
+            <option value="multiple">Multiple Choice</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Options</label>
+          <div class="poll-options-input" id="pollOptionsContainer">
+            <div class="poll-option-input">
+              <input type="text" class="poll-option-text" placeholder="Option 1">
+              <button type="button" onclick="removePollOption(this)" style="display: none;">Remove</button>
+            </div>
+            <div class="poll-option-input">
+              <input type="text" class="poll-option-text" placeholder="Option 2">
+              <button type="button" onclick="removePollOption(this)" style="display: none;">Remove</button>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-option-btn" onclick="addPollOption()">+ Add Option</button>
+        <div class="form-group" id="ownerSelectGroupPoll" style="display: none; margin-top: 15px;">
+          <label for="ownerSelectPoll">Send to team</label>
+          <select id="ownerSelectPoll"></select>
+        </div>
+        <button class="btn" id="createPollBtn">Create Poll</button>
+      </div>
+
+      <div class="card" id="pollList"></div>
+    </div>
   </div>
 
   <script>
@@ -260,9 +577,9 @@
     }
 
     const currentUser = auth.getUser();
-
     let activeOwnerCoachId = currentUser?.id;
     let canEditTeam = true;
+    const REACTION_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
 
     // Load team logo based on user's school affiliation
     function loadTeamLogo() {
@@ -284,10 +601,25 @@
 
     loadTeamLogo();
 
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(tabName + 'Tab').classList.add('active');
+        if (tabName === 'polls') loadPolls();
+      });
+    });
+
     async function loadOwnerTeams() {
       const ownerSelectGroup = document.getElementById('ownerSelectGroup');
       const ownerSelect = document.getElementById('ownerSelect');
+      const ownerSelectGroupPoll = document.getElementById('ownerSelectGroupPoll');
+      const ownerSelectPoll = document.getElementById('ownerSelectPoll');
       const formCard = document.getElementById('announcementFormCard');
+      const pollFormCard = document.getElementById('pollFormCard');
       try {
         const res = await api.get(`/api/coach-access/owners?coachId=${currentUser.id}`);
         if (!res.ok) return;
@@ -299,23 +631,32 @@
         }
 
         ownerSelectGroup.style.display = 'block';
-        ownerSelect.innerHTML = data.map(entry => {
+        ownerSelectGroupPoll.style.display = 'block';
+        const options = data.map(entry => {
           const label = entry.team_name || entry.email || entry.name || 'Team';
           return `<option value="${entry.owner_coach_id}">${label}</option>`;
         }).join('');
+        ownerSelect.innerHTML = options;
+        ownerSelectPoll.innerHTML = options;
         activeOwnerCoachId = data[0].owner_coach_id;
         canEditTeam = !!data[0].can_edit;
         if (!canEditTeam) {
           formCard.style.display = 'none';
+          pollFormCard.style.display = 'none';
         }
 
-        ownerSelect.addEventListener('change', () => {
+        const handleTeamChange = () => {
           const selected = data.find(entry => entry.owner_coach_id === ownerSelect.value);
           activeOwnerCoachId = ownerSelect.value;
           canEditTeam = !!selected?.can_edit;
           formCard.style.display = canEditTeam ? 'block' : 'none';
+          pollFormCard.style.display = canEditTeam ? 'block' : 'none';
           loadAnnouncements();
-        });
+          loadPolls();
+        };
+
+        ownerSelect.addEventListener('change', handleTeamChange);
+        ownerSelectPoll.addEventListener('change', handleTeamChange);
       } catch (error) {
         console.error('Load owner teams failed:', error);
       }
@@ -332,18 +673,242 @@
           list.innerHTML = '<div class="announcement-item">No announcements yet.</div>';
           return;
         }
-        list.innerHTML = data.map(item => {
-          const date = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        list.innerHTML = await Promise.all(data.map(async item => {
+          const reactions = await loadReactions(item.id);
+          const userReactions = Object.keys(reactions).filter(emoji => 
+            reactions[emoji].users.includes(currentUser.id)
+          );
+          
+          const date = new Date(item.created_at).toLocaleDateString('en-US', { 
+            month: 'short', day: 'numeric', year: 'numeric' 
+          });
+          
+          const deleteBtn = item.coach_id === activeOwnerCoachId && canEditTeam 
+            ? `<button class="delete-btn" onclick="deleteAnnouncement('${item.id}')">Delete</button>`
+            : '';
+          
+          const reactionBtns = REACTION_EMOJIS.map(emoji => {
+            const count = reactions[emoji]?.count || 0;
+            const hasReacted = userReactions.includes(emoji);
+            return `
+              <button class="reaction-btn ${hasReacted ? 'active' : ''}" 
+                      onclick="toggleReaction('${item.id}', '${emoji}')"
+                      title="React with ${emoji}">
+                ${emoji} ${count > 0 ? count : ''}
+              </button>
+            `;
+          }).join('');
+          
           return `
             <div class="announcement-item">
-              <div class="announcement-title">${item.title}</div>
-              <div class="announcement-meta">${date}</div>
-              <p class="announcement-body">${item.body}</p>
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                  <div class="announcement-title">${item.title}</div>
+                  <div class="announcement-meta">${date}</div>
+                  <p class="announcement-body">${item.body}</p>
+                </div>
+                ${deleteBtn}
+              </div>
+              <div class="announcement-actions">
+                <div class="reaction-container">
+                  ${reactionBtns}
+                </div>
+              </div>
             </div>
           `;
-        }).join('');
+        })).then(results => results.join(''));
       } catch (error) {
+        console.error('Error loading announcements:', error);
         list.innerHTML = '<div class="announcement-item">Failed to load announcements.</div>';
+      }
+    }
+
+    async function loadReactions(announcementId) {
+      try {
+        const res = await api.get(`/api/announcements/${announcementId}/reactions`);
+        if (!res.ok) return {};
+        return await res.json();
+      } catch (error) {
+        console.error('Error loading reactions:', error);
+        return {};
+      }
+    }
+
+    async function toggleReaction(announcementId, emoji) {
+      try {
+        const reactions = await loadReactions(announcementId);
+        const hasReacted = reactions[emoji]?.users.includes(currentUser.id);
+        
+        if (hasReacted) {
+          const res = await api.delete(`/api/announcements/${announcementId}/reactions?emoji=${emoji}&userId=${currentUser.id}`);
+          if (!res.ok) throw new Error('Failed to remove reaction');
+        } else {
+          const res = await api.post(`/api/announcements/${announcementId}/reactions`, {
+            emoji,
+            userId: currentUser.id,
+            userType: 'coach'
+          });
+          if (!res.ok) throw new Error('Failed to add reaction');
+        }
+        loadAnnouncements();
+      } catch (error) {
+        console.error('Error toggling reaction:', error);
+        showMessage('Failed to update reaction', 'error');
+      }
+    }
+
+    async function deleteAnnouncement(announcementId) {
+      if (!confirm('Are you sure you want to delete this announcement?')) return;
+      try {
+        const res = await api.delete(`/api/announcements/${announcementId}?coachId=${currentUser.id}`);
+        if (!res.ok) throw new Error('Failed to delete announcement');
+        showMessage('Announcement deleted', 'success');
+        loadAnnouncements();
+      } catch (error) {
+        console.error('Error deleting announcement:', error);
+        showMessage('Failed to delete announcement', 'error');
+      }
+    }
+
+    // Poll functions
+    function addPollOption() {
+      const container = document.getElementById('pollOptionsContainer');
+      const optionCount = container.children.length;
+      const div = document.createElement('div');
+      div.className = 'poll-option-input';
+      div.innerHTML = `
+        <input type="text" class="poll-option-text" placeholder="Option ${optionCount + 1}">
+        <button type="button" onclick="removePollOption(this)">Remove</button>
+      `;
+      container.appendChild(div);
+      updateRemoveButtons();
+    }
+
+    function removePollOption(btn) {
+      btn.closest('.poll-option-input').remove();
+      updateRemoveButtons();
+    }
+
+    function updateRemoveButtons() {
+      const container = document.getElementById('pollOptionsContainer');
+      const buttons = container.querySelectorAll('button');
+      buttons.forEach((btn, index) => {
+        btn.style.display = container.children.length > 2 ? 'block' : 'none';
+      });
+    }
+
+    async function loadPolls() {
+      const list = document.getElementById('pollList');
+      list.innerHTML = '<div class="poll-item">Loading polls...</div>';
+      try {
+        const res = await api.get(`/api/polls?coachId=${currentUser.id}`);
+        if (!res.ok) throw new Error('Failed to load polls');
+        const data = await res.json();
+        if (!data.length) {
+          list.innerHTML = '<div class="poll-item">No polls yet.</div>';
+          return;
+        }
+
+        list.innerHTML = await Promise.all(data.map(async poll => {
+          const results = await getPollResults(poll.id);
+          const userVote = await getUserVote(poll.id);
+          const totalVotes = Object.values(results).reduce((a, b) => a + b, 0);
+
+          const deleteBtn = poll.coach_id === activeOwnerCoachId && canEditTeam
+            ? `<button class="delete-btn" onclick="deletePoll('${poll.id}')">Delete Poll</button>`
+            : '';
+
+          const optionsHtml = (poll.poll_options || [])
+            .sort((a, b) => a.display_order - b.display_order)
+            .map(option => {
+              const votes = results[option.id] || 0;
+              const percentage = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+              const isVoted = userVote?.option_id === option.id;
+              return `
+                <label class="poll-option ${isVoted ? 'voted' : ''}" onclick="votePoll('${poll.id}', '${option.id}')">
+                  <input type="radio" name="poll-${poll.id}" value="${option.id}" ${isVoted ? 'checked' : ''} style="pointer-events: none;">
+                  <span class="poll-option-text">${option.text}</span>
+                  <span class="poll-option-count">${votes} vote${votes !== 1 ? 's' : ''} (${percentage}%)</span>
+                </label>
+              `;
+            }).join('');
+
+          const date = new Date(poll.created_at).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric'
+          });
+
+          return `
+            <div class="poll-item">
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                  <div class="poll-title">${poll.title}</div>
+                  ${poll.description ? `<div class="poll-description">${poll.description}</div>` : ''}
+                  <div class="poll-options">
+                    ${optionsHtml}
+                  </div>
+                  <div class="poll-meta">
+                    <span>${totalVotes} vote${totalVotes !== 1 ? 's' : ''}</span>
+                    <span>${date}</span>
+                  </div>
+                </div>
+                ${deleteBtn}
+              </div>
+            </div>
+          `;
+        })).then(results => results.join(''));
+      } catch (error) {
+        console.error('Error loading polls:', error);
+        list.innerHTML = '<div class="poll-item">Failed to load polls.</div>';
+      }
+    }
+
+    async function getPollResults(pollId) {
+      try {
+        const res = await api.get(`/api/polls/${pollId}/results`);
+        if (!res.ok) return {};
+        return await res.json();
+      } catch (error) {
+        console.error('Error loading poll results:', error);
+        return {};
+      }
+    }
+
+    async function getUserVote(pollId) {
+      try {
+        const res = await api.get(`/api/polls/${pollId}/user-vote?userId=${currentUser.id}`);
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (error) {
+        console.error('Error loading user vote:', error);
+        return null;
+      }
+    }
+
+    async function votePoll(pollId, optionId) {
+      try {
+        const res = await api.post(`/api/polls/${pollId}/vote`, {
+          optionId,
+          userId: currentUser.id,
+          userType: 'coach'
+        });
+        if (!res.ok) throw new Error('Failed to vote');
+        loadPolls();
+      } catch (error) {
+        console.error('Error voting on poll:', error);
+        showMessage('Failed to vote on poll', 'error');
+      }
+    }
+
+    async function deletePoll(pollId) {
+      if (!confirm('Are you sure you want to delete this poll?')) return;
+      try {
+        const res = await api.delete(`/api/polls/${pollId}?coachId=${currentUser.id}`);
+        if (!res.ok) throw new Error('Failed to delete poll');
+        showMessage('Poll deleted', 'success');
+        loadPolls();
+      } catch (error) {
+        console.error('Error deleting poll:', error);
+        showMessage('Failed to delete poll', 'error');
       }
     }
 
@@ -361,7 +926,12 @@
         showMessage('Please fill in title and message.', 'error');
         return;
       }
-      const res = await api.post('/api/announcements', { coachId: currentUser.id, ownerCoachId: activeOwnerCoachId, title, body });
+      const res = await api.post('/api/announcements', { 
+        coachId: currentUser.id, 
+        ownerCoachId: activeOwnerCoachId, 
+        title, 
+        body 
+      });
       if (!res.ok) {
         const data = await res.json();
         showMessage(data.error || 'Failed to post announcement.', 'error');
@@ -378,7 +948,56 @@
       loadAnnouncements();
     });
 
-    loadOwnerTeams().then(loadAnnouncements);
+    document.getElementById('createPollBtn').addEventListener('click', async () => {
+      const title = document.getElementById('pollTitle').value.trim();
+      const description = document.getElementById('pollDescription').value.trim();
+      const type = document.getElementById('pollType').value;
+      const optionInputs = document.querySelectorAll('#pollOptionsContainer .poll-option-text');
+      const options = Array.from(optionInputs).map(input => input.value.trim()).filter(v => v);
+
+      if (!title || options.length < 2) {
+        showMessage('Poll must have a title and at least 2 options.', 'error');
+        return;
+      }
+
+      const res = await api.post('/api/polls', {
+        coachId: currentUser.id,
+        ownerCoachId: activeOwnerCoachId,
+        title,
+        description: description || null,
+        type,
+        options
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        showMessage(data.error || 'Failed to create poll.', 'error');
+        return;
+      }
+
+      // Reset form
+      document.getElementById('pollTitle').value = '';
+      document.getElementById('pollDescription').value = '';
+      document.getElementById('pollType').value = 'single';
+      document.getElementById('pollOptionsContainer').innerHTML = `
+        <div class="poll-option-input">
+          <input type="text" class="poll-option-text" placeholder="Option 1">
+          <button type="button" onclick="removePollOption(this)" style="display: none;">Remove</button>
+        </div>
+        <div class="poll-option-input">
+          <input type="text" class="poll-option-text" placeholder="Option 2">
+          <button type="button" onclick="removePollOption(this)" style="display: none;">Remove</button>
+        </div>
+      `;
+      updateRemoveButtons();
+
+      showMessage('Poll created successfully!', 'success');
+      loadPolls();
+    });
+
+    loadOwnerTeams().then(() => {
+      loadAnnouncements();
+    });
   </script>
 </body>
 </html>

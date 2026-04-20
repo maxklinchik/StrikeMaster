@@ -872,6 +872,9 @@
           { rank: 4, name: 'Southridge HS', division: 'South', wins: 10, average: 168 },
         ];
 
+        // Get user school for all division rankings
+        const userSchool = getUserSchool();
+
         // Render boys division
         const bestDivisionBoysPlayer = findBestFromSchool(divisionBoysPlayers, userSchool);
         const bestDivisionBoysTeam = findBestFromSchool(divisionBoysTeams, userSchool);

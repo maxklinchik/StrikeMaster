@@ -852,19 +852,19 @@
           <div class="summary-value" id="totalMatches">0</div>
         </div>
         <div class="summary-box">
-          <div class="summary-label">Avg G1</div>
+          <div class="summary-label" id="box2Label">Avg G1</div>
           <div class="summary-value" id="avgGame1">0.0</div>
         </div>
         <div class="summary-box">
-          <div class="summary-label">Avg G2</div>
+          <div class="summary-label" id="box3Label">Avg G2</div>
           <div class="summary-value" id="avgGame2">0.0</div>
         </div>
         <div class="summary-box">
-          <div class="summary-label">Avg G3</div>
+          <div class="summary-label" id="box4Label">Avg G3</div>
           <div class="summary-value" id="avgGame3">0.0</div>
         </div>
         <div class="summary-box">
-          <div class="summary-label">Avg G4</div>
+          <div class="summary-label" id="box5Label">Avg G4</div>
           <div class="summary-value" id="avgGame4">0.0</div>
         </div>
         <div class="summary-box">
@@ -1443,12 +1443,13 @@
 
       const matchCount = filteredRecords.length;
       let totalG1 = 0, totalG2 = 0, totalG3 = 0, totalG4 = 0, countG1 = 0, countG2 = 0, countG3 = 0, countG4 = 0, totalAll = 0, countAll = 0;
+      let gameSpecificValues = [];
 
       filteredRecords.forEach(r => {
-        if (currentGameFilter === 'all' || currentGameFilter === 'game1') { if (r.game1) { totalG1 += r.game1; countG1++; } }
-        if (currentGameFilter === 'all' || currentGameFilter === 'game2') { if (r.game2) { totalG2 += r.game2; countG2++; } }
-        if (currentGameFilter === 'all' || currentGameFilter === 'game3') { if (r.game3) { totalG3 += r.game3; countG3++; } }
-        if (currentGameFilter === 'all' || currentGameFilter === 'game4') { if (r.game4) { totalG4 += r.game4; countG4++; } }
+        if (currentGameFilter === 'all' || currentGameFilter === 'game1') { if (r.game1) { totalG1 += r.game1; countG1++; if (currentGameFilter === 'game1') gameSpecificValues.push(r.game1); } }
+        if (currentGameFilter === 'all' || currentGameFilter === 'game2') { if (r.game2) { totalG2 += r.game2; countG2++; if (currentGameFilter === 'game2') gameSpecificValues.push(r.game2); } }
+        if (currentGameFilter === 'all' || currentGameFilter === 'game3') { if (r.game3) { totalG3 += r.game3; countG3++; if (currentGameFilter === 'game3') gameSpecificValues.push(r.game3); } }
+        if (currentGameFilter === 'all' || currentGameFilter === 'game4') { if (r.game4) { totalG4 += r.game4; countG4++; if (currentGameFilter === 'game4') gameSpecificValues.push(r.game4); } }
         let gameTotal = 0, gamesPlayed = 0;
         if (currentGameFilter === 'all') {
           if (r.game1) { gameTotal += r.game1; gamesPlayed++; }
@@ -1463,11 +1464,44 @@
       });
 
       document.getElementById('totalMatches').textContent = matchCount;
-      document.getElementById('avgGame1').textContent = countG1 > 0 ? (totalG1 / countG1).toFixed(1) : '0.0';
-      document.getElementById('avgGame2').textContent = countG2 > 0 ? (totalG2 / countG2).toFixed(1) : '0.0';
-      document.getElementById('avgGame3').textContent = countG3 > 0 ? (totalG3 / countG3).toFixed(1) : '0.0';
-      document.getElementById('avgGame4').textContent = countG4 > 0 ? (totalG4 / countG4).toFixed(1) : '0.0';
       document.getElementById('totalAvg').textContent = countAll > 0 ? (totalAll / countAll).toFixed(1) : '0.0';
+
+      // Update boxes 2-5 based on game filter
+      if (currentGameFilter !== 'all' && gameSpecificValues.length > 0) {
+        // Single game filter: show Average, Maximum, Minimum, Median
+        const avg = gameSpecificValues.reduce((a, b) => a + b, 0) / gameSpecificValues.length;
+        const max = Math.max(...gameSpecificValues);
+        const min = Math.min(...gameSpecificValues);
+        const sorted = [...gameSpecificValues].sort((a, b) => a - b);
+        const median = sorted.length % 2 === 0 
+          ? ((sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2).toFixed(1)
+          : sorted[Math.floor(sorted.length / 2)].toFixed(1);
+        
+        document.getElementById('box2Label').textContent = 'Average';
+        document.getElementById('avgGame1').textContent = avg.toFixed(1);
+        
+        document.getElementById('box3Label').textContent = 'Maximum';
+        document.getElementById('avgGame2').textContent = max.toFixed(1);
+        
+        document.getElementById('box4Label').textContent = 'Minimum';
+        document.getElementById('avgGame3').textContent = min.toFixed(1);
+        
+        document.getElementById('box5Label').textContent = 'Median';
+        document.getElementById('avgGame4').textContent = median;
+      } else {
+        // All games filter: show Avg G1, G2, G3, G4
+        document.getElementById('box2Label').textContent = 'Avg G1';
+        document.getElementById('avgGame1').textContent = countG1 > 0 ? (totalG1 / countG1).toFixed(1) : '0.0';
+        
+        document.getElementById('box3Label').textContent = 'Avg G2';
+        document.getElementById('avgGame2').textContent = countG2 > 0 ? (totalG2 / countG2).toFixed(1) : '0.0';
+        
+        document.getElementById('box4Label').textContent = 'Avg G3';
+        document.getElementById('avgGame3').textContent = countG3 > 0 ? (totalG3 / countG3).toFixed(1) : '0.0';
+        
+        document.getElementById('box5Label').textContent = 'Avg G4';
+        document.getElementById('avgGame4').textContent = countG4 > 0 ? (totalG4 / countG4).toFixed(1) : '0.0';
+      }
 
       updateTrendChart();
 

@@ -228,8 +228,32 @@
 
     .reaction-btn:hover {
       background: var(--accent-color);
-      color: var(--accent-text-color, white);
+    }
+
+    .custom-emoji-input {
+      background: var(--content-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+      width: 40px;
+      height: auto;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .custom-emoji-input:hover {
+      background: color-mix(in srgb, var(--accent-color) 20%, transparent);
       border-color: var(--accent-color);
+    }
+
+    .custom-emoji-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
     }
 
     .reaction-btn.active {
@@ -580,7 +604,6 @@
     const currentUser = auth.getUser();
     let activeOwnerCoachId = currentUser?.id;
     let canEditTeam = true;
-    const REACTION_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
 
     // Load team logo based on user's school affiliation
     function loadTeamLogo() {
@@ -688,7 +711,8 @@
             ? `<button class="delete-btn" onclick="deleteAnnouncement('${item.id}')">Delete</button>`
             : '';
           
-          const reactionBtns = REACTION_EMOJIS.map(emoji => {
+          const allReactions = Object.keys(reactions).sort();
+          const reactionBtns = allReactions.map(emoji => {
             const count = reactions[emoji]?.count || 0;
             const hasReacted = userReactions.includes(emoji);
             return `
@@ -699,6 +723,15 @@
               </button>
             `;
           }).join('');
+          
+          const customEmojiInput = `
+            <input type="text" 
+                   class="custom-emoji-input" 
+                   placeholder="+" 
+                   maxlength="2"
+                   onkeydown="if(event.key==='Enter') addCustomReaction('${item.id}', this)" 
+                   title="Add custom emoji reaction">
+          `;
           
           return `
             <div class="announcement-item">
@@ -713,6 +746,7 @@
               <div class="announcement-actions">
                 <div class="reaction-container">
                   ${reactionBtns}
+                  ${customEmojiInput}
                 </div>
               </div>
             </div>
@@ -735,13 +769,21 @@
       }
     }
 
+    async function addCustomReaction(announcementId, inputElement) {
+      const emoji = inputElement.value.trim();
+      if (!emoji) return;
+      
+      inputElement.value = '';
+      await toggleReaction(announcementId, emoji);
+    }
+
     async function toggleReaction(announcementId, emoji) {
       try {
         const reactions = await loadReactions(announcementId);
         const hasReacted = reactions[emoji]?.users.includes(currentUser.id);
         
         if (hasReacted) {
-          const res = await api.delete(`/api/announcements/${announcementId}/reactions?emoji=${emoji}&userId=${currentUser.id}`);
+          const res = await api.delete(`/api/announcements/${announcementId}/reactions?emoji=${encodeURIComponent(emoji)}&userId=${currentUser.id}`);
           if (!res.ok) throw new Error('Failed to remove reaction');
         } else {
           const res = await api.post(`/api/announcements/${announcementId}/reactions`, {

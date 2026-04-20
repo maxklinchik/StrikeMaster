@@ -691,6 +691,15 @@
       outline: none;
       border-color: var(--border-color);
     }
+
+    /* When accent is white, make icon background use main color */
+    html.accent-is-white .card-header .icon {
+      background: color-mix(in srgb, var(--main-color) 15%, transparent);
+    }
+
+    html.accent-is-white .card-header .icon svg {
+      stroke: var(--main-color);
+    }
   </style>
 </head>
 <body class="dashboard">

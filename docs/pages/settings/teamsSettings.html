@@ -23,6 +23,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/accent-loader.js"></script>
+  <script>
+    // Check if accent color is white IMMEDIATELY after accent-loader runs
+    // This prevents the flash of unstyled buttons on page load
+    (function() {
+      try {
+        const accentColor = getComputedStyle(document.documentElement)
+          .getPropertyValue("--accent-color")
+          .trim();
+        
+        if (accentColor.toUpperCase() === '#FFFFFF') {
+          document.documentElement.classList.add('accent-is-white');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <script src="../../assets/js/logo-loader.js"></script>
   <script src="../../assets/js/season-context.js"></script>
   <script src="../../assets/js/config/api.js"></script>
@@ -353,6 +368,15 @@
       .layout {
         flex-direction: column;
       }
+    }
+
+    /* When accent is white, make icon background use main color */
+    html.accent-is-white .card-header .icon {
+      background: color-mix(in srgb, var(--main-color) 15%, transparent);
+    }
+
+    html.accent-is-white .card-header .icon svg {
+      stroke: var(--main-color);
     }
   </style>
 </head>

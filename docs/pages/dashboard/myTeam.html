@@ -453,56 +453,66 @@
       font-weight: 600;
     }
 
-    .player-form {
-      background: var(--card-bg);
-      border: 2px solid var(--accent-color);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
       display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
     }
 
-    .player-form.active {
-      display: block;
-    }
+    .modal.active { display: flex; }
 
-    .player-form h3 {
-      margin-top: 0;
-      color: var(--accent-color);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    .form-grid label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 500;
-    }
-
-    .form-grid input, .form-grid select {
+    .modal-content {
       width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
+      max-width: 520px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 2px solid var(--accent-color);
+      padding: 20px;
     }
 
-    .form-actions {
-      margin-top: 15px;
-      text-align: right;
+    .modal-content h3 { margin-top: 0; }
+
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
     }
 
-    .form-actions button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
+    .btn-secondary {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.18));
+      background: #ccc;
+      color: #333;
       cursor: pointer;
       font-weight: 600;
-      margin-left: 10px;
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
+    }
+
+    .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--accent-color);
     }
 
     .btn-save {
@@ -898,48 +908,105 @@
           <button class="add-player-btn" id="addPlayerBtn">+ Add Player</button>
         </div>
 
-        <div class="player-form" id="playerForm">
-          <h3>Add New Player</h3>
-          <div class="form-grid">
-            <div>
-              <label>First Name *</label>
-              <input type="text" id="firstName" required>
+        <div class="card" id="addPlayerCard">
+          <div class="card-header">
+            <div class="icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+              </svg>
             </div>
             <div>
-              <label>Last Name *</label>
-              <input type="text" id="lastName" required>
-            </div>
-            <div>
-              <label>Graduation Year *</label>
-              <select id="gradYear" required>
-                <option value="">Select Year</option>
-                <option value="2025">2025</option>
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-                <option value="2028">2028</option>
-                <option value="2029">2029</option>
-              </select>
-            </div>
-            <div>
-              <label>Email (optional)</label>
-              <input type="email" id="playerEmail" placeholder="student@email.com">
+              <h3>Add New Player</h3>
+              <p>Add a player to your roster</p>
             </div>
           </div>
-          <div class="form-actions">
-            <button class="btn-cancel" id="cancelBtn">Cancel</button>
-            <button class="btn-save" id="savePlayerBtn">Add Player</button>
+          <div class="card-body">
+            <div class="add-form">
+              <div class="form-group">
+                <label>First Name *</label>
+                <input type="text" id="firstName" placeholder="First name">
+              </div>
+              <div class="form-group">
+                <label>Last Name *</label>
+                <input type="text" id="lastName" placeholder="Last name">
+              </div>
+              <div class="form-group">
+                <label>Grad Year *</label>
+                <select id="gradYear">
+                  <option value="">Select</option>
+                  <option value="2025">2025</option>
+                  <option value="2026">2026</option>
+                  <option value="2027">2027</option>
+                  <option value="2028">2028</option>
+                  <option value="2029">2029</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Email (optional)</label>
+                <input type="email" id="playerEmail" placeholder="student@email.com">
+              </div>
+              <button class="add-btn" id="savePlayerBtn">Add Player</button>
+            </div>
           </div>
         </div>
 
-        <div class="players-list" id="playersList">
-          <div class="no-players">Loading players...</div>
+        <div class="card" id="playersListCard">
+          <div class="card-header">
+            <div class="icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3>Manage Players</h3>
+              <p>Edit or remove players from your roster</p>
+            </div>
+          </div>
+          <div class="players-list" id="playersList">
+            <div class="no-players">Loading players...</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <div class="modal" id="editPlayerModal">
+    <div class="modal-content">
+      <h3>Edit Player</h3>
+      <div class="modal-grid">
+        <div class="form-group">
+          <label>First Name *</label>
+          <input type="text" id="editFirstName">
+        </div>
+        <div class="form-group">
+          <label>Last Name *</label>
+          <input type="text" id="editLastName">
+        </div>
+        <div class="form-group">
+          <label>Grad Year *</label>
+          <select id="editGradYear">
+            <option value="">Select</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Email (optional)</label>
+          <input type="email" id="editEmail" placeholder="student@email.com">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="editCancelBtn" type="button">Cancel</button>
+        <button class="add-btn" id="editSaveBtn" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
   <div class="footer">
-    <p>&copy; 2026 Strike Master | My Team</p>
+    <p>&copy; 2025 Strike Master | My Team</p>
   </div>
 
   <script>
@@ -1519,23 +1586,23 @@
 
     let editingPlayerId = null;
 
-    function startEditPlayer(playerId) {
+    function openEditPlayer(playerId) {
       const player = players.find(p => p.id === playerId);
       if (!player) return;
       editingPlayerId = playerId;
-      document.getElementById('firstName').value = player.first_name || '';
-      document.getElementById('lastName').value = player.last_name || '';
-      document.getElementById('gradYear').value = player.grad_year || '';
-      document.getElementById('playerEmail').value = player.email || '';
-      document.querySelector('#playerForm h3').textContent = 'Edit Player';
-      document.getElementById('savePlayerBtn').textContent = 'Save Changes';
-      document.getElementById('playerForm').classList.add('active');
+      document.getElementById('editFirstName').value = player.first_name || '';
+      document.getElementById('editLastName').value = player.last_name || '';
+      document.getElementById('editGradYear').value = player.grad_year || '';
+      document.getElementById('editEmail').value = player.email || '';
+      document.getElementById('editPlayerModal').classList.add('active');
+    }
+
+    function closeEditPlayer() {
+      editingPlayerId = null;
+      document.getElementById('editPlayerModal').classList.remove('active');
     }
 
     function resetPlayerForm() {
-      editingPlayerId = null;
-      document.querySelector('#playerForm h3').textContent = 'Add New Player';
-      document.getElementById('savePlayerBtn').textContent = 'Add Player';
       document.getElementById('firstName').value = '';
       document.getElementById('lastName').value = '';
       document.getElementById('gradYear').value = '';
@@ -1558,7 +1625,7 @@
             '<span>Class of ' + (player.grad_year || 'N/A') + (player.email ? ' • ' + player.email : '') + '</span>' +
           '</div>' +
           '<div class="player-actions">' +
-            '<button onclick="startEditPlayer(\'' + player.id + '\')" title="Edit">Edit</button>' +
+            '<button onclick="openEditPlayer(\'' + player.id + '\')" title="Edit">Edit</button>' +
             '<button onclick="removePlayer(\'' + player.id + '\')" title="Remove">Remove</button>' +
           '</div>' +
         '</div>'
@@ -1583,27 +1650,15 @@
       }
 
       try {
-        let res;
-        if (editingPlayerId) {
-          res = await api.put(`/api/players/${editingPlayerId}`, {
-            coachId: currentUser.id,
-            firstName,
-            lastName,
-            gradYear,
-            gender: currentPlayerGender,
-            email
-          });
-        } else {
-          res = await api.post('/api/players', {
-            coachId: currentUser.id,
-            firstName,
-            lastName,
-            gradYear,
-            gender: currentPlayerGender,
-            email,
-            ownerCoachId: activeOwnerCoachId
-          });
-        }
+        const res = await api.post('/api/players', {
+          coachId: currentUser.id,
+          firstName,
+          lastName,
+          gradYear,
+          gender: currentPlayerGender,
+          email,
+          ownerCoachId: activeOwnerCoachId
+        });
 
         if (!res.ok) {
           const data = await res.json();
@@ -1613,11 +1668,10 @@
 
         const data = await res.json();
 
-        document.getElementById('playerForm').classList.remove('active');
-        if (!editingPlayerId && data.emailStatus && !data.emailStatus.sent && email) {
+        if (data.emailStatus && !data.emailStatus.sent && email) {
           showMessage(`${firstName} ${lastName} added, but email not sent: ${data.emailStatus.error || 'unknown error'}`, 'error');
         } else {
-          showMessage(editingPlayerId ? 'Player updated.' : `${firstName} ${lastName} added successfully!`, 'success');
+          showMessage(`${firstName} ${lastName} added successfully!`, 'success');
         }
         resetPlayerForm();
         loadPlayers();
@@ -1722,18 +1776,42 @@
       setTimeout(() => { msg.className = 'message'; }, 4000);
     }
 
-    // Toggle form
-    document.getElementById('addPlayerBtn').addEventListener('click', () => {
-      resetPlayerForm();
-      document.getElementById('playerForm').classList.toggle('active');
-    });
-
-    document.getElementById('cancelBtn').addEventListener('click', () => {
-      document.getElementById('playerForm').classList.remove('active');
-      resetPlayerForm();
-    });
-
+    // Add player button and modal handlers
     document.getElementById('savePlayerBtn').addEventListener('click', addPlayer);
+    document.getElementById('editCancelBtn').addEventListener('click', closeEditPlayer);
+    document.getElementById('editPlayerModal').addEventListener('click', (event) => {
+      if (event.target.id === 'editPlayerModal') closeEditPlayer();
+    });
+    document.getElementById('editSaveBtn').addEventListener('click', async () => {
+      if (!editingPlayerId) return;
+      const firstName = document.getElementById('editFirstName').value.trim();
+      const lastName = document.getElementById('editLastName').value.trim();
+      const gradYear = document.getElementById('editGradYear').value;
+      const email = document.getElementById('editEmail').value.trim();
+      if (!firstName || !lastName || !gradYear) {
+        showMessage('Please fill in all required fields.', 'error');
+        return;
+      }
+      try {
+        const res = await api.put(`/api/players/${editingPlayerId}`, {
+          coachId: currentUser.id,
+          firstName,
+          lastName,
+          gradYear,
+          email
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          showMessage(data.error || 'Failed to update player', 'error');
+          return;
+        }
+        closeEditPlayer();
+        showMessage('Player updated.', 'success');
+        loadPlayers();
+      } catch (error) {
+        showMessage(error.message || 'Failed to update player.', 'error');
+      }
+    });
 
     // Initialize - load matches
     loadOwnerTeams().then(() => {

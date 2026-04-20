@@ -287,6 +287,25 @@
     .rank-2 { color: #C0C0C0; font-weight: 700; }
     .rank-3 { color: #CD7F32; font-weight: 700; }
 
+    .school-highlight-row {
+      background: color-mix(in srgb, var(--text-color) 8%, transparent);
+      border-top: 2px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      opacity: 0.85;
+    }
+
+    .school-highlight-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
     .filter-controls {
       display: flex;
       gap: 16px;
@@ -669,6 +688,23 @@
       return '';
     }
 
+    function getUserSchool() {
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          return user.team_name || null;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function findBestFromSchool(allRankings, schoolName) {
+      if (!schoolName) return null;
+      const filtered = allRankings.filter(item => item.team === schoolName);
+      return filtered.length > 0 ? filtered[0] : null;
+    }
+
     async function loadCountyRankings(season) {
       try {
         // Mock data for county rankings
@@ -701,6 +737,10 @@
         ];
 
         // Render boys county
+        const userSchool = getUserSchool();
+        const bestSchoolPlayer = findBestFromSchool(countyBoysPlayers, userSchool);
+        const bestSchoolTeam = findBestFromSchool(countyBoysTeams, userSchool);
+
         document.getElementById('countyBoysContent').innerHTML = `
           <div class="ranking-section-title">Top Players</div>
           <table class="ranking-table">
@@ -716,6 +756,11 @@
                   <td style="text-align: right;">${p.average}</td>
                 </tr>
               `).join('')}
+              ${bestSchoolPlayer ? `
+                <tr class="school-highlight-row">
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolPlayer.name}</div><div style="text-align: right;">${bestSchoolPlayer.average}</div></div></td>
+                </tr>
+              ` : ''}
             </tbody>
           </table>
           <div class="ranking-section-title">Top Teams</div>
@@ -732,11 +777,19 @@
                   <td style="text-align: right;">${t.average}</td>
                 </tr>
               `).join('')}
+              ${bestSchoolTeam ? `
+                <tr class="school-highlight-row">
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolTeam.name}</div><div style="text-align: right;">${bestSchoolTeam.average}</div></div></td>
+                </tr>
+              ` : ''}
             </tbody>
           </table>
         `;
 
         // Render girls county
+        const bestSchoolGirlsPlayer = findBestFromSchool(countyGirlsPlayers, userSchool);
+        const bestSchoolGirlsTeam = findBestFromSchool(countyGirlsTeams, userSchool);
+
         document.getElementById('countyGirlsContent').innerHTML = `
           <div class="ranking-section-title">Top Players</div>
           <table class="ranking-table">
@@ -752,6 +805,11 @@
                   <td style="text-align: right;">${p.average}</td>
                 </tr>
               `).join('')}
+              ${bestSchoolGirlsPlayer ? `
+                <tr class="school-highlight-row">
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolGirlsPlayer.name}</div><div style="text-align: right;">${bestSchoolGirlsPlayer.average}</div></div></td>
+                </tr>
+              ` : ''}
             </tbody>
           </table>
           <div class="ranking-section-title">Top Teams</div>
@@ -768,6 +826,11 @@
                   <td style="text-align: right;">${t.average}</td>
                 </tr>
               `).join('')}
+              ${bestSchoolGirlsTeam ? `
+                <tr class="school-highlight-row">
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolGirlsTeam.name}</div><div style="text-align: right;">${bestSchoolGirlsTeam.average}</div></div></td>
+                </tr>
+              ` : ''}
             </tbody>
           </table>
         `;
@@ -810,6 +873,9 @@
         ];
 
         // Render boys division
+        const bestDivisionBoysPlayer = findBestFromSchool(divisionBoysPlayers, userSchool);
+        const bestDivisionBoysTeam = findBestFromSchool(divisionBoysTeams, userSchool);
+
         document.getElementById('divisionBoysContent').innerHTML = `
           <div class="ranking-section-title">Top Players</div>
           <table class="ranking-table">
@@ -826,6 +892,11 @@
                   <td style="text-align: right;">${p.average}</td>
                 </tr>
               `).join('')}
+              ${bestDivisionBoysPlayer ? `
+                <tr class="school-highlight-row">
+                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysPlayer.name} <strong style="margin-left: 8px;">${bestDivisionBoysPlayer.division}</strong></div><div style="text-align: right;">${bestDivisionBoysPlayer.average}</div></div></td>
+                </tr>
+              ` : ''}
             </tbody>
           </table>
           <div class="ranking-section-title">Top Teams</div>
@@ -843,11 +914,19 @@
                   <td style="text-align: right;">${t.average}</td>
                 </tr>
               `).join('')}
+              ${bestDivisionBoysTeam ? `
+                <tr class="school-highlight-row">
+                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysTeam.name} <strong style="margin-left: 8px;">${bestDivisionBoysTeam.division}</strong></div><div style="text-align: right;">${bestDivisionBoysTeam.average}</div></div></td>
+                </tr>
+              ` : ''}
             </tbody>
           </table>
         `;
 
         // Render girls division
+        const bestDivisionGirlsPlayer = findBestFromSchool(divisionGirlsPlayers, userSchool);
+        const bestDivisionGirlsTeam = findBestFromSchool(divisionGirlsTeams, userSchool);
+
         document.getElementById('divisionGirlsContent').innerHTML = `
           <div class="ranking-section-title">Top Players</div>
           <table class="ranking-table">
@@ -864,6 +943,11 @@
                   <td style="text-align: right;">${p.average}</td>
                 </tr>
               `).join('')}
+              ${bestDivisionGirlsPlayer ? `
+                <tr class="school-highlight-row">
+                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsPlayer.name} <strong style="margin-left: 8px;">${bestDivisionGirlsPlayer.division}</strong></div><div style="text-align: right;">${bestDivisionGirlsPlayer.average}</div></div></td>
+                </tr>
+              ` : ''}
             </tbody>
           </table>
           <div class="ranking-section-title">Top Teams</div>
@@ -881,6 +965,11 @@
                   <td style="text-align: right;">${t.average}</td>
                 </tr>
               `).join('')}
+              ${bestDivisionGirlsTeam ? `
+                <tr class="school-highlight-row">
+                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsTeam.name} <strong style="margin-left: 8px;">${bestDivisionGirlsTeam.division}</strong></div><div style="text-align: right;">${bestDivisionGirlsTeam.average}</div></div></td>
+                </tr>
+              ` : ''}
             </tbody>
           </table>
         `;

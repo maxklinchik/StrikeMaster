@@ -26,6 +26,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/accent-loader.js"></script>
+  <script>
+    // Check if accent color is white IMMEDIATELY after accent-loader runs
+    // This prevents the flash of unstyled buttons on page load
+    (function() {
+      try {
+        const accentColor = getComputedStyle(document.documentElement)
+          .getPropertyValue("--accent-color")
+          .trim();
+        
+        if (accentColor.toUpperCase() === '#FFFFFF') {
+          document.documentElement.classList.add('accent-is-white');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <script src="../../assets/js/logo-loader.js"></script>
   <script src="../../assets/js/season-context.js"></script>
   <script src="../../assets/js/config/api.js"></script>
@@ -35,7 +50,7 @@
       --accent-color: #ff6b6b;
       --main-color: #6ecbff;
       --bg-color: #ffffff;
-      --content-bg: #fff9e2;
+      --content-bg: #ffffff;
       --card-bg: #ffffff;
       --text-color: #1f1f1f;
       --text-muted: #4b4b4b;
@@ -1315,6 +1330,59 @@
       .score-input.auto-calc {
         width: 50px;
       }
+    }
+
+    /* When accent is white, set initial outline color to dark gray in dark mode */
+    html.accent-is-white[data-theme="dark"] .tab-btn {
+      border-color: var(--content-bg);
+      outline: 2px solid var(--content-bg);
+      outline-offset: -2px;
+    }
+
+    html.accent-is-white .tab-btn:hover {
+      filter: none;
+      border-color: var(--main-color);
+      outline: 2px solid var(--main-color);
+      outline-offset: -2px;
+    }
+
+    /* When accent is white, active tab buttons use main color instead of white accent */
+    html.accent-is-white .tab-btn.active {
+      background: var(--main-color);
+      color: white;
+      border-color: var(--main-color);
+      outline: 2px solid var(--main-color);
+      outline-offset: -2px;
+    }
+
+    /* When accent is white, match type buttons (boys/girls/coed) get main color outline on hover and active */
+    html.accent-is-white[data-theme="dark"] .match-type-btn {
+      border-color: var(--content-bg);
+      outline: 2px solid var(--content-bg);
+      outline-offset: -2px;
+    }
+
+    html.accent-is-white .match-type-btn:hover {
+      filter: none;
+      border-color: var(--main-color);
+      outline: 2px solid var(--main-color);
+      outline-offset: -2px;
+    }
+
+    html.accent-is-white .match-type-btn.active {
+      background: var(--main-color);
+      color: white;
+      border-color: var(--main-color);
+      outline: 2px solid var(--main-color);
+      outline-offset: -2px;
+    }
+
+    /* When accent is white, remove white focus border from textboxes */
+    html.accent-is-white input:focus,
+    html.accent-is-white textarea:focus,
+    html.accent-is-white select:focus {
+      outline: none;
+      border-color: var(--border-color);
     }
   </style>
 </head>
@@ -2994,6 +3062,17 @@
         loadPlayers();
       }
     });
+
+    // Add class if accent color is white for button styling
+    (function() {
+      const accentColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--accent-color")
+        .trim();
+      
+      if (accentColor.toUpperCase() === '#FFFFFF') {
+        document.documentElement.classList.add('accent-is-white');
+      }
+    })();
   </script>
 </body>
 </html>

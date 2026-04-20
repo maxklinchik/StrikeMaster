@@ -33,7 +33,7 @@
       --accent-color: #ff6b6b;
       --main-color: #6ecbff;
       --bg-color: #ffffff;
-      --content-bg: #fff9e2;
+      --content-bg: #ffffff;
       --card-bg: #ffffff;
       --text-color: #1f1f1f;
       --text-muted: #4b4b4b;
@@ -504,6 +504,23 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 });
 
 loadTeams();
+
+// Update icon colors if accent is white
+(function() {
+  const accentColor = getComputedStyle(document.documentElement)
+    .getPropertyValue("--accent-color")
+    .trim();
+  
+  if (accentColor.toUpperCase() === '#FFFFFF') {
+    const mainColor = getComputedStyle(document.documentElement)
+      .getPropertyValue("--main-color")
+      .trim();
+    
+    document.querySelectorAll('.card-header .icon svg').forEach(svg => {
+      svg.style.stroke = mainColor;
+    });
+  }
+})();
   </script>
 </body>
 </html>

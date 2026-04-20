@@ -36,7 +36,7 @@
       --accent-color: #ff6b6b;
       --main-color: #6ecbff;
       --bg-color: #ffffff;
-      --content-bg: #fff9e2;
+      --content-bg: #ffffff;
       --card-bg: #ffffff;
       --text-color: #1f1f1f;
       --text-muted: #4b4b4b;
@@ -762,9 +762,33 @@
     // Initialize
     function init() {
       initLogoDisplay();
+      initSchoolLogoPreview();
       initTheme();
       initUiMode();
+      updateIconColorsForWhiteAccent();
       initColors();
+    }
+
+    // Initialize school logo preview with correct school logo
+    function initSchoolLogoPreview() {
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.team_name && typeof getTeamLogo === 'function') {
+            const schoolLogo = getTeamLogo(user.team_name, '../../assets/images/Team Logos/');
+            if (schoolLogo) {
+              const schoolLogoPreview = document.getElementById('schoolLogoPreview');
+              if (schoolLogoPreview) {
+                schoolLogoPreview.src = schoolLogo;
+              }
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Could not load school logo preview:', e.message);
+      }
     }
 
     // Logo Display
@@ -897,6 +921,23 @@
         localStorage.setItem("simpleUi", simple);
         document.documentElement.setAttribute("data-ui", simple ? "simple" : "cartoon");
       });
+    }
+
+    // Update icon colors if accent is white
+    function updateIconColorsForWhiteAccent() {
+      const accentColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--accent-color")
+        .trim();
+      
+      if (accentColor.toUpperCase() === '#FFFFFF') {
+        const mainColor = getComputedStyle(document.documentElement)
+          .getPropertyValue("--main-color")
+          .trim();
+        
+        document.querySelectorAll('.card-header .icon svg').forEach(svg => {
+          svg.style.stroke = mainColor;
+        });
+      }
     }
 
     // Colors

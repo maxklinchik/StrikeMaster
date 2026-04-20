@@ -15,13 +15,24 @@
       }
     }
     
-    if (teamName && typeof getTeamColors === 'function') {
+  if (teamName && typeof getTeamColors === 'function') {
       const teamColors = getTeamColors(teamName);
       if (teamColors) {
+        // If accent is white, swap with main color to reduce white visibility
+        let mainColor = teamColors.mainColor;
+        let accentColor = teamColors.accentColor;
+        
+        if (accentColor && accentColor.toUpperCase() === '#FFFFFF') {
+          // Swap: use main color as accent, and accent (white) as main
+          const temp = mainColor;
+          mainColor = accentColor;
+          accentColor = temp;
+        }
+        
         // IMMEDIATELY set school colors as CSS variables
         // This overrides any :root defaults
-        document.documentElement.style.setProperty("--main-color", teamColors.mainColor, "important");
-        document.documentElement.style.setProperty("--accent-color", teamColors.accentColor, "important");
+        document.documentElement.style.setProperty("--main-color", mainColor, "important");
+        document.documentElement.style.setProperty("--accent-color", accentColor, "important");
       }
     }
   } catch (e) {

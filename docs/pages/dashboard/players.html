@@ -26,6 +26,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="../../assets/js/config/teams.js"></script>
   <script src="../../assets/js/accent-loader.js"></script>
+  <script>
+    // Check if accent color is white IMMEDIATELY after accent-loader runs
+    // This prevents the flash of unstyled buttons on page load
+    (function() {
+      try {
+        const accentColor = getComputedStyle(document.documentElement)
+          .getPropertyValue("--accent-color")
+          .trim();
+        
+        if (accentColor.toUpperCase() === '#FFFFFF') {
+          document.documentElement.classList.add('accent-is-white');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <script src="../../assets/js/logo-loader.js"></script>
   <script src="../../assets/js/season-context.js"></script>
   <script src="../../assets/js/config/api.js"></script>
@@ -36,7 +51,7 @@
       --accent-color: #ff6b6b;
       --main-color: #6ecbff;
       --bg-color: #ffffff;
-      --content-bg: #fff9e2;
+      --content-bg: #ffffff;
       --card-bg: #ffffff;
       --text-color: #1f1f1f;
       --text-muted: #4b4b4b;
@@ -153,7 +168,7 @@
       box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
     }
 
-    .tab-btn:hover { border-color: var(--accent-color); }
+    .tab-btn:hover { filter: brightness(0.95); }
     .tab-btn.active { background: var(--accent-color); color: var(--accent-text-color, white); border-color: var(--accent-color); }
 
     .view-toggle {
@@ -176,7 +191,7 @@
       box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
     }
 
-    .view-btn:hover { border-color: var(--accent-color); }
+    .view-btn:hover { filter: brightness(0.95); }
     .view-btn.active { background: var(--accent-color); color: var(--accent-text-color, white); border-color: var(--accent-color); }
 
     /* Card */
@@ -505,6 +520,7 @@
       transition: all 0.2s;
     }
 
+    .filter-btn:hover { filter: brightness(0.95); }
     .filter-btn.active { background: var(--accent-color); color: var(--accent-text-color, white); border-color: var(--accent-color); }
 
     .filter-select {
@@ -636,6 +652,44 @@
       .history-table { font-size: 12px; }
       .history-table th, .history-table td { padding: 8px 4px; }
       .tabs, .view-toggle { flex-wrap: wrap; }
+    }
+
+    /* When accent is white, outline buttons on hover with main color */
+    /* When accent is white, set initial outline color to dark gray in dark mode */
+    html.accent-is-white[data-theme="dark"] .tab-btn,
+    html.accent-is-white[data-theme="dark"] .view-btn,
+    html.accent-is-white[data-theme="dark"] .filter-btn {
+      border-color: var(--content-bg);
+      outline: 2px solid var(--content-bg);
+      outline-offset: -2px;
+    }
+
+    html.accent-is-white .tab-btn:hover,
+    html.accent-is-white .view-btn:hover,
+    html.accent-is-white .filter-btn:hover {
+      filter: none;
+      border-color: var(--main-color);
+      outline: 2px solid var(--main-color);
+      outline-offset: -2px;
+    }
+
+    /* When accent is white, active buttons use main color instead of white accent */
+    html.accent-is-white .tab-btn.active,
+    html.accent-is-white .view-btn.active,
+    html.accent-is-white .filter-btn.active {
+      background: var(--main-color);
+      color: white;
+      border-color: var(--main-color);
+      outline: 2px solid var(--main-color);
+      outline-offset: -2px;
+    }
+
+    /* When accent is white, remove white focus border from textboxes */
+    html.accent-is-white input:focus,
+    html.accent-is-white textarea:focus,
+    html.accent-is-white select:focus {
+      outline: none;
+      border-color: var(--border-color);
     }
   </style>
 </head>
@@ -1673,6 +1727,27 @@
     }
 
     checkAuth().then(user => { if (user) { loadTeamLogo(); applyStudentMode(); syncAddPlayerGender(); loadPlayers(); } });
+
+    // Update icon colors if accent is white
+    (function() {
+      const accentColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--accent-color")
+        .trim();
+      
+      if (accentColor.toUpperCase() === '#FFFFFF') {
+        const mainColor = getComputedStyle(document.documentElement)
+          .getPropertyValue("--main-color")
+          .trim();
+        
+        // Update icon colors
+        document.querySelectorAll('.card-header .icon svg').forEach(svg => {
+          svg.style.stroke = mainColor;
+        });
+        
+        // Add class for button hover styling
+        document.documentElement.classList.add('accent-is-white');
+      }
+    })();
   </script>
 </body>
 </html>

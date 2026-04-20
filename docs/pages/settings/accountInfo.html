@@ -36,7 +36,7 @@
       --accent-color: #ff6b6b;
       --main-color: #6ecbff;
       --bg-color: #ffffff;
-      --content-bg: #fff9e2;
+      --content-bg: #ffffff;
       --card-bg: #ffffff;
       --text-color: #1f1f1f;
       --text-muted: #4b4b4b;
@@ -900,6 +900,23 @@
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1waHdna2VwbHZxbnFubGJhb2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MTA2NjYsImV4cCI6MjA5MTk4NjY2Nn0.jI8YKPJ1ZbLXwG2XYz9Z7eP5V5Q7K8R9_QvW0XxYz_8';
       return window.supabase.createClient(supabaseUrl, supabaseKey);
     }
+
+    // Update icon colors if accent is white
+    (function() {
+      const accentColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--accent-color")
+        .trim();
+      
+      if (accentColor.toUpperCase() === '#FFFFFF') {
+        const mainColor = getComputedStyle(document.documentElement)
+          .getPropertyValue("--main-color")
+          .trim();
+        
+        document.querySelectorAll('.card-header .icon svg').forEach(svg => {
+          svg.style.stroke = mainColor;
+        });
+      }
+    })();
   </script>
 </body>
 </html>

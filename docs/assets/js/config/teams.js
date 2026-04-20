@@ -25,8 +25,8 @@ const TEAMS_CONFIG = {
     name: 'Bergenfield High School',
     shortName: 'Bergenfield',
     logo: 'bergenfieldLogo.png',
-    accentColor: '#ab2622', // Maroon
-    mainColor: '#FFFFFF'    // White
+    accentColor: '#FFFFFF', // Maroon
+    mainColor: '#ab2622'    // White
   },
   // Cliffside Park - Red and Black
   'cliffside park': {
@@ -74,14 +74,14 @@ const TEAMS_CONFIG = {
     shortName: 'Don Bosco Prep',
     logo: 'dbLogo.png',
     accentColor: '#800000', // Maroon
-    mainColor: '#C0C0C0'    // Silver
+    mainColor: '#979797'    // Silver
   },
   'don bosco': {
     name: 'Don Bosco Preparatory High School',
     shortName: 'Don Bosco Prep',
     logo: 'dbLogo.png',
     accentColor: '#74273d',
-    mainColor: '#cfccce'
+    mainColor: '#adadad'
   },
   // Dwight Morrow High School - Dark Red and Black
   'dwight morrow': {
@@ -158,7 +158,7 @@ const TEAMS_CONFIG = {
     name: 'Lakeland Regional High School',
     shortName: 'Lakeland',
     logo: 'llLogo.png',
-    accentColor: '#fefafd', //Grey
+    accentColor: '#a5a5a5', //Grey
     mainColor: '#bf1d2f'    // Red
   },
   // Mahwah High School - Light Blue and Grey
@@ -167,7 +167,7 @@ const TEAMS_CONFIG = {
     shortName: 'Mahwah',
     logo: 'mahLogo.png',
     accentColor: '#7ebfe9', // Light Blue
-    mainColor: '#c7cbce'    // Grey
+    mainColor: '#b7b7b7'    // Grey
   },
   // Northern Highlands Regional High School - Red and Black
   'northern highlands': {
@@ -299,8 +299,8 @@ const TEAMS_CONFIG = {
     name: 'Ridgefield Park High School',
     shortName: 'Ridgefield Park',
     logo: 'rpLogo.png',
-    accentColor: '#ea2435', // Red
-    mainColor: '#FFFFFF'    // White
+    accentColor: '#FFFFFF', // Red
+    mainColor: '#ea2435'    // White
   },
   // Ridgewood High School - Black and Red
   'ridgewood': {

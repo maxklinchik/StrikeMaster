@@ -1041,8 +1041,18 @@
     }
 
     // Update welcome message
+    const teamName = (() => {
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          return user.team_name || 'Your Team';
+        }
+      } catch (e) {}
+      return 'Your Team';
+    })();
     document.getElementById('welcomeMsg').textContent = 
-      `${auth.getDisplayName()}'s team statistics and match history.`;
+      `${teamName}'s team statistics and match history.`;
 
     // View Toggle
     document.querySelectorAll('.view-btn').forEach(btn => {

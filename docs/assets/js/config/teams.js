@@ -92,7 +92,7 @@ const TEAMS_CONFIG = {
     mainColor: '#231f20'    // Black
   },
   // Eastern Christian High School - Dark Blue and Gold
-  'dwight morrow': {
+  'eastern christian': {
     name: 'Eastern Christian High School',
     shortName: 'Eastern Christian',
     logo: 'ecLogo.png',

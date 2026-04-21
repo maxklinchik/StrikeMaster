@@ -4,12 +4,12 @@
  */
 
 const TEAMS_CONFIG = {
-  // Bergen Catholic High School - Red and Yellow
+  // Bergen Catholic High School - Gold and Red
   'bergen catholic': {
     name: 'Bergen Catholic High School',
     shortName: 'Bergen Catholic',
     logo: 'bcLogo.png',
-    accentColor: '#e9ac21', // Yellow
+    accentColor: '#F1B855', // Gold
     mainColor: '#cc0001'    // Red
   },
   // Bergen County Technical High School - Gold and Black
@@ -91,13 +91,13 @@ const TEAMS_CONFIG = {
     accentColor: '#7f1519', // Dark Red
     mainColor: '#231f20'    // Black
   },
-  // Eastern Christian High School - Dark Blue and Gold
+  // Eastern Christian High School - Gold and Dark Blue
   'eastern christian': {
     name: 'Eastern Christian High School',
     shortName: 'Eastern Christian',
     logo: 'ecLogo.png',
-    accentColor: '#081D4B', // Dark Blue
-    mainColor: '#F1B855'    // Gold
+    accentColor: '#F1B855', // Gold
+    mainColor: '#081D4B'    // Dark Blue
   },
   // Fair Lawn High School - Red and White
   'fair lawn': {

@@ -134,6 +134,23 @@ async function canEditTeam(coachId, ownerCoachId) {
   return !!data?.can_edit;
 }
 
+// Extract and verify user from Authorization header
+async function getAuthenticatedUserId(req) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return null;
+    }
+    const token = authHeader.substring(7);
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) return null;
+    return user.id;
+  } catch (error) {
+    console.error('Auth verification error:', error);
+    return null;
+  }
+}
+
 // ==================== HEALTH CHECK ====================
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -895,6 +912,12 @@ app.post('/api/announcements/:id/reactions', async (req, res) => {
       return res.status(400).json({ error: 'announcement_id, emoji, and userId are required' });
     }
 
+    // Verify that the authenticated user matches the userId
+    const authenticatedUserId = await getAuthenticatedUserId(req);
+    if (!authenticatedUserId || authenticatedUserId !== userId) {
+      return res.status(403).json({ error: 'Unauthorized: can only add reactions for your own account' });
+    }
+
     // Check if reaction already exists
     const { data: existing } = await supabase
       .from('announcement_reactions')
@@ -936,6 +959,12 @@ app.delete('/api/announcements/:id/reactions', async (req, res) => {
 
     if (!id || !emoji || !userId) {
       return res.status(400).json({ error: 'announcement_id, emoji, and userId are required' });
+    }
+
+    // Verify that the authenticated user matches the userId
+    const authenticatedUserId = await getAuthenticatedUserId(req);
+    if (!authenticatedUserId || authenticatedUserId !== userId) {
+      return res.status(403).json({ error: 'Unauthorized: can only remove your own reactions' });
     }
 
     const { error } = await supabase

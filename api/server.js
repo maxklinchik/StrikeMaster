@@ -912,11 +912,16 @@ app.post('/api/announcements/:id/reactions', async (req, res) => {
       return res.status(400).json({ error: 'announcement_id, emoji, and userId are required' });
     }
 
-    // Verify that the authenticated user matches the userId
-    const authenticatedUserId = await getAuthenticatedUserId(req);
-    if (!authenticatedUserId || authenticatedUserId !== userId) {
-      return res.status(403).json({ error: 'Unauthorized: can only add reactions for your own account' });
+    // Verify auth if token is provided (coaches have tokens, students don't)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      // If token is provided, verify it matches the userId
+      const authenticatedUserId = await getAuthenticatedUserId(req);
+      if (!authenticatedUserId || authenticatedUserId !== userId) {
+        return res.status(403).json({ error: 'Unauthorized: can only add reactions for your own account' });
+      }
     }
+    // If no token, allow request (student accounts don't have tokens)
 
     // Check if reaction already exists
     const { data: existing } = await supabase
@@ -961,11 +966,16 @@ app.delete('/api/announcements/:id/reactions', async (req, res) => {
       return res.status(400).json({ error: 'announcement_id, emoji, and userId are required' });
     }
 
-    // Verify that the authenticated user matches the userId
-    const authenticatedUserId = await getAuthenticatedUserId(req);
-    if (!authenticatedUserId || authenticatedUserId !== userId) {
-      return res.status(403).json({ error: 'Unauthorized: can only remove your own reactions' });
+    // Verify auth if token is provided (coaches have tokens, students don't)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      // If token is provided, verify it matches the userId
+      const authenticatedUserId = await getAuthenticatedUserId(req);
+      if (!authenticatedUserId || authenticatedUserId !== userId) {
+        return res.status(403).json({ error: 'Unauthorized: can only remove your own reactions' });
+      }
     }
+    // If no token, allow request (student accounts don't have tokens)
 
     const { error } = await supabase
       .from('announcement_reactions')

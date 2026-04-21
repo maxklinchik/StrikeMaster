@@ -417,6 +417,7 @@ const SCHOOLS_LIST = [
   { value: 'Don Bosco Prep', name: 'Don Bosco Preparatory High School' },
   { value: 'Dumont', name: 'Dumont High School' },
   { value: 'Dwight Morrow', name: 'Dwight Morrow High School' },
+  { value: 'Eastern Christian', name: 'Eastern Christian High School' },
   { value: 'Fair Lawn', name: 'Fair Lawn High School' },
   { value: 'Fort Lee', name: 'Fort Lee High School' },
   { value: 'Hackensack', name: 'Hackensack High School' },

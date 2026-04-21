@@ -738,29 +738,78 @@
           const container = document.querySelector(`[data-announcement-id="${announcementId}"]`);
           if (!container) return;
 
-          // Update all reaction buttons for this announcement
-          for (const emoji of REACTION_EMOJIS.concat(ALL_EMOJIS)) {
-            const buttons = container.querySelectorAll(`.reaction-btn[onclick*="toggleReaction('${announcementId}', '${emoji}')"]`);
-            const btn = buttons[0];
-            if (!btn) continue;
+          const reactionContainer = container.querySelector('.reaction-container');
+          if (!reactionContainer) return;
 
+          // Get all unique emojis from reactions
+          const allEmojis = new Set([...REACTION_EMOJIS, ...Object.keys(reactions)]);
+          
+          // Update all reaction buttons for this announcement
+          for (const emoji of allEmojis) {
             const count = reactions[emoji]?.count || 0;
             const userReacted = reactions[emoji]?.userReacted || false;
+            const isQuickReaction = REACTION_EMOJIS.includes(emoji);
 
-            // Update button state
-            if (userReacted) {
-              btn.classList.add('active');
-            } else {
-              btn.classList.remove('active');
+            // Try to find existing button by searching text content
+            let btn = null;
+            const allButtons = reactionContainer.querySelectorAll('.reaction-btn');
+            for (let button of allButtons) {
+              if (button.textContent.trim().startsWith(emoji)) {
+                btn = button;
+                break;
+              }
             }
 
-            // Update button text (count only, no emoji)
-            btn.textContent = count > 0 ? `${emoji} ${count}` : emoji;
+            if (btn) {
+              // Update existing button
+              btn.textContent = count > 0 ? `${emoji} ${count}` : emoji;
+              if (userReacted) {
+                btn.classList.add('active');
+              } else {
+                btn.classList.remove('active');
+              }
+            } else if (count > 0 || isQuickReaction) {
+              // Create new button if it has reactions or is a quick reaction
+              const newBtn = document.createElement('button');
+              newBtn.className = `reaction-btn ${userReacted ? 'active' : ''}`;
+              newBtn.textContent = `${emoji} ${count > 0 ? count : ''}`;
+              newBtn.onclick = () => toggleReaction(announcementId, emoji);
+              newBtn.title = `React with ${emoji}`;
+              
+              // Insert before the emoji picker button div
+              const pickerDiv = reactionContainer.querySelector('div[style*="position"]');
+              if (pickerDiv) {
+                reactionContainer.insertBefore(newBtn, pickerDiv);
+              } else {
+                reactionContainer.appendChild(newBtn);
+              }
+            }
+          }
+
+          // Clean up extra emoji buttons with no reactions (but keep quick reactions)
+          const finalButtons = reactionContainer.querySelectorAll('.reaction-btn');
+          for (let button of finalButtons) {
+            // Check if this button is a quick reaction
+            const isQuickBtn = REACTION_EMOJIS.some(quickEmoji => button.textContent.trim().startsWith(quickEmoji));
+            
+            // Check if this emoji has any reactions
+            let hasReactions = false;
+            for (const emoji of Object.keys(reactions)) {
+              if (button.textContent.trim().startsWith(emoji)) {
+                hasReactions = true;
+                break;
+              }
+            }
+            
+            // Only remove if it's NOT a quick reaction and has no reactions
+            if (!isQuickBtn && !hasReactions) {
+              button.remove();
+            }
           }
         } catch (error) {
           console.error('Error polling reactions:', error);
         }
-      }, 2000);
+      }, 1000);
     }
 
     function stopReactionPolling(announcementId) {
@@ -792,7 +841,11 @@
             ? `<button class="delete-btn" onclick="deleteAnnouncement('${item.id}')">Delete</button>`
             : '';
           
-          const reactionBtns = REACTION_EMOJIS.map(emoji => {
+          // Get all unique emojis from reactions, plus quick reactions
+          const allEmojisWithReactions = new Set(REACTION_EMOJIS);
+          Object.keys(reactions).forEach(emoji => allEmojisWithReactions.add(emoji));
+          
+          const reactionBtns = Array.from(allEmojisWithReactions).map(emoji => {
             const count = reactions[emoji]?.count || 0;
             const userReacted = reactions[emoji]?.userReacted || false;
             return `
@@ -805,7 +858,7 @@
           }).join('');
 
           const emojiPickerMenu = ALL_EMOJIS.map(emoji => {
-            return `<div class="emoji-option" onclick="toggleReaction('${item.id}', '${emoji}')" title="React with ${emoji}">${emoji}</div>`;
+            return `<div class="emoji-option" data-emoji="${emoji}" title="React with ${emoji}">${emoji}</div>`;
           }).join('');
           
           return `
@@ -835,6 +888,21 @@
 
         // Start polling for reactions on all announcements
         data.forEach(item => startReactionPolling(item.id));
+
+        // Handle emoji picker clicks with event delegation
+        const listElement = document.getElementById('announcementList');
+        listElement.addEventListener('click', (e) => {
+          if (e.target.classList.contains('emoji-option')) {
+            e.stopPropagation();
+            const emoji = e.target.getAttribute('data-emoji');
+            const container = e.target.closest('[data-announcement-id]');
+            const announcementId = container?.getAttribute('data-announcement-id');
+            console.log('Emoji picker clicked:', { emoji, announcementId, element: e.target });
+            if (emoji && announcementId) {
+              toggleReaction(announcementId, emoji);
+            }
+          }
+        });
       } catch (error) {
         console.error('Error loading announcements:', error);
         list.innerHTML = '<div class="announcement-item">Failed to load announcements.</div>';
@@ -853,67 +921,91 @@
     }
 
     async function toggleReaction(announcementId, emoji) {
-      // Find the clicked button
-      const buttons = document.querySelectorAll(`.reaction-btn[onclick*="toggleReaction('${announcementId}', '${emoji}')"]`);
-      const btn = buttons[0];
-      if (!btn) return;
+      // Find the button within this announcement
+      const container = document.querySelector(`[data-announcement-id="${announcementId}"]`);
+      if (!container) return;
+      
+      // Find reaction button by checking text content starts with the emoji
+      let btn = null;
+      const allButtons = container.querySelectorAll('.reaction-btn');
+      for (let button of allButtons) {
+        if (button.textContent.startsWith(emoji)) {
+          btn = button;
+          break;
+        }
+      }
 
-      // Get actual reaction state from server first to ensure accuracy
-      const reactions = await loadReactions(announcementId);
-      const userReacted = reactions[emoji]?.userReacted || false;
-      const currentCount = reactions[emoji]?.count || 0;
+      // Store original state for rollback (if button exists)
+      let wasActive = false;
+      let originalText = '';
+      let originalCount = 0;
+      if (btn) {
+        wasActive = btn.classList.contains('active');
+        originalText = btn.textContent;
+        originalCount = parseInt(originalText.match(/\d+/)?.[0]) || 0;
+      }
 
-      // Use SERVER state, not UI state
-      if (userReacted) {
-        // Delete reaction
-        const newCount = currentCount - 1;
+      console.log('toggleReaction:', { emoji, announcementId, buttonExists: !!btn, wasActive });
+
+      // OPTIMISTIC UPDATE: Update UI immediately if button exists
+      if (wasActive && btn) {
+        // Remove reaction
+        const newCount = Math.max(0, originalCount - 1);
         btn.textContent = newCount > 0 ? `${emoji} ${newCount}` : emoji;
         btn.classList.remove('active');
 
+        // Send delete in background (no await)
         api.delete(`/api/announcements/${announcementId}/reactions?emoji=${emoji}&userId=${currentUser.id}&userType=${userType}`)
           .then(res => {
             if (!res.ok) throw new Error('Failed to remove reaction');
-            // Refresh to get real state
-            return loadReactions(announcementId);
-          })
-          .then(updatedReactions => {
-            const newCount = updatedReactions[emoji]?.count || 0;
-            btn.textContent = newCount > 0 ? `${emoji} ${newCount}` : emoji;
-            btn.classList.remove('active');
+            console.log('Reaction deleted successfully');
           })
           .catch(error => {
             console.error('Error removing reaction:', error);
-            // Revert UI: restore from server state
-            btn.textContent = currentCount > 0 ? `${emoji} ${currentCount}` : emoji;
+            // Rollback on error
+            btn.textContent = originalText;
             btn.classList.add('active');
             showMessage('Failed to remove reaction', 'error');
           });
       } else {
         // Add reaction
-        const newCount = currentCount + 1;
-        btn.textContent = `${emoji} ${newCount}`;
-        btn.classList.add('active');
+        if (btn) {
+          const newCount = originalCount + 1;
+          btn.textContent = `${emoji} ${newCount}`;
+          btn.classList.add('active');
+        }
 
+        console.log('Sending POST request:', { announcementId, emoji, userId: currentUser.id, userType });
+
+        // Send post in background (no await)
         api.post(`/api/announcements/${announcementId}/reactions`, {
           emoji,
           userId: currentUser.id,
           userType: userType
         })
           .then(res => {
-            if (!res.ok) throw new Error('Failed to add reaction');
-            // Refresh to get real state
-            return loadReactions(announcementId);
+            console.log('POST response status:', res.status);
+            if (!res.ok) {
+              return res.json().then(data => {
+                if (data.error && data.error.includes('already exists')) {
+                  console.log('Reaction already exists, treating as success');
+                  return { success: true };
+                }
+                throw new Error('Failed to add reaction: ' + data.error);
+              });
+            }
+            return res.json();
           })
-          .then(updatedReactions => {
-            const newCount = updatedReactions[emoji]?.count || 0;
-            btn.textContent = newCount > 0 ? `${emoji} ${newCount}` : emoji;
-            btn.classList.add('active');
+          .then(() => {
+            console.log('Reaction added successfully');
           })
           .catch(error => {
             console.error('Error adding reaction:', error);
-            // Revert UI: restore from server state
-            btn.textContent = currentCount > 0 ? `${emoji} ${currentCount}` : emoji;
-            btn.classList.remove('active');
+            // Rollback on error if button exists
+            if (btn) {
+              btn.textContent = originalText;
+              btn.classList.remove('active');
+            }
             showMessage('Failed to add reaction', 'error');
           });
       }

@@ -2407,6 +2407,320 @@ app.get('/api/stats/team', async (req, res) => {
   }
 });
 
+// ==================== POLLS ENDPOINTS ====================
+
+// Get all polls for a coach
+app.get('/api/polls', async (req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
+    const { coachId } = req.query;
+    if (!coachId) return res.status(400).json({ error: 'coachId is required' });
+
+    const ownerCoachIds = await getOwnerCoachIds(coachId);
+    const { data: polls, error: pollsError } = await supabase
+      .from('polls')
+      .select('*')
+      .in('coach_id', ownerCoachIds)
+      .order('created_at', { ascending: false });
+
+    if (pollsError) throw pollsError;
+
+    // Fetch poll options for each poll
+    const pollIds = (polls || []).map(p => p.id);
+    let allOptions = [];
+    if (pollIds.length > 0) {
+      const { data: options, error: optionsError } = await supabase
+        .from('poll_options')
+        .select('*')
+        .in('poll_id', pollIds)
+        .order('display_order');
+      if (optionsError) throw optionsError;
+      allOptions = options || [];
+    }
+
+    // Organize options by poll_id
+    const optionsByPollId = {};
+    allOptions.forEach(opt => {
+      if (!optionsByPollId[opt.poll_id]) {
+        optionsByPollId[opt.poll_id] = [];
+      }
+      optionsByPollId[opt.poll_id].push(opt);
+    });
+
+    // Attach options to each poll
+    const pollsWithOptions = (polls || []).map(poll => ({
+      ...poll,
+      poll_options: optionsByPollId[poll.id] || []
+    }));
+
+    res.json(pollsWithOptions);
+  } catch (error) {
+    console.error('Get polls error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Create a new poll
+app.post('/api/polls', async (req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
+    const { coachId, ownerCoachId, title, description, type, options } = req.body;
+
+    if (!coachId || !title || !options || options.length < 2) {
+      return res.status(400).json({ error: 'coachId, title, and at least 2 options are required' });
+    }
+
+    const targetCoachId = ownerCoachId || coachId;
+    if (!(await canEditTeam(coachId, targetCoachId))) {
+      return res.status(403).json({ error: 'Edit access denied' });
+    }
+
+    // Create poll
+    const { data: poll, error: pollError } = await supabase
+      .from('polls')
+      .insert([{
+        coach_id: targetCoachId,
+        title,
+        description: description || null,
+        type: type || 'single'
+      }])
+      .select()
+      .single();
+
+    if (pollError) throw pollError;
+
+    // Create poll options
+    const optionPayload = options.map((text, index) => ({
+      poll_id: poll.id,
+      text,
+      display_order: index
+    }));
+
+    const { data: createdOptions, error: optionsError } = await supabase
+      .from('poll_options')
+      .insert(optionPayload)
+      .select();
+
+    if (optionsError) throw optionsError;
+
+    res.json({
+      ...poll,
+      poll_options: createdOptions || []
+    });
+  } catch (error) {
+    console.error('Create poll error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Get poll results (vote counts per option)
+app.get('/api/polls/:id/results', async (req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
+    const { id } = req.params;
+
+    // Get all options for this poll
+    const { data: options, error: optionsError } = await supabase
+      .from('poll_options')
+      .select('id')
+      .eq('poll_id', id);
+
+    if (optionsError) throw optionsError;
+
+    const optionIds = (options || []).map(o => o.id);
+    
+    // Get vote counts for each option
+    const results = {};
+    for (const optionId of optionIds) {
+      const { count, error: countError } = await supabase
+        .from('poll_votes')
+        .select('*', { count: 'exact', head: true })
+        .eq('option_id', optionId);
+
+      if (!countError) {
+        results[optionId] = count || 0;
+      }
+    }
+
+    res.json(results);
+  } catch (error) {
+    console.error('Get poll results error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Get user's vote on a specific poll
+app.get('/api/polls/:id/user-vote', async (req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
+    const { id } = req.params;
+    const { userId } = req.query;
+
+    if (!userId) return res.status(400).json({ error: 'userId is required' });
+
+    // Get options for this poll
+    const { data: options, error: optionsError } = await supabase
+      .from('poll_options')
+      .select('id')
+      .eq('poll_id', id);
+
+    if (optionsError) throw optionsError;
+
+    const optionIds = (options || []).map(o => o.id);
+
+    // Check if user voted on any option
+    const { data: vote, error: voteError } = await supabase
+      .from('poll_votes')
+      .select('*')
+      .in('option_id', optionIds)
+      .eq('user_id', userId)
+      .single();
+
+    if (voteError && voteError.code !== 'PGRST116') {
+      throw voteError;
+    }
+
+    if (vote) {
+      res.json(vote);
+    } else {
+      res.json(null);
+    }
+  } catch (error) {
+    console.error('Get user vote error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Vote on a poll option
+app.post('/api/polls/:id/vote', async (req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
+    const { id } = req.params;
+    const { optionId, userId, userType } = req.body;
+
+    if (!optionId || !userId) {
+      return res.status(400).json({ error: 'optionId and userId are required' });
+    }
+
+    // Check if user already voted on this poll
+    const { data: option } = await supabase
+      .from('poll_options')
+      .select('poll_id')
+      .eq('id', optionId)
+      .single();
+
+    if (!option) {
+      return res.status(404).json({ error: 'Option not found' });
+    }
+
+    // Get all options for this poll
+    const { data: pollOptions } = await supabase
+      .from('poll_options')
+      .select('id')
+      .eq('poll_id', option.poll_id);
+
+    const optionIds = (pollOptions || []).map(o => o.id);
+
+    // Check existing vote
+    const { data: existingVote } = await supabase
+      .from('poll_votes')
+      .select('*')
+      .in('option_id', optionIds)
+      .eq('user_id', userId)
+      .single();
+
+    // If user already voted, update it
+    if (existingVote) {
+      const { data, error } = await supabase
+        .from('poll_votes')
+        .update({
+          option_id: optionId,
+          user_type: userType || 'coach'
+        })
+        .eq('id', existingVote.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return res.json(data);
+    }
+
+    // Create new vote
+    const { data, error } = await supabase
+      .from('poll_votes')
+      .insert([{
+        poll_id: option.poll_id,
+        option_id: optionId,
+        user_id: userId,
+        user_type: userType || 'coach'
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Vote poll error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Delete a poll
+app.delete('/api/polls/:id', async (req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
+    const { id } = req.params;
+    const { coachId } = req.query;
+
+    if (!coachId) return res.status(400).json({ error: 'coachId is required' });
+
+    // Verify poll ownership
+    const { data: poll } = await supabase
+      .from('polls')
+      .select('coach_id')
+      .eq('id', id)
+      .single();
+
+    if (!poll) return res.status(404).json({ error: 'Poll not found' });
+
+    if (!(await canEditTeam(coachId, poll.coach_id))) {
+      return res.status(403).json({ error: 'Delete access denied' });
+    }
+
+    // Delete poll votes first
+    const { data: options } = await supabase
+      .from('poll_options')
+      .select('id')
+      .eq('poll_id', id);
+
+    const optionIds = (options || []).map(o => o.id);
+    if (optionIds.length > 0) {
+      await supabase
+        .from('poll_votes')
+        .delete()
+        .in('option_id', optionIds);
+    }
+
+    // Delete poll options
+    await supabase
+      .from('poll_options')
+      .delete()
+      .eq('poll_id', id);
+
+    // Delete poll
+    const { error } = await supabase
+      .from('polls')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete poll error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // ==================== START SERVER ====================
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🎳 Strike Master API running on port ${PORT}`);

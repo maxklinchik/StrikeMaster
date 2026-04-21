@@ -91,6 +91,14 @@ const TEAMS_CONFIG = {
     accentColor: '#7f1519', // Dark Red
     mainColor: '#231f20'    // Black
   },
+  // Eastern Christian High School - Dark Blue and Gold
+  'dwight morrow': {
+    name: 'Eastern Christian High School',
+    shortName: 'Eastern Christian',
+    logo: 'ecLogo.png',
+    accentColor: '#081D4B', // Dark Blue
+    mainColor: '#F1B855'    // Gold
+  },
   // Fair Lawn High School - Red and White
   'fair lawn': {
     name: 'Fair Lawn High School',

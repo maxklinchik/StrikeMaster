@@ -804,25 +804,52 @@
     }
 
     async function toggleReaction(announcementId, emoji) {
-      try {
-        const reactions = await loadReactions(announcementId);
-        const hasReacted = reactions[emoji]?.users.includes(currentUser.id);
-        
-        if (hasReacted) {
-          const res = await api.delete(`/api/announcements/${announcementId}/reactions?emoji=${emoji}&userId=${currentUser.id}&userType=${userType}`);
-          if (!res.ok) throw new Error('Failed to remove reaction');
-        } else {
-          const res = await api.post(`/api/announcements/${announcementId}/reactions`, {
-            emoji,
-            userId: currentUser.id,
-            userType: userType
+      // Find the clicked button
+      const buttons = document.querySelectorAll(`.reaction-btn[onclick*="toggleReaction('${announcementId}', '${emoji}')"]`);
+      const btn = buttons[0];
+      if (!btn) return;
+
+      // Optimistically update the UI immediately (no await)
+      const wasActive = btn.classList.contains('active');
+      btn.classList.toggle('active');
+      
+      // Extract current count from button text
+      const currentText = btn.textContent.trim();
+      const currentCount = parseInt(currentText.split(' ')[1]) || 0;
+      const newCount = wasActive ? currentCount - 1 : currentCount + 1;
+      btn.textContent = newCount > 0 ? `${emoji} ${newCount}` : emoji;
+
+      // Post to backend in the background (fire and forget with error handling)
+      if (wasActive) {
+        // Delete reaction
+        api.delete(`/api/announcements/${announcementId}/reactions?emoji=${emoji}&userId=${currentUser.id}&userType=${userType}`)
+          .then(res => {
+            if (!res.ok) throw new Error('Failed to remove reaction');
+          })
+          .catch(error => {
+            console.error('Error removing reaction:', error);
+            // Revert UI on error
+            btn.classList.add('active');
+            btn.textContent = `${emoji} ${currentCount}`;
+            showMessage('Failed to remove reaction', 'error');
           });
-          if (!res.ok) throw new Error('Failed to add reaction');
-        }
-        loadAnnouncements();
-      } catch (error) {
-        console.error('Error toggling reaction:', error);
-        showMessage('Failed to update reaction', 'error');
+      } else {
+        // Add reaction
+        api.post(`/api/announcements/${announcementId}/reactions`, {
+          emoji,
+          userId: currentUser.id,
+          userType: userType
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Failed to add reaction');
+          })
+          .catch(error => {
+            console.error('Error adding reaction:', error);
+            // Revert UI on error
+            btn.classList.remove('active');
+            btn.textContent = newCount > 1 ? `${emoji} ${currentCount}` : emoji;
+            showMessage('Failed to add reaction', 'error');
+          });
       }
     }
 

@@ -1301,11 +1301,15 @@
         totalSeries.push(total);
         avgSeries.push(Number(avg.toFixed(1)));
 
-        // Separate by gender
+        // Separate by gender - use null for non-matching genders
         if (match.gender === 'boys') {
           boysTotalSeries.push(total);
           boysAvgSeries.push(Number(avg.toFixed(1)));
+          girlsTotalSeries.push(null);
+          girlsAvgSeries.push(null);
         } else if (match.gender === 'girls') {
+          boysTotalSeries.push(null);
+          boysAvgSeries.push(null);
           girlsTotalSeries.push(total);
           girlsAvgSeries.push(Number(avg.toFixed(1)));
         }
@@ -1337,8 +1341,8 @@
           {
             label: 'Boys Match Total',
             data: boysTotalSeries,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.15)',
+            borderColor: '#1e40af',
+            backgroundColor: 'rgba(30, 64, 175, 0.15)',
             tension: 0.25,
             fill: true,
             pointRadius: 3
@@ -1346,8 +1350,8 @@
           {
             label: 'Girls Match Total',
             data: girlsTotalSeries,
-            borderColor: '#ec4899',
-            backgroundColor: 'rgba(236, 72, 153, 0.15)',
+            borderColor: '#dc2626',
+            backgroundColor: 'rgba(220, 38, 38, 0.15)',
             tension: 0.25,
             fill: true,
             pointRadius: 3
@@ -1355,8 +1359,8 @@
           {
             label: 'Boys Avg per Player',
             data: boysAvgSeries,
-            borderColor: '#0ea5e9',
-            backgroundColor: 'rgba(14, 165, 233, 0.15)',
+            borderColor: '#7c3aed',
+            backgroundColor: 'rgba(124, 58, 237, 0.15)',
             tension: 0.25,
             fill: true,
             pointRadius: 3
@@ -1364,8 +1368,8 @@
           {
             label: 'Girls Avg per Player',
             data: girlsAvgSeries,
-            borderColor: '#f43f5e',
-            backgroundColor: 'rgba(244, 63, 94, 0.15)',
+            borderColor: '#ea580c',
+            backgroundColor: 'rgba(234, 88, 12, 0.15)',
             tension: 0.25,
             fill: true,
             pointRadius: 3

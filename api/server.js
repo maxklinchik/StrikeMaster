@@ -910,22 +910,22 @@ app.post('/api/announcements/:id/reactions', async (req, res) => {
   try {
     if (!supabase) return res.status(500).json({ error: 'Database not configured' });
     const { id } = req.params;
-    const { emoji, userId, userType } = req.body;
+    let { emoji, userId, userType } = req.body;
 
     if (!id || !emoji || !userId) {
       return res.status(400).json({ error: 'announcement_id, emoji, and userId are required' });
     }
 
-    // Verify auth if token is provided (coaches have tokens, students don't)
+    // If a valid auth token is provided (coaches), use the authenticated user ID
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
-      // If token is provided, verify it matches the userId
       const authenticatedUserId = await getAuthenticatedUserId(req);
-      if (!authenticatedUserId || authenticatedUserId !== userId) {
-        return res.status(403).json({ error: 'Unauthorized: can only add reactions for your own account' });
+      if (authenticatedUserId) {
+        // Use the authenticated user ID (overrides frontend userId)
+        userId = authenticatedUserId;
       }
     }
-    // If no token, allow request (student accounts don't have tokens)
+    // Otherwise use the userId from the request (students without auth tokens)
 
     // Check if reaction already exists
     const { data: existing } = await supabase
@@ -964,22 +964,22 @@ app.delete('/api/announcements/:id/reactions', async (req, res) => {
   try {
     if (!supabase) return res.status(500).json({ error: 'Database not configured' });
     const { id } = req.params;
-    const { emoji, userId, userType } = req.query;
+    let { emoji, userId, userType } = req.query;
 
     if (!id || !emoji || !userId) {
       return res.status(400).json({ error: 'announcement_id, emoji, and userId are required' });
     }
 
-    // Verify auth if token is provided (coaches have tokens, students don't)
+    // If a valid auth token is provided (coaches), use the authenticated user ID
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
-      // If token is provided, verify it matches the userId
       const authenticatedUserId = await getAuthenticatedUserId(req);
-      if (!authenticatedUserId || authenticatedUserId !== userId) {
-        return res.status(403).json({ error: 'Unauthorized: can only remove your own reactions' });
+      if (authenticatedUserId) {
+        // Use the authenticated user ID (overrides frontend userId)
+        userId = authenticatedUserId;
       }
     }
-    // If no token, allow request (student accounts don't have tokens)
+    // Otherwise use the userId from the request (students without auth tokens)
 
     const { error } = await supabase
       .from('announcement_reactions')

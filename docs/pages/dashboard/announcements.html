@@ -228,32 +228,8 @@
 
     .reaction-btn:hover {
       background: var(--accent-color);
-    }
-
-    .custom-emoji-input {
-      background: var(--content-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 6px 8px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: all 0.2s;
-      width: 40px;
-      height: auto;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .custom-emoji-input:hover {
-      background: color-mix(in srgb, var(--accent-color) 20%, transparent);
+      color: var(--accent-text-color, white);
       border-color: var(--accent-color);
-    }
-
-    .custom-emoji-input::placeholder {
-      color: var(--text-muted);
-      opacity: 0.5;
     }
 
     .reaction-btn.active {
@@ -291,6 +267,7 @@
     .content-tabs {
       display: flex;
       gap: 10px;
+      padding-bottom: 12px;
       margin-bottom: 20px;
       border-bottom: 2px solid var(--border-color);
     }
@@ -497,6 +474,62 @@
       background: var(--accent-color);
       color: var(--accent-text-color, white);
     }
+
+    .emoji-picker-btn {
+      background: var(--content-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+      font-family: inherit;
+      position: relative;
+    }
+
+    .emoji-picker-btn:hover {
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border-color: var(--accent-color);
+    }
+
+    .emoji-picker-menu {
+      position: absolute;
+      bottom: 40px;
+      left: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      display: none;
+      z-index: 1000;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .emoji-picker-menu.active {
+      display: grid;
+    }
+
+    .emoji-option {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: var(--content-bg);
+    }
+
+    .emoji-option:hover {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+    }
   </style>
 </head>
 <body class="dashboard">
@@ -510,7 +543,6 @@
       <a href="home.html">Home</a>
       <a href="players.html">Players</a>
       <a href="myTeam.html">My Team</a>
-      <a href="rankings.html">Rankings</a>
       <a href="announcements.html" class="active">Announcements</a>
       <a href="../settings/appearanceSettings.html">Settings</a>
     </div>
@@ -602,8 +634,11 @@
     }
 
     const currentUser = auth.getUser();
+    const userType = auth.isStudent() ? 'student' : 'coach';
     let activeOwnerCoachId = currentUser?.id;
-    let canEditTeam = true;
+    let canEditTeam = auth.isCoach();
+    const REACTION_EMOJIS = ['👍', '👎', '😂'];
+    const ALL_EMOJIS = ['👍', '👎', '😂', '❤️', '😮', '😢', '🔥', '😍', '🤔', '👏', '🎉', '✨'];
 
     // Load team logo based on user's school affiliation
     function loadTeamLogo() {
@@ -707,12 +742,11 @@
             month: 'short', day: 'numeric', year: 'numeric' 
           });
           
-          const deleteBtn = item.coach_id === activeOwnerCoachId && canEditTeam 
+          const deleteBtn = userType === 'coach' && item.coach_id === activeOwnerCoachId && canEditTeam 
             ? `<button class="delete-btn" onclick="deleteAnnouncement('${item.id}')">Delete</button>`
             : '';
           
-          const allReactions = Object.keys(reactions).sort();
-          const reactionBtns = allReactions.map(emoji => {
+          const reactionBtns = REACTION_EMOJIS.map(emoji => {
             const count = reactions[emoji]?.count || 0;
             const hasReacted = userReactions.includes(emoji);
             return `
@@ -723,15 +757,10 @@
               </button>
             `;
           }).join('');
-          
-          const customEmojiInput = `
-            <input type="text" 
-                   class="custom-emoji-input" 
-                   placeholder="+" 
-                   maxlength="2"
-                   onkeydown="if(event.key==='Enter') addCustomReaction('${item.id}', this)" 
-                   title="Add custom emoji reaction">
-          `;
+
+          const emojiPickerMenu = ALL_EMOJIS.map(emoji => {
+            return `<div class="emoji-option" onclick="toggleReaction('${item.id}', '${emoji}')" title="React with ${emoji}">${emoji}</div>`;
+          }).join('');
           
           return `
             <div class="announcement-item">
@@ -746,7 +775,12 @@
               <div class="announcement-actions">
                 <div class="reaction-container">
                   ${reactionBtns}
-                  ${customEmojiInput}
+                  <div style="position: relative;">
+                    <button class="emoji-picker-btn" onclick="toggleEmojiPicker(event)">➕</button>
+                    <div class="emoji-picker-menu">
+                      ${emojiPickerMenu}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -769,27 +803,19 @@
       }
     }
 
-    async function addCustomReaction(announcementId, inputElement) {
-      const emoji = inputElement.value.trim();
-      if (!emoji) return;
-      
-      inputElement.value = '';
-      await toggleReaction(announcementId, emoji);
-    }
-
     async function toggleReaction(announcementId, emoji) {
       try {
         const reactions = await loadReactions(announcementId);
         const hasReacted = reactions[emoji]?.users.includes(currentUser.id);
         
         if (hasReacted) {
-          const res = await api.delete(`/api/announcements/${announcementId}/reactions?emoji=${encodeURIComponent(emoji)}&userId=${currentUser.id}`);
+          const res = await api.delete(`/api/announcements/${announcementId}/reactions?emoji=${emoji}&userId=${currentUser.id}&userType=${userType}`);
           if (!res.ok) throw new Error('Failed to remove reaction');
         } else {
           const res = await api.post(`/api/announcements/${announcementId}/reactions`, {
             emoji,
             userId: currentUser.id,
-            userType: 'coach'
+            userType: userType
           });
           if (!res.ok) throw new Error('Failed to add reaction');
         }
@@ -801,6 +827,10 @@
     }
 
     async function deleteAnnouncement(announcementId) {
+      if (auth.isStudent()) {
+        showMessage('Students cannot delete announcements', 'error');
+        return;
+      }
       if (!confirm('Are you sure you want to delete this announcement?')) return;
       try {
         const res = await api.delete(`/api/announcements/${announcementId}?coachId=${currentUser.id}`);
@@ -857,7 +887,7 @@
           const userVote = await getUserVote(poll.id);
           const totalVotes = Object.values(results).reduce((a, b) => a + b, 0);
 
-          const deleteBtn = poll.coach_id === activeOwnerCoachId && canEditTeam
+          const deleteBtn = userType === 'coach' && poll.coach_id === activeOwnerCoachId && canEditTeam
             ? `<button class="delete-btn" onclick="deletePoll('${poll.id}')">Delete Poll</button>`
             : '';
 
@@ -932,7 +962,7 @@
         const res = await api.post(`/api/polls/${pollId}/vote`, {
           optionId,
           userId: currentUser.id,
-          userType: 'coach'
+          userType: userType
         });
         if (!res.ok) throw new Error('Failed to vote');
         loadPolls();
@@ -943,6 +973,10 @@
     }
 
     async function deletePoll(pollId) {
+      if (auth.isStudent()) {
+        showMessage('Students cannot delete polls', 'error');
+        return;
+      }
       if (!confirm('Are you sure you want to delete this poll?')) return;
       try {
         const res = await api.delete(`/api/polls/${pollId}?coachId=${currentUser.id}`);
@@ -961,6 +995,23 @@
       msg.className = `message ${type}`;
       setTimeout(() => { msg.className = 'message'; }, 4000);
     }
+
+    function toggleEmojiPicker(event) {
+      event.stopPropagation();
+      const menu = event.target.nextElementSibling;
+      // Close all other menus
+      document.querySelectorAll('.emoji-picker-menu.active').forEach(m => {
+        if (m !== menu) m.classList.remove('active');
+      });
+      menu.classList.toggle('active');
+    }
+
+    // Close emoji picker when clicking outside
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.emoji-picker-menu.active').forEach(m => {
+        m.classList.remove('active');
+      });
+    });
 
     document.getElementById('postAnnouncementBtn').addEventListener('click', async () => {
       const title = document.getElementById('announcementTitle').value.trim();
@@ -1041,6 +1092,16 @@
     loadOwnerTeams().then(() => {
       loadAnnouncements();
     });
+
+    // Hide form cards for students
+    if (userType !== 'coach') {
+      document.getElementById('announcementFormCard').style.display = 'none';
+      document.getElementById('pollFormCard').style.display = 'none';
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => {
+        if (btn.dataset.tab === 'polls') btn.style.display = 'none'; // Hide polls tab for students if desired
+      });
+    }
   </script>
 </body>
 </html>

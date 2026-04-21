@@ -840,6 +840,108 @@ app.post('/api/announcements', async (req, res) => {
   }
 });
 
+// Get reactions for an announcement
+app.get('/api/announcements/:id/reactions', async (req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'Announcement ID is required' });
+
+    const { data, error } = await supabase
+      .from('announcement_reactions')
+      .select('emoji, user_id')
+      .eq('announcement_id', id);
+
+    if (error) throw error;
+
+    // Group reactions by emoji and count
+    const reactions = {};
+    if (data) {
+      for (const reaction of data) {
+        if (!reactions[reaction.emoji]) {
+          reactions[reaction.emoji] = { count: 0, users: [] };
+        }
+        reactions[reaction.emoji].count++;
+        reactions[reaction.emoji].users.push(reaction.user_id);
+      }
+    }
+
+    res.json(reactions);
+  } catch (error) {
+    console.error('Reactions fetch error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Add a reaction to an announcement
+app.post('/api/announcements/:id/reactions', async (req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
+    const { id } = req.params;
+    const { emoji, userId, userType } = req.body;
+
+    if (!id || !emoji || !userId) {
+      return res.status(400).json({ error: 'announcement_id, emoji, and userId are required' });
+    }
+
+    // Check if reaction already exists
+    const { data: existing } = await supabase
+      .from('announcement_reactions')
+      .select('id')
+      .eq('announcement_id', id)
+      .eq('emoji', emoji)
+      .eq('user_id', userId)
+      .single();
+
+    if (existing) {
+      return res.status(400).json({ error: 'Reaction already exists' });
+    }
+
+    const { data, error } = await supabase
+      .from('announcement_reactions')
+      .insert([{
+        announcement_id: id,
+        emoji,
+        user_id: userId,
+        user_type: userType || 'coach'
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Reaction create error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Remove a reaction from an announcement
+app.delete('/api/announcements/:id/reactions', async (req, res) => {
+  try {
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
+    const { id } = req.params;
+    const { emoji, userId, userType } = req.query;
+
+    if (!id || !emoji || !userId) {
+      return res.status(400).json({ error: 'announcement_id, emoji, and userId are required' });
+    }
+
+    const { error } = await supabase
+      .from('announcement_reactions')
+      .delete()
+      .eq('announcement_id', id)
+      .eq('emoji', emoji)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Reaction delete error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // Link Google Account to existing user
 app.post('/api/auth/link-google', async (req, res) => {
   try {

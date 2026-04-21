@@ -139,7 +139,18 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    database: supabase ? 'connected' : 'not configured'
+    database: supabase ? 'connected' : 'not configured',
+    features: {
+      announcementReactions: true
+    },
+    railway: {
+      gitCommit:
+        process.env.RAILWAY_GIT_COMMIT_SHA ||
+        process.env.RAILWAY_GIT_COMMIT ||
+        process.env.GIT_COMMIT ||
+        process.env.COMMIT_SHA ||
+        null
+    }
   });
 });
 

@@ -453,6 +453,93 @@
       font-weight: 600;
     }
 
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 2px solid var(--accent-color);
+      padding: 20px;
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      color: var(--accent-color);
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn-secondary {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--content-bg);
+    }
+
     .player-form {
       background: var(--card-bg);
       border: 2px solid var(--accent-color);
@@ -510,6 +597,16 @@
       color: var(--accent-text-color, white);
       border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.18));
       box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+      filter: brightness(0.95);
     }
 
     .btn-cancel {
@@ -517,6 +614,25 @@
       color: #333;
       border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.25));
       box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
+    }
+
+    .add-btn {
+      padding: 12px 24px;
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: 2px solid var(--button-border-color, rgba(0, 0, 0, 0.18));
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      height: fit-content;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0 var(--button-shadow-color, rgba(0, 0, 0, 0.15));
+    }
+
+    .add-btn:hover {
+      filter: brightness(0.95);
     }
 
     .players-list {
@@ -528,32 +644,73 @@
 
     .player-item {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 15px 20px;
-      border-bottom: 1px solid #eee;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
     .player-item:last-child {
       border-bottom: none;
     }
 
+    .player-item:hover {
+      background: var(--content-bg);
+    }
+
+    .player-item.selected {
+      background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+      border-left: 3px solid var(--accent-color);
+    }
+
     .player-info h4 {
-      margin: 0 0 5px 0;
-      color: var(--text-color);
+      margin: 0 0 4px 0;
+      font-size: 15px;
+      font-weight: 600;
     }
 
     .player-info span {
-      font-size: 14px;
-      color: #666;
+      font-size: 13px;
+      color: var(--text-muted);
     }
 
-    .player-actions button {
-      background: transparent;
-      border: none;
+    .player-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .edit-btn {
+      padding: 8px 16px;
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: 1px solid var(--accent-color);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
-      font-size: 18px;
-      padding: 5px 10px;
+      transition: all 0.2s;
+    }
+
+    .edit-btn:hover {
+      filter: brightness(0.95);
+    }
+
+    .remove-btn {
+      padding: 8px 16px;
+      background: transparent;
+      color: #ef4444;
+      border: 1px solid #ef4444;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .remove-btn:hover {
+      background: #fef2f2;
     }
 
     .no-players {
@@ -772,6 +929,24 @@
       outline: none;
       border-color: var(--border-color);
     }
+
+    /* When accent is white, make modal title use main color */
+    html.accent-is-white .modal-content h3 {
+      color: var(--main-color);
+    }
+
+    html.accent-is-white[data-theme="dark"] .modal-content h3 {
+      color: white;
+    }
+
+    /* When accent is white, change modal border color */
+    html.accent-is-white[data-theme="dark"] .modal-content {
+      border-color: #555555;
+    }
+
+    html.accent-is-white[data-theme="light"] .modal-content {
+      border-color: #cccccc;
+    }
   </style>
 </head>
 <body class="dashboard">
@@ -897,42 +1072,44 @@
           <button class="add-player-btn" id="addPlayerBtn">+ Add Player</button>
         </div>
 
-        <div class="player-form" id="playerForm">
-          <h3>Add New Player</h3>
-          <div class="form-grid">
-            <div>
-              <label>First Name *</label>
-              <input type="text" id="firstName" required>
-            </div>
-            <div>
-              <label>Last Name *</label>
-              <input type="text" id="lastName" required>
-            </div>
-            <div>
-              <label>Graduation Year *</label>
-              <select id="gradYear" required>
-                <option value="">Select Year</option>
-                <option value="2025">2025</option>
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-                <option value="2028">2028</option>
-                <option value="2029">2029</option>
-              </select>
-            </div>
-            <div>
-              <label>Email (optional)</label>
-              <input type="email" id="playerEmail" placeholder="student@email.com">
-            </div>
-          </div>
-          <div class="form-actions">
-            <button class="btn-cancel" id="cancelBtn">Cancel</button>
-            <button class="btn-save" id="savePlayerBtn">Add Player</button>
-          </div>
-        </div>
-
         <div class="players-list" id="playersList">
           <div class="no-players">Loading players...</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="playerModal">
+    <div class="modal-content">
+      <h3 id="playerModalTitle">Add New Player</h3>
+      <div class="modal-grid">
+        <div class="form-group">
+          <label>First Name *</label>
+          <input type="text" id="firstName" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name *</label>
+          <input type="text" id="lastName" required>
+        </div>
+        <div class="form-group">
+          <label>Graduation Year *</label>
+          <select id="gradYear" required>
+            <option value="">Select Year</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Email (optional)</label>
+          <input type="email" id="playerEmail" placeholder="student@email.com">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="cancelBtn">Cancel</button>
+        <button class="btn-save" id="savePlayerBtn">Add Player</button>
       </div>
     </div>
   </div>
@@ -1594,14 +1771,14 @@
       document.getElementById('lastName').value = player.last_name || '';
       document.getElementById('gradYear').value = player.grad_year || '';
       document.getElementById('playerEmail').value = player.email || '';
-      document.querySelector('#playerForm h3').textContent = 'Edit Player';
+      document.getElementById('playerModalTitle').textContent = 'Edit Player';
       document.getElementById('savePlayerBtn').textContent = 'Save Changes';
-      document.getElementById('playerForm').classList.add('active');
+      document.getElementById('playerModal').classList.add('active');
     }
 
     function resetPlayerForm() {
       editingPlayerId = null;
-      document.querySelector('#playerForm h3').textContent = 'Add New Player';
+      document.getElementById('playerModalTitle').textContent = 'Add New Player';
       document.getElementById('savePlayerBtn').textContent = 'Add Player';
       document.getElementById('firstName').value = '';
       document.getElementById('lastName').value = '';
@@ -1625,8 +1802,8 @@
             '<span>Class of ' + (player.grad_year || 'N/A') + (player.email ? ' • ' + player.email : '') + '</span>' +
           '</div>' +
           '<div class="player-actions">' +
-            '<button onclick="startEditPlayer(\'' + player.id + '\')" title="Edit">Edit</button>' +
-            '<button onclick="removePlayer(\'' + player.id + '\')" title="Remove">Remove</button>' +
+            '<button class="edit-btn" onclick="startEditPlayer(\'' + player.id + '\')" title="Edit">Edit</button>' +
+            '<button class="remove-btn" onclick="removePlayer(\'' + player.id + '\')" title="Remove">Remove</button>' +
           '</div>' +
         '</div>'
       ).join('');
@@ -1680,7 +1857,7 @@
 
         const data = await res.json();
 
-        document.getElementById('playerForm').classList.remove('active');
+        document.getElementById('playerModal').classList.remove('active');
         if (!editingPlayerId && data.emailStatus && !data.emailStatus.sent && email) {
           showMessage(`${firstName} ${lastName} added, but email not sent: ${data.emailStatus.error || 'unknown error'}`, 'error');
         } else {
@@ -1789,15 +1966,23 @@
       setTimeout(() => { msg.className = 'message'; }, 4000);
     }
 
-    // Toggle form
+    // Toggle modal
     document.getElementById('addPlayerBtn').addEventListener('click', () => {
       resetPlayerForm();
-      document.getElementById('playerForm').classList.toggle('active');
+      document.getElementById('playerModalTitle').textContent = 'Add New Player';
+      document.getElementById('playerModal').classList.add('active');
     });
 
     document.getElementById('cancelBtn').addEventListener('click', () => {
-      document.getElementById('playerForm').classList.remove('active');
+      document.getElementById('playerModal').classList.remove('active');
       resetPlayerForm();
+    });
+
+    document.getElementById('playerModal').addEventListener('click', (event) => {
+      if (event.target.id === 'playerModal') {
+        document.getElementById('playerModal').classList.remove('active');
+        resetPlayerForm();
+      }
     });
 
     document.getElementById('savePlayerBtn').addEventListener('click', addPlayer);

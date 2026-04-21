@@ -744,10 +744,10 @@
             if (!btn) continue;
 
             const count = reactions[emoji]?.count || 0;
-            const hasReacted = reactions[emoji]?.users.includes(currentUser.id) || false;
+            const userReacted = reactions[emoji]?.userReacted || false;
 
             // Update button state
-            if (hasReacted) {
+            if (userReacted) {
               btn.classList.add('active');
             } else {
               btn.classList.remove('active');
@@ -782,9 +782,6 @@
         }
         list.innerHTML = await Promise.all(data.map(async item => {
           const reactions = await loadReactions(item.id);
-          const userReactions = Object.keys(reactions).filter(emoji => 
-            reactions[emoji].users.includes(currentUser.id)
-          );
           
           const date = new Date(item.created_at).toLocaleDateString('en-US', { 
             month: 'short', day: 'numeric', year: 'numeric' 
@@ -796,9 +793,9 @@
           
           const reactionBtns = REACTION_EMOJIS.map(emoji => {
             const count = reactions[emoji]?.count || 0;
-            const hasReacted = userReactions.includes(emoji);
+            const userReacted = reactions[emoji]?.userReacted || false;
             return `
-              <button class="reaction-btn ${hasReacted ? 'active' : ''}" 
+              <button class="reaction-btn ${userReacted ? 'active' : ''}" 
                       onclick="toggleReaction('${item.id}', '${emoji}')"
                       title="React with ${emoji}">
                 ${emoji} ${count > 0 ? count : ''}
@@ -845,7 +842,7 @@
 
     async function loadReactions(announcementId) {
       try {
-        const res = await api.get(`/api/announcements/${announcementId}/reactions`);
+        const res = await api.get(`/api/announcements/${announcementId}/reactions?userId=${currentUser.id}`);
         if (!res.ok) return {};
         return await res.json();
       } catch (error) {
@@ -862,11 +859,11 @@
 
       // Get actual reaction state from server first to ensure accuracy
       const reactions = await loadReactions(announcementId);
-      const hasReacted = reactions[emoji]?.users.includes(currentUser.id) || false;
+      const userReacted = reactions[emoji]?.userReacted || false;
       const currentCount = reactions[emoji]?.count || 0;
 
       // Use SERVER state, not UI state
-      if (hasReacted) {
+      if (userReacted) {
         // Delete reaction
         const newCount = currentCount - 1;
         btn.textContent = newCount > 0 ? `${emoji} ${newCount}` : emoji;

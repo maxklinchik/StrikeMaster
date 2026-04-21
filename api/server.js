@@ -873,6 +873,7 @@ app.get('/api/announcements/:id/reactions', async (req, res) => {
   try {
     if (!supabase) return res.status(500).json({ error: 'Database not configured' });
     const { id } = req.params;
+    const { userId } = req.query;
     if (!id) return res.status(400).json({ error: 'Announcement ID is required' });
 
     const { data, error } = await supabase
@@ -882,15 +883,18 @@ app.get('/api/announcements/:id/reactions', async (req, res) => {
 
     if (error) throw error;
 
-    // Group reactions by emoji and count
+    // Group reactions by emoji and count, but only expose userReacted for current user
     const reactions = {};
     if (data) {
       for (const reaction of data) {
         if (!reactions[reaction.emoji]) {
-          reactions[reaction.emoji] = { count: 0, users: [] };
+          reactions[reaction.emoji] = { count: 0, userReacted: false };
         }
         reactions[reaction.emoji].count++;
-        reactions[reaction.emoji].users.push(reaction.user_id);
+        // Only mark userReacted if userId matches current user
+        if (userId && reaction.user_id === userId) {
+          reactions[reaction.emoji].userReacted = true;
+        }
       }
     }
 

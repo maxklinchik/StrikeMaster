@@ -1,0 +1,54 @@
+    /* Navbar */
+    .navbar {
+      display: flex;
+      align-items: center;
+      padding: 15px 30px;
+      background: var(--main-color);
+      color: var(--sidebar-text-color, white);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .navbar .logo img {
+      height: 45px;
+      width: auto;
+      cursor: pointer;
+    }
+
+    .nav-links {
+      margin-left: auto;
+    }
+
+    .nav-links a {
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: 600;
+      color: var(--sidebar-text-color, white);
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-color);
+    }
+
+:root {
+  --accent-color: #ff6b6b; /* default — overwritten by JS if user chooses */
+  --accent-color-light: color-mix(in srgb, var(--accent-color) 70%, white);
+  --accent-color-dark: color-mix(in srgb, var(--accent-color) 70%, black);
+}
+
+:root {
+  --main-color: #6ecbff; /* default — overwritten by JS if user chooses */
+}
+
+/* Ensure form controls are readable on all themes */
+input, select, textarea {
+  background: var(--input-bg, #fff);
+  color: var(--input-color, #111);
+  border: 1px solid rgba(0,0,0,0.12);
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+input::placeholder, textarea::placeholder { color: rgba(0,0,0,0.5); }
+
+.small-input { width:72px; padding:6px; margin-left:6px; }

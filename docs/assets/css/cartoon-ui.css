@@ -1,0 +1,140 @@
+[data-ui="cartoon"] body {
+  font-family: 'Nunito', 'Segoe UI', sans-serif;
+  background:
+    repeating-linear-gradient(35deg, rgba(0, 0, 0, 0.04) 0 1px, transparent 1px 18px),
+    linear-gradient(#f2f2f2, #f2f2f2);
+  background-size: 32px 32px, auto;
+  background-position: 0 0, 0 0;
+}
+
+[data-ui="cartoon"][data-theme="dark"] body {
+  background:
+    repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 18px),
+    linear-gradient(var(--bg-color), var(--bg-color));
+  background-size: 32px 32px, auto;
+  background-position: 0 0, 0 0;
+}
+
+[data-ui="cartoon"] body.dashboard {
+  background:
+    repeating-linear-gradient(22deg, rgba(0, 0, 0, 0.04) 0 1px, transparent 1px 26px),
+    linear-gradient(#f2f2f2, #f2f2f2);
+  background-size: 30px 30px, auto;
+  background-position: 0 0, 0 0;
+  background-attachment: fixed;
+}
+
+[data-ui="cartoon"][data-theme="dark"] body.dashboard {
+  background:
+    repeating-linear-gradient(22deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 26px),
+    linear-gradient(var(--bg-color), var(--bg-color));
+  background-size: 30px 30px, auto;
+  background-position: 0 0, 0 0;
+  background-attachment: fixed;
+}
+
+[data-ui="cartoon"] .navbar {
+  border-bottom: 3px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+[data-ui="cartoon"] .navbar .logo img {
+  height: 48px;
+}
+
+[data-ui="cartoon"] .nav-links a {
+  border-radius: 999px;
+  font-weight: 700;
+  border: 2px solid transparent;
+}
+
+[data-ui="cartoon"] .nav-links a.active {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-ui="cartoon"] .page-header h1,
+[data-ui="cartoon"] .card-header h2,
+[data-ui="cartoon"] .card-header h3,
+[data-ui="cartoon"] .profile-title,
+[data-ui="cartoon"] .brand-name {
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+}
+
+[data-ui="cartoon"] .card,
+[data-ui="cartoon"] .profile-card,
+[data-ui="cartoon"] .players-section,
+[data-ui="cartoon"] .add-player-section,
+[data-ui="cartoon"] .stats-summary,
+[data-ui="cartoon"] .stat-card,
+[data-ui="cartoon"] .spreadsheet-container,
+[data-ui="cartoon"] .logo-option,
+[data-ui="cartoon"] .current-preview {
+  border-radius: 18px;
+  border-width: 2px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+[data-ui="cartoon"] .card-header .icon,
+[data-ui="cartoon"] .logo-option {
+  border-radius: 14px;
+}
+
+[data-ui="cartoon"] .tab-btn,
+[data-ui="cartoon"] .log-match-btn,
+[data-ui="cartoon"] .view-btn,
+[data-ui="cartoon"] .gender-btn,
+[data-ui="cartoon"] .add-btn,
+[data-ui="cartoon"] .export-btn,
+[data-ui="cartoon"] .btn,
+[data-ui="cartoon"] button[type="submit"],
+[data-ui="cartoon"] .google-btn {
+  border-radius: 999px;
+  font-weight: 700;
+  border: 2px solid rgba(0, 0, 0, 0.18);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+}
+
+[data-ui="cartoon"] .tab-btn.active,
+[data-ui="cartoon"] .log-match-btn,
+[data-ui="cartoon"] .view-btn.active,
+[data-ui="cartoon"] .gender-btn.active,
+[data-ui="cartoon"] .add-btn,
+[data-ui="cartoon"] .export-btn,
+[data-ui="cartoon"] .btn-primary {
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
+[data-ui="cartoon"] input,
+[data-ui="cartoon"] select,
+[data-ui="cartoon"] textarea {
+  border-radius: 14px;
+  border-width: 2px;
+}
+
+[data-ui="cartoon"] .sidebar,
+[data-ui="cartoon"] .container,
+[data-ui="cartoon"] .content {
+  position: relative;
+}
+
+[data-ui="cartoon"] .sidebar {
+  box-shadow: 6px 0 0 rgba(0, 0, 0, 0.12);
+}
+
+[data-ui="cartoon"] .card-header {
+  border-bottom-width: 2px;
+}
+
+[data-ui="cartoon"] .setting-row {
+  border-bottom-width: 2px;
+}
+
+[data-ui="cartoon"] .role-option,
+[data-ui="cartoon"] .logo-option {
+  border-width: 2px;
+}
+
+[data-ui="cartoon"] .message.success,
+[data-ui="cartoon"] .message.error {
+  border: 2px solid rgba(0, 0, 0, 0.08);
+}

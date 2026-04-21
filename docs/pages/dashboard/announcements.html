@@ -721,6 +721,54 @@
       }
     }
 
+    // Polling to refresh reactions in real-time
+    let reactionPollingIntervals = {};
+
+    async function startReactionPolling(announcementId) {
+      // Stop existing polling for this announcement
+      if (reactionPollingIntervals[announcementId]) {
+        clearInterval(reactionPollingIntervals[announcementId]);
+      }
+
+      // Poll every 2 seconds
+      reactionPollingIntervals[announcementId] = setInterval(async () => {
+        try {
+          const reactions = await loadReactions(announcementId);
+          const container = document.querySelector(`[data-announcement-id="${announcementId}"]`);
+          if (!container) return;
+
+          // Update all reaction buttons for this announcement
+          for (const emoji of REACTION_EMOJIS.concat(ALL_EMOJIS)) {
+            const buttons = container.querySelectorAll(`.reaction-btn[onclick*="toggleReaction('${announcementId}', '${emoji}')"]`);
+            const btn = buttons[0];
+            if (!btn) continue;
+
+            const count = reactions[emoji]?.count || 0;
+            const hasReacted = reactions[emoji]?.users.includes(currentUser.id) || false;
+
+            // Update button state
+            if (hasReacted) {
+              btn.classList.add('active');
+            } else {
+              btn.classList.remove('active');
+            }
+
+            // Update button text (count only, no emoji)
+            btn.textContent = count > 0 ? `${emoji} ${count}` : emoji;
+          }
+        } catch (error) {
+          console.error('Error polling reactions:', error);
+        }
+      }, 2000);
+    }
+
+    function stopReactionPolling(announcementId) {
+      if (reactionPollingIntervals[announcementId]) {
+        clearInterval(reactionPollingIntervals[announcementId]);
+        delete reactionPollingIntervals[announcementId];
+      }
+    }
+
     async function loadAnnouncements() {
       const list = document.getElementById('announcementList');
       list.innerHTML = '<div class="announcement-item">Loading announcements...</div>';
@@ -763,7 +811,7 @@
           }).join('');
           
           return `
-            <div class="announcement-item">
+            <div class="announcement-item" data-announcement-id="${item.id}">
               <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div style="flex: 1;">
                   <div class="announcement-title">${item.title}</div>
@@ -786,6 +834,9 @@
             </div>
           `;
         })).then(results => results.join(''));
+
+        // Start polling for reactions on all announcements
+        data.forEach(item => startReactionPolling(item.id));
       } catch (error) {
         console.error('Error loading announcements:', error);
         list.innerHTML = '<div class="announcement-item">Failed to load announcements.</div>';
@@ -825,6 +876,13 @@
         api.delete(`/api/announcements/${announcementId}/reactions?emoji=${emoji}&userId=${currentUser.id}&userType=${userType}`)
           .then(res => {
             if (!res.ok) throw new Error('Failed to remove reaction');
+            // After successful delete, fetch and update from server
+            return loadReactions(announcementId);
+          })
+          .then(reactions => {
+            // Update button with latest server data
+            const count = reactions[emoji]?.count || 0;
+            btn.textContent = count > 0 ? `${emoji} ${count}` : emoji;
           })
           .catch(error => {
             console.error('Error removing reaction:', error);
@@ -842,6 +900,13 @@
         })
           .then(res => {
             if (!res.ok) throw new Error('Failed to add reaction');
+            // After successful add, fetch and update from server
+            return loadReactions(announcementId);
+          })
+          .then(reactions => {
+            // Update button with latest server data
+            const count = reactions[emoji]?.count || 0;
+            btn.textContent = count > 0 ? `${emoji} ${count}` : emoji;
           })
           .catch(error => {
             console.error('Error adding reaction:', error);
@@ -1129,6 +1194,13 @@
         if (btn.dataset.tab === 'polls') btn.style.display = 'none'; // Hide polls tab for students if desired
       });
     }
+
+    // Cleanup polling when leaving page
+    window.addEventListener('beforeunload', () => {
+      Object.keys(reactionPollingIntervals).forEach(announcementId => {
+        stopReactionPolling(announcementId);
+      });
+    });
   </script>
 </body>
 </html>

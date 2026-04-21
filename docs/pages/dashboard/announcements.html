@@ -1083,10 +1083,10 @@
               const percentage = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
               const isVoted = userVote?.option_id === option.id;
               return `
-                <label class="poll-option ${isVoted ? 'voted' : ''}" onclick="votePoll('${poll.id}', '${option.id}')">
+                <label class="poll-option ${isVoted ? 'voted' : ''}" data-poll-id="${poll.id}" data-option-id="${option.id}" onclick="votePoll('${poll.id}', '${option.id}')">
                   <input type="radio" name="poll-${poll.id}" value="${option.id}" ${isVoted ? 'checked' : ''} style="pointer-events: none;">
                   <span class="poll-option-text">${option.text}</span>
-                  <span class="poll-option-count">${votes} vote${votes !== 1 ? 's' : ''} (${percentage}%)</span>
+                  <span class="poll-option-count"><span class="vote-count">${votes}</span> vote${votes !== 1 ? 's' : ''} (<span class="vote-percentage">${percentage}%</span>)</span>
                 </label>
               `;
             }).join('');
@@ -1096,7 +1096,7 @@
           });
 
           return `
-            <div class="poll-item">
+            <div class="poll-item" data-poll-id="${poll.id}">
               <div style="display: flex; justify-content: space-between; align-items: start;">
                 <div style="flex: 1;">
                   <div class="poll-title">${poll.title}</div>
@@ -1114,6 +1114,9 @@
             </div>
           `;
         })).then(results => results.join(''));
+
+        // Start polling for all polls
+        data.forEach(poll => startPollPolling(poll.id));
       } catch (error) {
         console.error('Error loading polls:', error);
         list.innerHTML = '<div class="poll-item">Failed to load polls.</div>';
@@ -1143,18 +1146,85 @@
     }
 
     async function votePoll(pollId, optionId) {
-      try {
-        const res = await api.post(`/api/polls/${pollId}/vote`, {
-          optionId,
-          userId: currentUser.id,
-          userType: userType
+      // Find the clicked option
+      const clickedOption = document.querySelector(`label[data-poll-id="${pollId}"][data-option-id="${optionId}"]`);
+      if (!clickedOption) return;
+
+      // Get all options for this poll
+      const pollOptions = document.querySelectorAll(`label[data-poll-id="${pollId}"]`);
+      
+      // Store original states
+      const originalStates = new Map();
+      pollOptions.forEach(opt => {
+        const input = opt.querySelector('input');
+        originalStates.set(opt.dataset.optionId, {
+          checked: input?.checked || false,
+          voted: opt.classList.contains('voted')
         });
-        if (!res.ok) throw new Error('Failed to vote');
-        loadPolls();
-      } catch (error) {
-        console.error('Error voting on poll:', error);
-        showMessage('Failed to vote on poll', 'error');
+      });
+
+      // OPTIMISTIC UPDATE: Update UI immediately
+      const input = clickedOption.querySelector('input');
+      const wasVoted = clickedOption.classList.contains('voted');
+
+      if (wasVoted) {
+        // Unvote
+        clickedOption.classList.remove('voted');
+        input.checked = false;
+        const voteCountEl = clickedOption.querySelector('.vote-count');
+        if (voteCountEl) {
+          const currentCount = parseInt(voteCountEl.textContent) || 0;
+          voteCountEl.textContent = Math.max(0, currentCount - 1);
+        }
+      } else {
+        // Vote - uncheck others and check this one
+        pollOptions.forEach(opt => {
+          const optInput = opt.querySelector('input');
+          if (opt.dataset.optionId === optionId) {
+            opt.classList.add('voted');
+            optInput.checked = true;
+            const voteCountEl = opt.querySelector('.vote-count');
+            if (voteCountEl) {
+              voteCountEl.textContent = (parseInt(voteCountEl.textContent) || 0) + 1;
+            }
+          } else {
+            opt.classList.remove('voted');
+            optInput.checked = false;
+            const voteCountEl = opt.querySelector('.vote-count');
+            if (voteCountEl && originalStates.get(opt.dataset.optionId)?.voted) {
+              voteCountEl.textContent = Math.max(0, (parseInt(voteCountEl.textContent) || 0) - 1);
+            }
+          }
+        });
       }
+
+      // Send vote in background (no await)
+      api.post(`/api/polls/${pollId}/vote`, {
+        optionId,
+        userId: currentUser.id,
+        userType: userType
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to vote');
+          return res.json();
+        })
+        .catch(error => {
+          console.error('Error voting on poll:', error);
+          showMessage('Failed to vote on poll', 'error');
+          
+          // Rollback UI on error
+          pollOptions.forEach(opt => {
+            const optInput = opt.querySelector('input');
+            const oldState = originalStates.get(opt.dataset.optionId);
+            if (oldState.voted) {
+              opt.classList.add('voted');
+              optInput.checked = true;
+            } else {
+              opt.classList.remove('voted');
+              optInput.checked = false;
+            }
+          });
+        });
     }
 
     async function deletePoll(pollId) {
@@ -1179,6 +1249,49 @@
       msg.textContent = text;
       msg.className = `message ${type}`;
       setTimeout(() => { msg.className = 'message'; }, 4000);
+    }
+
+    // Poll results polling for live vote count updates
+    let pollPollingIntervals = {};
+
+    async function startPollPolling(pollId) {
+      // Stop existing polling for this poll
+      if (pollPollingIntervals[pollId]) {
+        clearInterval(pollPollingIntervals[pollId]);
+      }
+
+      // Poll every 1 second for updated results
+      pollPollingIntervals[pollId] = setInterval(async () => {
+        try {
+          const results = await getPollResults(pollId);
+          const pollItem = document.querySelector(`[data-poll-id="${pollId}"]`)?.closest('.poll-item');
+          if (!pollItem) return;
+
+          const options = pollItem.querySelectorAll(`[data-poll-id="${pollId}"]`);
+          const totalVotes = Object.values(results).reduce((a, b) => a + b, 0);
+
+          options.forEach(option => {
+            const optionId = option.dataset.optionId;
+            const votes = results[optionId] || 0;
+            const percentage = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+
+            const voteCountEl = option.querySelector('.vote-count');
+            const percentageEl = option.querySelector('.vote-percentage');
+            
+            if (voteCountEl) voteCountEl.textContent = votes;
+            if (percentageEl) percentageEl.textContent = percentage + '%';
+          });
+        } catch (error) {
+          console.error('Error polling poll results:', error);
+        }
+      }, 1000);
+    }
+
+    function stopPollPolling(pollId) {
+      if (pollPollingIntervals[pollId]) {
+        clearInterval(pollPollingIntervals[pollId]);
+        delete pollPollingIntervals[pollId];
+      }
     }
 
     function toggleEmojiPicker(event) {
@@ -1292,6 +1405,9 @@
     window.addEventListener('beforeunload', () => {
       Object.keys(reactionPollingIntervals).forEach(announcementId => {
         stopReactionPolling(announcementId);
+      });
+      Object.keys(pollPollingIntervals).forEach(pollId => {
+        stopPollPolling(pollId);
       });
     });
   </script>

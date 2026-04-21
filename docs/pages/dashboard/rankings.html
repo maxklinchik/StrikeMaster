@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en" data-ui="cartoon">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    // Load school colors IMMEDIATELY before any CSS or content renders
+    (function() {
+      try {
+        const userStr = localStorage.getItem("bowling_user");
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.team_name) {
+            // Store school team name for later color lookup
+            document.documentElement.setAttribute('data-school-team', user.team_name);
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <title>Rankings - Strike Master</title>
+  <link rel="icon" type="image/png" href="../../assets/images/BowlingPinCartoon.png">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/stored-colors.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/cartoon-ui.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="../../assets/js/config/teams.js"></script>
+  <script src="../../assets/js/accent-loader.js"></script>
+  <script>
+    // Check if accent color is white IMMEDIATELY after accent-loader runs
+    // This prevents the flash of unstyled buttons on page load
+    (function() {
+      try {
+        const accentColor = getComputedStyle(document.documentElement)
+          .getPropertyValue("--accent-color")
+          .trim();
+        
+        if (accentColor.toUpperCase() === '#FFFFFF') {
+          document.documentElement.classList.add('accent-is-white');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script src="../../assets/js/logo-loader.js"></script>
+  <script src="../../assets/js/season-context.js"></script>
+  <script src="../../assets/js/config/api.js"></script>
+  <script src="../../assets/js/auth-helper.js"></script>
+  <style>
+    :root {
+      --accent-color: #ff6b6b;
+      --main-color: #6ecbff;
+      --bg-color: #ffffff;
+      --content-bg: #ffffff;
+      --card-bg: #ffffff;
+      --text-color: #1f1f1f;
+      --text-muted: #4b4b4b;
+      --border-color: rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1f1f1f;
+      --content-bg: #2a2a2a;
+      --card-bg: #2f2f2f;
+      --text-color: #f8f8f8;
+      --text-muted: #c8c8c8;
+      --border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', 'Segoe UI', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: var(--main-color);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar .logo img {
+      height: 46px;
+      width: 46px;
+      object-fit: contain;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-links { display: flex; gap: 8px; align-items: center; }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover { background: rgba(255,255,255,0.1); }
+    .nav-links a.active { background: var(--accent-color); color: var(--accent-text-color, white); }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 36px 28px;
+    }
+
+    .page-header {
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .page-header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0 0 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 400;
+      letter-spacing: 0.2px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .tab-btn {
+      padding: 12px 22px;
+      border: 2px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-color);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .tab-btn:hover {
+      border-color: var(--accent-color);
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-color) 20%, transparent);
+      transform: translateY(-1px);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent-color), color-mix(in srgb, var(--accent-color) 85%, black));
+      color: var(--accent-text-color, white);
+      border-color: transparent;
+      box-shadow: 0 6px 20px color-mix(in srgb, var(--accent-color) 30%, transparent);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Rankings Grid */
+    .rankings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .rankings-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ranking-block {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .ranking-block:hover {
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+      transform: translateY(-4px);
+      border-color: color-mix(in srgb, var(--accent-color) 30%, transparent);
+    }
+
+    .ranking-block-header {
+      background: linear-gradient(135deg, var(--accent-color), color-mix(in srgb, var(--accent-color) 85%, black));
+      color: var(--accent-text-color, white);
+      padding: 20px 24px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .ranking-block-content {
+      padding: 24px;
+    }
+
+    .ranking-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-color);
+      margin: 24px 0 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border-color);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .ranking-section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Tables */
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .ranking-table th,
+    .ranking-table td {
+      padding: 13px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .ranking-table th {
+      background: color-mix(in srgb, var(--accent-color) 6%, transparent);
+      color: var(--text-color);
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .ranking-table tbody tr {
+      transition: all 0.15s ease;
+    }
+
+    .ranking-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .ranking-table tbody tr:hover {
+      background: color-mix(in srgb, var(--accent-color) 6%, transparent);
+    }
+
+    .ranking-table td:first-child {
+      width: 50px;
+      text-align: center;
+      font-weight: 700;
+      color: var(--accent-color);
+    }
+
+    .rank-1 { color: #FFD700; font-weight: 700; }
+    .rank-2 { color: #C0C0C0; font-weight: 700; }
+    .rank-3 { color: #CD7F32; font-weight: 700; }
+
+    .school-highlight-row {
+      background: color-mix(in srgb, var(--text-color) 8%, transparent);
+      border-top: 2px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      opacity: 0.85;
+    }
+
+    .school-highlight-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-color);
+      letter-spacing: 0.3px;
+    }
+
+    .filter-group select {
+      padding: 10px 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--content-bg);
+      color: var(--text-color);
+      font-size: 13px;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .filter-group select:hover {
+      border-color: var(--accent-color);
+      box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-color) 15%, transparent);
+    }
+
+    .filter-group select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 20%, transparent);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 32px 24px;
+      margin-top: 48px;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 2px solid var(--border-color);
+      letter-spacing: 0.3px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      margin-left: 8px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Medal badges */
+    .medal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 11px;
+      margin-right: 8px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .medal-gold { 
+      background: linear-gradient(135deg, #FFD700, #FFC700);
+      color: #1a1a1a;
+    }
+
+    .medal-silver {
+      background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+      color: #1a1a1a;
+    }
+
+    .medal-bronze {
+      background: linear-gradient(135deg, #CD7F32, #B8621E);
+      color: white;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .rankings-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 24px 16px; }
+      .page-header { 
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+      }
+      .page-header h1 { 
+        font-size: 28px;
+        margin-bottom: 10px;
+      }
+      .tabs { 
+        gap: 8px; 
+        margin-bottom: 28px; 
+        flex-wrap: wrap;
+      }
+      .tab-btn { 
+        padding: 10px 18px; 
+        font-size: 13px;
+        border-radius: 8px;
+      }
+      .ranking-block-header {
+        padding: 16px 20px;
+        font-size: 15px;
+      }
+      .ranking-block-content { 
+        padding: 18px; 
+      }
+      .ranking-section-title {
+        font-size: 13px;
+        margin: 18px 0 12px;
+        padding-bottom: 8px;
+      }
+      .ranking-table { 
+        font-size: 12px; 
+      }
+      .ranking-table th, .ranking-table td { 
+        padding: 10px 6px; 
+      }
+      .filter-controls { 
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .filter-group {
+        gap: 6px;
+      }
+      .filter-group select {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+      .footer { 
+        padding: 24px 16px;
+        margin-top: 40px;
+      }
+      .medal {
+        width: 24px;
+        height: 24px;
+        margin-right: 6px;
+        font-size: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 16px 12px; }
+      .page-header h1 { 
+        font-size: 24px;
+      }
+      .page-header p { 
+        font-size: 13px;
+      }
+      .tabs {
+        gap: 6px;
+        margin-bottom: 20px;
+      }
+      .tab-btn { 
+        padding: 8px 14px; 
+        font-size: 12px;
+      }
+      .ranking-block-content { 
+        padding: 16px; 
+      }
+      .ranking-table { 
+        font-size: 11px; 
+      }
+      .ranking-table th, .ranking-table td { 
+        padding: 8px 4px; 
+      }
+      .filter-group label {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body class="dashboard">
+  <div class="navbar">
+    <div class="nav-left">
+      <a href="../../index.html" class="logo">
+        <img id="navLogo" src="../../assets/images/Team Logos/phLogo.png" alt="School logo">
+      </a>
+    </div>
+    <div class="nav-links">
+      <a href="home.html">Home</a>
+      <a href="players.html">Players</a>
+      <a href="myTeam.html">My Team</a>
+      <a href="rankings.html" class="active">Rankings</a>
+      <a href="announcements.html">Announcements</a>
+      <a href="../settings/appearanceSettings.html">Settings</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>Rankings</h1>
+      <p>County and division rankings for boys and girls teams and players</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="county">County Rankings</button>
+      <button class="tab-btn" data-tab="division">Division Rankings</button>
+    </div>
+
+    <!-- COUNTY RANKINGS TAB -->
+    <div id="countyTab" class="tab-content active">
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label for="countySeasonSelect">Season:</label>
+          <select id="countySeasonSelect">
+            <option value="2025-2026">2025-2026</option>
+            <option value="2024-2025">2024-2025</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="rankings-grid">
+        <!-- Boys County Rankings -->
+        <div class="ranking-block">
+          <div class="ranking-block-header">Boys County Rankings</div>
+          <div class="ranking-block-content" id="countyBoysContent">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Girls County Rankings -->
+        <div class="ranking-block">
+          <div class="ranking-block-header">Girls County Rankings</div>
+          <div class="ranking-block-content" id="countyGirlsContent">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIVISION RANKINGS TAB -->
+    <div id="divisionTab" class="tab-content">
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label for="divisionSeasonSelect">Season:</label>
+          <select id="divisionSeasonSelect">
+            <option value="2025-2026">2025-2026</option>
+            <option value="2024-2025">2024-2025</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="divisionFilter">Division:</label>
+          <select id="divisionFilter">
+            <option value="">All Divisions</option>
+            <option value="north">North</option>
+            <option value="south">South</option>
+            <option value="east">East</option>
+            <option value="west">West</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="rankings-grid">
+        <!-- Boys Division Rankings -->
+        <div class="ranking-block">
+          <div class="ranking-block-header">Boys Division Rankings</div>
+          <div class="ranking-block-content" id="divisionBoysContent">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Girls Division Rankings -->
+        <div class="ranking-block">
+          <div class="ranking-block-header">Girls Division Rankings</div>
+          <div class="ranking-block-content" id="divisionGirlsContent">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2026 Strike Master | Rankings</p>
+  </div>
+
+  <script>
+    // Require authentication
+    if (!auth.requireAuth('../auth/login.html')) {
+      throw new Error('Not authenticated');
+    }
+
+    // Load team logo based on user's school affiliation
+    function loadTeamLogo() {
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user.team_name && typeof getTeamLogo === 'function') {
+            const logoPath = getTeamLogo(user.team_name, '../../assets/images/Team Logos/');
+            if (logoPath) {
+              document.getElementById('navLogo').src = logoPath;
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Team logo loading not available:', e.message);
+      }
+    }
+
+    loadTeamLogo();
+
+    let allPlayers = [];
+    let allMatches = [];
+    let countySeasonSelect = document.getElementById('countySeasonSelect');
+    let divisionSeasonSelect = document.getElementById('divisionSeasonSelect');
+    let divisionFilter = document.getElementById('divisionFilter');
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(tabName + 'Tab').classList.add('active');
+      });
+    });
+
+    // Load data
+    async function loadRankingsData(season) {
+      try {
+        const currentUser = auth.getUser();
+        // In a real app, this would fetch from the API
+        // For now, we'll use mock data
+        await loadCountyRankings(season);
+        await loadDivisionRankings(season);
+      } catch (error) {
+        console.error('Error loading rankings:', error);
+      }
+    }
+
+    function getMedalClass(rank) {
+      if (rank === 1) return 'medal medal-gold';
+      if (rank === 2) return 'medal medal-silver';
+      if (rank === 3) return 'medal medal-bronze';
+      return '';
+    }
+
+    function getUserSchool() {
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          return user.team_name || null;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function findBestFromSchool(allRankings, schoolName) {
+      if (!schoolName) return null;
+      const filtered = allRankings.filter(item => item.team === schoolName);
+      return filtered.length > 0 ? filtered[0] : null;
+    }
+
+    async function loadCountyRankings(season) {
+      try {
+        // Mock data for county rankings
+        const countyBoysPlayers = [
+          { rank: 1, name: 'Alex Johnson', team: 'Strike Master HS', average: 190 },
+          { rank: 2, name: 'Marcus Brown', team: 'Strike Master HS', average: 185 },
+          { rank: 3, name: 'Liam Carter', team: 'County Central HS', average: 182 },
+          { rank: 4, name: 'Noah Patel', team: 'Ridge Valley HS', average: 180 },
+        ];
+        
+        const countyBoysTeams = [
+          { rank: 1, name: 'Strike Master HS', wins: 15, average: 178 },
+          { rank: 2, name: 'County Central HS', wins: 12, average: 172 },
+          { rank: 3, name: 'Ridge Valley HS', wins: 11, average: 170 },
+          { rank: 4, name: 'Westbrook HS', wins: 10, average: 168 },
+        ];
+        
+        const countyGirlsPlayers = [
+          { rank: 1, name: 'Samantha Lee', team: 'Strike Master HS', average: 195 },
+          { rank: 2, name: 'Emily Davis', team: 'Strike Master HS', average: 188 },
+          { rank: 3, name: 'Ava Martinez', team: 'County West HS', average: 186 },
+          { rank: 4, name: 'Chloe Nguyen', team: 'Eastview HS', average: 181 },
+        ];
+        
+        const countyGirlsTeams = [
+          { rank: 1, name: 'Strike Master HS', wins: 14, average: 180 },
+          { rank: 2, name: 'County West HS', wins: 11, average: 170 },
+          { rank: 3, name: 'Eastview HS', wins: 10, average: 169 },
+          { rank: 4, name: 'Southridge HS', wins: 9, average: 166 },
+        ];
+
+        // Render boys county
+        const userSchool = getUserSchool();
+        const bestSchoolPlayer = findBestFromSchool(countyBoysPlayers, userSchool);
+        const bestSchoolTeam = findBestFromSchool(countyBoysTeams, userSchool);
+
+        document.getElementById('countyBoysContent').innerHTML = `
+          <div class="ranking-section-title">Top Players</div>
+          <table class="ranking-table">
+            <thead>
+              <tr><th>Rank</th><th>Player</th><th>Team</th><th style="text-align: right;">Avg</th></tr>
+            </thead>
+            <tbody>
+              ${countyBoysPlayers.map(p => `
+                <tr>
+                  <td><span class="${getMedalClass(p.rank)}"></span>${p.rank}</td>
+                  <td>${p.name}</td>
+                  <td>${p.team}</td>
+                  <td style="text-align: right;">${p.average}</td>
+                </tr>
+              `).join('')}
+              ${bestSchoolPlayer ? `
+                <tr class="school-highlight-row">
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolPlayer.name}</div><div style="text-align: right;">${bestSchoolPlayer.average}</div></div></td>
+                </tr>
+              ` : ''}
+            </tbody>
+          </table>
+          <div class="ranking-section-title">Top Teams</div>
+          <table class="ranking-table">
+            <thead>
+              <tr><th>Rank</th><th>Team</th><th style="text-align: center;">Wins</th><th style="text-align: right;">Avg</th></tr>
+            </thead>
+            <tbody>
+              ${countyBoysTeams.map(t => `
+                <tr>
+                  <td><span class="${getMedalClass(t.rank)}"></span>${t.rank}</td>
+                  <td>${t.name}</td>
+                  <td style="text-align: center;">${t.wins}</td>
+                  <td style="text-align: right;">${t.average}</td>
+                </tr>
+              `).join('')}
+              ${bestSchoolTeam ? `
+                <tr class="school-highlight-row">
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolTeam.name}</div><div style="text-align: right;">${bestSchoolTeam.average}</div></div></td>
+                </tr>
+              ` : ''}
+            </tbody>
+          </table>
+        `;
+
+        // Render girls county
+        const bestSchoolGirlsPlayer = findBestFromSchool(countyGirlsPlayers, userSchool);
+        const bestSchoolGirlsTeam = findBestFromSchool(countyGirlsTeams, userSchool);
+
+        document.getElementById('countyGirlsContent').innerHTML = `
+          <div class="ranking-section-title">Top Players</div>
+          <table class="ranking-table">
+            <thead>
+              <tr><th>Rank</th><th>Player</th><th>Team</th><th style="text-align: right;">Avg</th></tr>
+            </thead>
+            <tbody>
+              ${countyGirlsPlayers.map(p => `
+                <tr>
+                  <td><span class="${getMedalClass(p.rank)}"></span>${p.rank}</td>
+                  <td>${p.name}</td>
+                  <td>${p.team}</td>
+                  <td style="text-align: right;">${p.average}</td>
+                </tr>
+              `).join('')}
+              ${bestSchoolGirlsPlayer ? `
+                <tr class="school-highlight-row">
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolGirlsPlayer.name}</div><div style="text-align: right;">${bestSchoolGirlsPlayer.average}</div></div></td>
+                </tr>
+              ` : ''}
+            </tbody>
+          </table>
+          <div class="ranking-section-title">Top Teams</div>
+          <table class="ranking-table">
+            <thead>
+              <tr><th>Rank</th><th>Team</th><th style="text-align: center;">Wins</th><th style="text-align: right;">Avg</th></tr>
+            </thead>
+            <tbody>
+              ${countyGirlsTeams.map(t => `
+                <tr>
+                  <td><span class="${getMedalClass(t.rank)}"></span>${t.rank}</td>
+                  <td>${t.name}</td>
+                  <td style="text-align: center;">${t.wins}</td>
+                  <td style="text-align: right;">${t.average}</td>
+                </tr>
+              `).join('')}
+              ${bestSchoolGirlsTeam ? `
+                <tr class="school-highlight-row">
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolGirlsTeam.name}</div><div style="text-align: right;">${bestSchoolGirlsTeam.average}</div></div></td>
+                </tr>
+              ` : ''}
+            </tbody>
+          </table>
+        `;
+      } catch (error) {
+        console.error('Error loading county rankings:', error);
+        document.getElementById('countyBoysContent').innerHTML = '<div class="no-data">Error loading rankings</div>';
+        document.getElementById('countyGirlsContent').innerHTML = '<div class="no-data">Error loading rankings</div>';
+      }
+    }
+
+    async function loadDivisionRankings(season) {
+      try {
+        // Mock data for division rankings
+        const divisionBoysPlayers = [
+          { rank: 1, name: 'Alex Johnson', team: 'Strike Master HS', division: 'North', average: 192 },
+          { rank: 2, name: 'Marcus Brown', team: 'Strike Master HS', division: 'North', average: 186 },
+          { rank: 3, name: 'Liam Carter', team: 'County Central HS', division: 'South', average: 183 },
+          { rank: 4, name: 'Noah Patel', team: 'Ridge Valley HS', division: 'East', average: 181 },
+        ];
+        
+        const divisionBoysTeams = [
+          { rank: 1, name: 'Strike Master HS', division: 'North', wins: 16, average: 179 },
+          { rank: 2, name: 'County Central HS', division: 'South', wins: 13, average: 174 },
+          { rank: 3, name: 'Ridge Valley HS', division: 'East', wins: 12, average: 171 },
+          { rank: 4, name: 'Westbrook HS', division: 'West', wins: 11, average: 169 },
+        ];
+        
+        const divisionGirlsPlayers = [
+          { rank: 1, name: 'Samantha Lee', team: 'Strike Master HS', division: 'North', average: 196 },
+          { rank: 2, name: 'Emily Davis', team: 'Strike Master HS', division: 'North', average: 189 },
+          { rank: 3, name: 'Ava Martinez', team: 'County West HS', division: 'West', average: 185 },
+          { rank: 4, name: 'Chloe Nguyen', team: 'Eastview HS', division: 'East', average: 182 },
+        ];
+        
+        const divisionGirlsTeams = [
+          { rank: 1, name: 'Strike Master HS', division: 'North', wins: 15, average: 181 },
+          { rank: 2, name: 'County West HS', division: 'West', wins: 12, average: 173 },
+          { rank: 3, name: 'Eastview HS', division: 'East', wins: 11, average: 171 },
+          { rank: 4, name: 'Southridge HS', division: 'South', wins: 10, average: 168 },
+        ];
+
+        // Get user school for all division rankings
+        const userSchool = getUserSchool();
+
+        // Render boys division
+        const bestDivisionBoysPlayer = findBestFromSchool(divisionBoysPlayers, userSchool);
+        const bestDivisionBoysTeam = findBestFromSchool(divisionBoysTeams, userSchool);
+
+        document.getElementById('divisionBoysContent').innerHTML = `
+          <div class="ranking-section-title">Top Players</div>
+          <table class="ranking-table">
+            <thead>
+              <tr><th>Rank</th><th>Player</th><th>Team</th><th>Division</th><th style="text-align: right;">Avg</th></tr>
+            </thead>
+            <tbody>
+              ${divisionBoysPlayers.map(p => `
+                <tr>
+                  <td><span class="${getMedalClass(p.rank)}"></span>${p.rank}</td>
+                  <td>${p.name}</td>
+                  <td>${p.team}</td>
+                  <td><strong>${p.division}</strong></td>
+                  <td style="text-align: right;">${p.average}</td>
+                </tr>
+              `).join('')}
+              ${bestDivisionBoysPlayer ? `
+                <tr class="school-highlight-row">
+                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysPlayer.name} <strong style="margin-left: 8px;">${bestDivisionBoysPlayer.division}</strong></div><div style="text-align: right;">${bestDivisionBoysPlayer.average}</div></div></td>
+                </tr>
+              ` : ''}
+            </tbody>
+          </table>
+          <div class="ranking-section-title">Top Teams</div>
+          <table class="ranking-table">
+            <thead>
+              <tr><th>Rank</th><th>Team</th><th>Division</th><th style="text-align: center;">Wins</th><th style="text-align: right;">Avg</th></tr>
+            </thead>
+            <tbody>
+              ${divisionBoysTeams.map(t => `
+                <tr>
+                  <td><span class="${getMedalClass(t.rank)}"></span>${t.rank}</td>
+                  <td>${t.name}</td>
+                  <td><strong>${t.division}</strong></td>
+                  <td style="text-align: center;">${t.wins}</td>
+                  <td style="text-align: right;">${t.average}</td>
+                </tr>
+              `).join('')}
+              ${bestDivisionBoysTeam ? `
+                <tr class="school-highlight-row">
+                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysTeam.name} <strong style="margin-left: 8px;">${bestDivisionBoysTeam.division}</strong></div><div style="text-align: right;">${bestDivisionBoysTeam.average}</div></div></td>
+                </tr>
+              ` : ''}
+            </tbody>
+          </table>
+        `;
+
+        // Render girls division
+        const bestDivisionGirlsPlayer = findBestFromSchool(divisionGirlsPlayers, userSchool);
+        const bestDivisionGirlsTeam = findBestFromSchool(divisionGirlsTeams, userSchool);
+
+        document.getElementById('divisionGirlsContent').innerHTML = `
+          <div class="ranking-section-title">Top Players</div>
+          <table class="ranking-table">
+            <thead>
+              <tr><th>Rank</th><th>Player</th><th>Team</th><th>Division</th><th style="text-align: right;">Avg</th></tr>
+            </thead>
+            <tbody>
+              ${divisionGirlsPlayers.map(p => `
+                <tr>
+                  <td><span class="${getMedalClass(p.rank)}"></span>${p.rank}</td>
+                  <td>${p.name}</td>
+                  <td>${p.team}</td>
+                  <td><strong>${p.division}</strong></td>
+                  <td style="text-align: right;">${p.average}</td>
+                </tr>
+              `).join('')}
+              ${bestDivisionGirlsPlayer ? `
+                <tr class="school-highlight-row">
+                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsPlayer.name} <strong style="margin-left: 8px;">${bestDivisionGirlsPlayer.division}</strong></div><div style="text-align: right;">${bestDivisionGirlsPlayer.average}</div></div></td>
+                </tr>
+              ` : ''}
+            </tbody>
+          </table>
+          <div class="ranking-section-title">Top Teams</div>
+          <table class="ranking-table">
+            <thead>
+              <tr><th>Rank</th><th>Team</th><th>Division</th><th style="text-align: center;">Wins</th><th style="text-align: right;">Avg</th></tr>
+            </thead>
+            <tbody>
+              ${divisionGirlsTeams.map(t => `
+                <tr>
+                  <td><span class="${getMedalClass(t.rank)}"></span>${t.rank}</td>
+                  <td>${t.name}</td>
+                  <td><strong>${t.division}</strong></td>
+                  <td style="text-align: center;">${t.wins}</td>
+                  <td style="text-align: right;">${t.average}</td>
+                </tr>
+              `).join('')}
+              ${bestDivisionGirlsTeam ? `
+                <tr class="school-highlight-row">
+                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsTeam.name} <strong style="margin-left: 8px;">${bestDivisionGirlsTeam.division}</strong></div><div style="text-align: right;">${bestDivisionGirlsTeam.average}</div></div></td>
+                </tr>
+              ` : ''}
+            </tbody>
+          </table>
+        `;
+      } catch (error) {
+        console.error('Error loading division rankings:', error);
+        document.getElementById('divisionBoysContent').innerHTML = '<div class="no-data">Error loading rankings</div>';
+        document.getElementById('divisionGirlsContent').innerHTML = '<div class="no-data">Error loading rankings</div>';
+      }
+    }
+
+    // Event listeners
+    countySeasonSelect.addEventListener('change', (e) => {
+      loadCountyRankings(e.target.value);
+    });
+
+    divisionSeasonSelect.addEventListener('change', (e) => {
+      loadDivisionRankings(e.target.value);
+    });
+
+    // Initialize
+    loadRankingsData('2025-2026');
+  </script>
+</body>
+</html>

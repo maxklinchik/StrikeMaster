@@ -1185,10 +1185,6 @@
               <h4>${player.first_name} ${player.last_name}</h4>
               <span>Class of ${player.grad_year || 'N/A'}${player.email ? ` • ${player.email}` : ''}</span>
             </div>
-            <div class="player-actions">
-              <button class="edit-btn" onclick="event.stopPropagation(); openEditPlayer('${player.id}')">Edit</button>
-              <button class="remove-btn" onclick="event.stopPropagation(); deletePlayer('${player.id}')">Remove</button>
-            </div>
           </div>
         `).join('');
         if (currentView === 'sheet') {
@@ -1448,15 +1444,6 @@
     }
 
     function isStudentMode() { return localStorage.getItem('bowling_role') === 'student'; }
-
-    function applyStudentMode() {
-      if (isStudentMode()) {
-        const addCard = document.getElementById('addPlayerCard');
-        if (addCard) addCard.style.display = 'none';
-        document.querySelectorAll('.remove-btn').forEach(btn => btn.style.display = 'none');
-        document.querySelectorAll('.edit-btn').forEach(btn => btn.style.display = 'none');
-      }
-    }
 
     function showMessage(text, type) {
       const msg = document.getElementById('message');

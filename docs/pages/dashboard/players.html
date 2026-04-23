@@ -1197,7 +1197,8 @@
     async function selectPlayer(playerId) {
       selectedPlayerId = playerId;
       document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
-      document.querySelector(`[data-player-id="${playerId}"]`).classList.add('selected');
+      const selectedCard = document.querySelector(`[data-player-id="${playerId}"]`);
+      if (selectedCard) selectedCard.classList.add('selected');
       const player = players.find(p => p.id === playerId);
       document.getElementById('statsPlayerName').textContent = `${player.first_name} ${player.last_name}'s Stats`;
       try {
@@ -1469,7 +1470,11 @@
       });
     }
 
-    checkAuth().then(user => { if (user) { loadTeamLogo(); applyStudentMode(); syncAddPlayerGender(); loadPlayers(); } });
+    function applyStudentMode() {
+  // Placeholder: add student-mode UI restrictions here if needed
+}
+
+checkAuth().then(user => { if (user) { loadTeamLogo(); applyStudentMode(); syncAddPlayerGender(); loadPlayers(); } });
 
     // Update icon colors if accent is white
     (function() {

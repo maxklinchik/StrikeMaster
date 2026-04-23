@@ -327,10 +327,11 @@
       align-items: center;
       gap: 10px;
       padding: 12px;
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--border-color);
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
+      background: transparent;
     }
 
     .poll-option:hover {
@@ -338,9 +339,21 @@
     }
 
     .poll-option.voted {
-      background: var(--accent-color);
-      color: var(--accent-text-color, white);
-      border-color: var(--accent-color);
+      background: #ff0000 !important;
+      color: white !important;
+      border-color: #ff0000 !important;
+      border-width: 3px;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+      font-weight: 700;
+    }
+
+    .poll-option.voted .poll-option-text {
+      color: inherit;
+    }
+
+    .poll-option.voted .poll-option-count {
+      color: inherit;
+      opacity: 0.9;
     }
 
     .poll-option input {
@@ -1148,10 +1161,15 @@
     async function votePoll(pollId, optionId) {
       // Find the clicked option
       const clickedOption = document.querySelector(`label[data-poll-id="${pollId}"][data-option-id="${optionId}"]`);
-      if (!clickedOption) return;
+      console.log('votePoll - clicked:', { pollId, optionId, found: !!clickedOption });
+      if (!clickedOption) {
+        console.error('Could not find clicked option');
+        return;
+      }
 
       // Get all options for this poll
       const pollOptions = document.querySelectorAll(`label[data-poll-id="${pollId}"]`);
+      console.log('Found poll options:', pollOptions.length);
       
       // Store original states
       const originalStates = new Map();
@@ -1166,6 +1184,7 @@
       // OPTIMISTIC UPDATE: Update UI immediately
       const input = clickedOption.querySelector('input');
       const wasVoted = clickedOption.classList.contains('voted');
+      console.log('Before update - wasVoted:', wasVoted);
 
       if (wasVoted) {
         // Unvote
@@ -1182,13 +1201,28 @@
           const optInput = opt.querySelector('input');
           if (opt.dataset.optionId === optionId) {
             opt.classList.add('voted');
+            // Also apply inline styles to force highlighting
+            opt.style.background = '#ff0000';
+            opt.style.color = 'white';
+            opt.style.borderColor = '#ff0000';
+            opt.style.borderWidth = '3px';
+            opt.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.5)';
+            opt.style.fontWeight = '700';
             optInput.checked = true;
             const voteCountEl = opt.querySelector('.vote-count');
             if (voteCountEl) {
               voteCountEl.textContent = (parseInt(voteCountEl.textContent) || 0) + 1;
             }
+            console.log('Added voted class and inline styles, now:', opt.className, opt.style.background);
           } else {
             opt.classList.remove('voted');
+            // Remove inline styles
+            opt.style.background = '';
+            opt.style.color = '';
+            opt.style.borderColor = '';
+            opt.style.borderWidth = '';
+            opt.style.boxShadow = '';
+            opt.style.fontWeight = '';
             optInput.checked = false;
             const voteCountEl = opt.querySelector('.vote-count');
             if (voteCountEl && originalStates.get(opt.dataset.optionId)?.voted) {
@@ -1206,6 +1240,7 @@
       })
         .then(res => {
           if (!res.ok) throw new Error('Failed to vote');
+          console.log('Vote saved successfully');
           return res.json();
         })
         .catch(error => {
@@ -1260,7 +1295,7 @@
         clearInterval(pollPollingIntervals[pollId]);
       }
 
-      // Poll every 1 second for updated results
+      // Poll every 1 second for updated vote counts (but NOT user vote status)
       pollPollingIntervals[pollId] = setInterval(async () => {
         try {
           const results = await getPollResults(pollId);
@@ -1275,6 +1310,8 @@
             const votes = results[optionId] || 0;
             const percentage = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
 
+            // Only update vote count and percentage - do NOT update the .voted class
+            // The .voted class is managed by optimistic updates in votePoll()
             const voteCountEl = option.querySelector('.vote-count');
             const percentageEl = option.querySelector('.vote-percentage');
             

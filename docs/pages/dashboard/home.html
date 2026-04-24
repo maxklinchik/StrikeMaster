@@ -1406,7 +1406,7 @@
   <div class="container">
     <div class="page-header" style="text-align:center;">
       <div class="brand-logo" id="brandLogo" aria-label="Strike Master"></div>
-      <p style="font-size: 1.1rem; color: #4b4b4b; margin: 0 0 10px 0;">Match history and performance tracking</p>
+      <p style="font-size: 1.1rem; color: var(--text-color); margin: 0 0 10px 0;">Match history and performance tracking</p>
     </div>
 
     <div class="tabs">
@@ -3040,7 +3040,7 @@
 
         // Add a read-only notice
         const noticeDiv = document.createElement('div');
-        noticeDiv.style.cssText = 'text-align: center; padding: 10px; color: #666; margin-bottom: 20px;';
+        noticeDiv.style.cssText = 'text-align: center; padding: 10px; color: var(--text-color); margin-bottom: 20px;';
         noticeDiv.textContent = 'Student View (Read-Only)';
         document.querySelector('.tabs').after(noticeDiv);
       }

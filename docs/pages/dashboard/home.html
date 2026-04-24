@@ -34,7 +34,7 @@
         const accentColor = getComputedStyle(document.documentElement)
           .getPropertyValue("--accent-color")
           .trim();
-        
+       
         if (accentColor.toUpperCase() === '#FFFFFF') {
           document.documentElement.classList.add('accent-is-white');
         }
@@ -1524,7 +1524,7 @@
               </tr>
             </tbody>
           </table>
-          
+         
           <!-- Points Result Card -->
           <div class="points-result-card" id="pointsResultCard" style="display: none;">
             <div class="points-breakdown">
@@ -1558,7 +1558,7 @@
             <div class="result-badge-large" id="resultBadgeLarge">-</div>
           </div>
         </div>
-        
+       
         <!-- Hidden fields to store calculated values -->
         <input type="hidden" id="result" value="">
         <input type="hidden" id="ourScore" value="0">
@@ -1670,7 +1670,7 @@
       // Check if any scores entered
       const hasScores = teamG1 || teamG2 || teamG3 || teamG4 || oppG1 || oppG2 || oppG3 || oppG4;
       const resultCard = document.getElementById('pointsResultCard');
-      
+     
       if (!hasScores) {
         resultCard.style.display = 'none';
         document.getElementById('result').value = '';
@@ -1807,7 +1807,7 @@
 
     // Populate opponent dropdown from SCHOOLS_LIST
     let allOpponents = [];
-    
+   
     function populateOpponentDropdown() {
       // Build all opponents list from SCHOOLS_LIST
       allOpponents = SCHOOLS_LIST.map(school => ({
@@ -1827,7 +1827,7 @@
     const opponentHiddenInput = document.getElementById('opponent');
 
     function renderOpponentDropdown(filter = '') {
-      const filtered = allOpponents.filter(opp => 
+      const filtered = allOpponents.filter(opp =>
         opp.name.toLowerCase().includes(filter.toLowerCase())
       );
 
@@ -1871,7 +1871,7 @@
     });
 
     // ==================== LOCATION MANAGEMENT ====================
-    
+   
     let savedLocations = ['Montvale Lanes', 'Bowler City', 'Lodi Lanes', 'Parkway Lanes', 'Holiday Bowl'];
 
     // Load saved locations from Supabase
@@ -1891,10 +1891,10 @@
     // Populate location dropdown
     function populateLocationDropdown(selectedValue = '') {
       const locationSelect = document.getElementById('location');
-      
+     
       // Clear existing options except first
       locationSelect.innerHTML = '<option value="">Select location...</option>';
-      
+     
       savedLocations.sort().forEach(loc => {
         const option = document.createElement('option');
         option.value = loc;
@@ -1931,7 +1931,7 @@
             location: newLocation
           })
         });
-        
+       
         if (response.ok) {
           savedLocations = await response.json();
         } else {
@@ -1947,7 +1947,7 @@
           savedLocations.push(newLocation);
         }
       }
-      
+     
       populateLocationDropdown(newLocation);
       hideAddLocation();
     }
@@ -1997,8 +1997,8 @@
         if (currentGender !== 'all') {
           selectedMatchGender = currentGender;
         }
-        document.getElementById('sectionTitle').textContent = 
-          currentGender === 'boys' ? 'Boys Recent Matches' : 
+        document.getElementById('sectionTitle').textContent =
+          currentGender === 'boys' ? 'Boys Recent Matches' :
           currentGender === 'girls' ? 'Girls Recent Matches' : 'All Recent Matches';
         loadMatches();
         if (currentGender !== 'all') loadPlayers();
@@ -2053,24 +2053,24 @@
             fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=boys`),
             fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=girls`)
           ]);
-          
+         
           if (!boysResponse.ok || !girlsResponse.ok) throw new Error('Failed to fetch players');
-          
+         
           allPlayers.boys = await boysResponse.json();
           allPlayers.girls = await girlsResponse.json();
           players = [...allPlayers.boys, ...allPlayers.girls];
           renderAllPlayersTable();
         } else {
           const response = await fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=${activeGender}`);
-          
+         
           if (!response.ok) throw new Error('Failed to fetch players');
-          
+         
           players = await response.json();
           renderPlayersTable();
         }
       } catch (error) {
         console.error('Error loading players:', error);
-        document.getElementById('playersTableBody').innerHTML = 
+        document.getElementById('playersTableBody').innerHTML =
           '<tr><td colspan="7" style="text-align:center; color:#dc3545;">Error loading players</td></tr>';
       }
     }
@@ -2078,7 +2078,7 @@
     // Render players table in modal (single gender)
     function renderPlayersTable() {
       const tbody = document.getElementById('playersTableBody');
-      
+     
       if (!players || players.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found. Add players in the Players tab first.</td></tr>';
         return;
@@ -2100,14 +2100,14 @@
     // Render all players table (both genders with separators)
     function renderAllPlayersTable() {
       const tbody = document.getElementById('playersTableBody');
-      
+     
       if (allPlayers.boys.length === 0 && allPlayers.girls.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found. Add players in the Players tab first.</td></tr>';
         return;
       }
 
       let html = '';
-      
+     
       // Boys section
       if (allPlayers.boys.length > 0) {
         html += '<tr><td colspan="7" class="gender-separator">Boys Team</td></tr>';
@@ -2123,7 +2123,7 @@
           </tr>
         `).join('');
       }
-      
+     
       // Girls section
       if (allPlayers.girls.length > 0) {
         html += '<tr><td colspan="7" class="gender-separator">Girls Team</td></tr>';
@@ -2139,13 +2139,13 @@
           </tr>
         `).join('');
       }
-      
+     
       tbody.innerHTML = html;
     }
 
     function renderAllPlayersTableWithScores(records) {
       const tbody = document.getElementById('playersTableBody');
-      
+     
       if (allPlayers.boys.length === 0 && allPlayers.girls.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found.</td></tr>';
         return;
@@ -2205,11 +2205,11 @@
     function calculateTeamTotals() {
       let teamG1 = 0, teamG2 = 0, teamG3 = 0, teamG4 = 0;
       const matchType = document.getElementById('matchType')?.value || 'team';
-      
+     
       document.querySelectorAll('.player-row').forEach(row => {
         const isVarsity = row.querySelector('.varsity-checkbox')?.checked;
         const isDNP = row.querySelector('.dnp-checkbox')?.checked;
-        
+       
         if (isVarsity && !isDNP) {
           const g1 = parseInt(row.querySelector('.game1')?.value) || 0;
           const g2 = parseInt(row.querySelector('.game2')?.value) || 0;
@@ -2221,14 +2221,14 @@
           if (matchType === 'tournament') teamG4 += g4;
         }
       });
-      
+     
       // Update team score inputs
       document.getElementById('teamG1').value = teamG1 || '';
       document.getElementById('teamG2').value = teamG2 || '';
       document.getElementById('teamG3').value = teamG3 || '';
       const teamG4Input = document.getElementById('teamG4');
       if (teamG4Input) teamG4Input.value = matchType === 'tournament' ? (teamG4 || '') : '';
-      
+     
       // Recalculate match result
       calculateMatchResult();
     }
@@ -2344,16 +2344,16 @@
     // Submit match form
     document.getElementById('matchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+     
       // Validate opponent is selected
       if (!document.getElementById('opponent').value) {
         showMessage('Please select an opponent', 'error');
         return;
       }
-      
+     
       const isEditing = editingMatchId !== null;
       const selectedGender = selectedMatchGender || currentGender;
-      
+     
       const baseMatchData = {
         coachId: coachId,
         opponent: document.getElementById('opponent').value,
@@ -2379,11 +2379,11 @@
 
       try {
         const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
-        
+       
         if (isEditing) {
           // Update existing match (single gender)
           const matchData = { ...baseMatchData, gender: editingMatchGender };
-          
+         
           const matchResponse = await fetch(`${API_BASE}/api/matches/${editingMatchId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -2391,27 +2391,27 @@
           });
 
           if (!matchResponse.ok) throw new Error('Failed to update match');
-          
+         
           // Delete existing records for this match (we'll recreate them)
           await fetch(`${API_BASE}/api/records/match/${editingMatchId}`, {
             method: 'DELETE'
           });
-          
+         
           // Save player records for this single match and get total wood
           const totalWood = await savePlayerRecords(editingMatchId, null);
-          
+         
           // Update match with recalculated total wood
           await fetch(`${API_BASE}/api/matches/${editingMatchId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ourScore: totalWood })
           });
-          
+         
           showMessage('Match updated successfully!', 'success');
         } else {
           // Create single match (boys, girls, or coed)
           const matchData = { ...baseMatchData, gender: selectedGender };
-          
+         
           const matchResponse = await fetch(`${API_BASE}/api/matches`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2419,20 +2419,20 @@
           });
 
           if (!matchResponse.ok) throw new Error('Failed to create match');
-          
+         
           const match = await matchResponse.json();
           const totalWood = await savePlayerRecords(match.id, null);
-          
+         
           // Update match with total wood
           await fetch(`${API_BASE}/api/matches/${match.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ourScore: totalWood })
           });
-          
+         
           showMessage('Match saved successfully!', 'success');
         }
-        
+       
         document.getElementById('matchModal').classList.remove('active');
         resetModal();
         loadMatches();
@@ -2449,11 +2449,11 @@
       const rows = document.querySelectorAll('.player-row');
       let totalWood = 0;
       const matchType = document.getElementById('matchType')?.value || 'team';
-      
+     
       for (const row of rows) {
         // Skip rows that don't match the gender filter (if specified)
         if (genderFilter && row.dataset.gender !== genderFilter) continue;
-        
+       
         const dnp = row.querySelector('.dnp-checkbox').checked;
         if (dnp) continue;
 
@@ -2470,12 +2470,12 @@
           const g2 = game2 ? parseInt(game2) : 0;
           const g3 = game3 ? parseInt(game3) : 0;
           const g4 = game4 ? parseInt(game4) : 0;
-          
+         
           // Add to total wood if varsity
           if (isVarsity) {
             totalWood += g1 + g2 + g3 + (matchType === 'tournament' ? g4 : 0);
           }
-          
+         
           await fetch(`${API_BASE}/api/records`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2491,7 +2491,7 @@
           });
         }
       }
-      
+     
       return totalWood;
     }
 
@@ -2528,7 +2528,7 @@
       const season = localStorage.getItem('bowling_season') || '2025-2026';
       const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
       const cacheKey = `matches_cache_${coachId}_${season}`;
-      
+     
       // Helper function to render matches
       const renderMatches = (matchesWithRecords) => {
         const filteredMatches = filterMatchesBySeason(matchesWithRecords || [], currentSeason);
@@ -2572,7 +2572,7 @@
           const oppG4 = match.opp_g4 || 0;
           const teamTotal = teamG1 + teamG2 + teamG3 + (isTournament ? teamG4 : 0);
           const oppTotal = oppG1 + oppG2 + oppG3 + (isTournament ? oppG4 : 0);
-          
+         
           let ourPoints = 0;
           let oppPoints = 0;
           if (teamG1 > oppG1) ourPoints += 2; else if (oppG1 > teamG1) oppPoints += 2;
@@ -2585,11 +2585,11 @@
 
           // Format date
           const date = parseLocalDate(match.match_date);
-          const formattedDate = (date || new Date()).toLocaleDateString('en-US', { 
+          const formattedDate = (date || new Date()).toLocaleDateString('en-US', {
             weekday: 'short',
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric' 
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
           });
 
           // Determine result from calculated points (not stored result)
@@ -2734,7 +2734,7 @@
         console.log('Fetching matches from:', url);
         let response = await fetch(url);
         console.log('Response status:', response.status);
-        
+       
         // Fallback to old endpoint if new one doesn't exist (404)
         if (response.status === 404) {
           console.log('New endpoint not available, falling back to old endpoint');
@@ -2744,15 +2744,15 @@
           }
           response = await fetch(url);
         }
-        
+       
         if (!response.ok) {
           const errorText = await response.text();
           console.error('Response error text:', errorText);
           throw new Error(`Failed to fetch matches: ${response.status}`);
         }
-        
+       
         let matchesData = await response.json();
-        
+       
         // If using old endpoint, fetch records separately for each match
         let matchesWithRecords = matchesData;
         if (!matchesData[0]?.records) {
@@ -2763,7 +2763,7 @@
               fetch(`${API_BASE}/api/records?matchId=${match.id}`)
                 .then(res => res.ok ? res.json() : [])
                 .then(records => { recordsMap[match.id] = records; })
-                .catch(err => { 
+                .catch(err => {
                   console.error(`Error fetching records for match ${match.id}:`, err);
                   recordsMap[match.id] = [];
                 })
@@ -2772,25 +2772,25 @@
           } catch (err) {
             console.error('Error fetching records:', err);
           }
-          
+         
           // Attach records to matches
           matchesWithRecords = matchesData.map(match => ({
             ...match,
             records: recordsMap[match.id] || []
           }));
         }
-        
+       
         console.log('Fetched matches:', matchesWithRecords);
-        
+       
         // Step 3: Update cache with fresh data
         localStorage.setItem(cacheKey, JSON.stringify(matchesWithRecords));
-        
+       
         // Step 4: Render fresh data (will replace cached if different)
         renderMatches(matchesWithRecords);
 
       } catch (error) {
         console.error('Error loading matches:', error);
-        
+       
         // If we have cached data, keep it visible
         const cachedData = localStorage.getItem(cacheKey);
         if (!cachedData) {
@@ -2826,7 +2826,7 @@
     async function editMatch(matchId) {
       try {
         const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
-        
+       
         // Fetch match details
         const matchResponse = await fetch(`${API_BASE}/api/matches/${matchId}?coachId=${coachId}`);
         if (!matchResponse.ok) throw new Error('Failed to fetch match');
@@ -2836,31 +2836,31 @@
           showMessage('You only have view access for this match.', 'error');
           return;
         }
-        
+       
         // Fetch records for this match
         const recordsResponse = await fetch(`${API_BASE}/api/records?matchId=${matchId}`);
         const records = recordsResponse.ok ? await recordsResponse.json() : [];
-        
+       
         // Fallback: if records is not an array, make it an array
         const recordsArray = Array.isArray(records) ? records : [];
-        
+       
         // Set editing state
         editingMatchId = matchId;
         editingMatchGender = match.gender;
         selectedMatchGender = match.gender;
-        
+       
         // Update modal title
         document.querySelector('.modal-header h2').textContent = 'Edit Match';
         document.querySelector('.submit-match-btn').textContent = 'Update Match';
-        
+       
         // Fill in form fields
         document.getElementById('matchDate').value = formatDateInputValue(match.match_date);
-        
+       
         // Set opponent - update both the hidden input and search display
         document.getElementById('opponent').value = match.opponent;
         const opponentName = allOpponents.find(opp => opp.value === match.opponent)?.name || match.opponent;
         document.getElementById('opponentSearch').value = opponentName;
-        
+       
         document.getElementById('matchType').value = match.match_type || 'team';
         populateLocationDropdown(match.location || '');
         document.getElementById('comments').value = match.comments || '';
@@ -2872,7 +2872,7 @@
           canEdit: !!entry.can_edit
         }));
         renderShareList();
-        
+       
         // Fill in team game scores (if stored)
         document.getElementById('teamG1').value = match.team_g1 || '';
         document.getElementById('teamG2').value = match.team_g2 || '';
@@ -2885,10 +2885,10 @@
         const oppG4Input = document.getElementById('oppG4');
         if (oppG4Input) oppG4Input.value = match.opp_g4 || '';
         applyMatchTypeUI();
-        
+       
         // Recalculate the result display
         calculateMatchResult();
-        
+       
         // Load players for this match's gender
         const ownerCoachId = match.coach_id || coachId;
 
@@ -2911,10 +2911,10 @@
             calculateTeamTotals();
           }
         }
-        
+       
         // Show modal
         document.getElementById('matchModal').classList.add('active');
-        
+       
       } catch (error) {
         console.error('Error editing match:', error);
         showMessage('Error loading match data. Please try again.', 'error');
@@ -2924,7 +2924,7 @@
     // Render players table with existing scores
     function renderPlayersTableWithScores(records) {
       const tbody = document.getElementById('playersTableBody');
-      
+     
       if (!players || players.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888;">No players found.</td></tr>';
         return;
@@ -2940,7 +2940,7 @@
         const record = recordMap[player.id];
         const hasRecord = !!record;
         const isDNP = !hasRecord;
-        
+       
         return `
           <tr class="player-row ${isDNP ? 'dnp' : ''}" data-player-id="${player.id}" data-record-id="${record ? record.id : ''}">
             <td class="player-name-cell">${player.first_name} ${player.last_name}</td>
@@ -2953,7 +2953,7 @@
           </tr>
         `;
       }).join('');
-      
+     
       // Recalculate team totals after loading existing scores
       setTimeout(() => calculateTeamTotals(), 100);
     }
@@ -2991,7 +2991,7 @@
       document.getElementById('opponentDropdown').classList.remove('open');
       populateLocationDropdown();
       hideAddLocation();
-      
+     
       // Reset opponent scores section
       document.getElementById('teamG1').value = '';
       document.getElementById('teamG2').value = '';
@@ -3069,7 +3069,7 @@
       const accentColor = getComputedStyle(document.documentElement)
         .getPropertyValue("--accent-color")
         .trim();
-      
+     
       if (accentColor.toUpperCase() === '#FFFFFF') {
         document.documentElement.classList.add('accent-is-white');
       }

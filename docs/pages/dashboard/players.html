@@ -356,6 +356,11 @@
       background: var(--content-bg);
     }
 
+    .spreadsheet-table tbody tr.selected {
+      background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+      border-left: 3px solid var(--accent-color);
+    }
+
     .spreadsheet-table tbody td.player-name {
       cursor: pointer;
       font-weight: 600;
@@ -952,6 +957,7 @@
     function closeStatsPanel() {
       document.getElementById('statsPanel').classList.remove('active');
       document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.spreadsheet-table tbody tr').forEach(r => r.classList.remove('selected'));
       selectedPlayerId = null;
       trendVisible = false;
       document.getElementById('trendSection').classList.remove('active');
@@ -1142,7 +1148,7 @@
       }
 
       tbody.innerHTML = sortedData.map(({ player, stats }) => `
-        <tr>
+        <tr data-player-id="${player.id}" class="${selectedPlayerId === player.id ? 'selected' : ''}">
           <td class="player-name" onclick="selectPlayer('${player.id}');">${player.first_name} ${player.last_name}</td>
           ${showGender ? `<td>${(player._gender || currentGender) === 'boys' ? 'M' : 'F'}</td>` : ''}
           <td>${stats.matches}</td>
@@ -1197,8 +1203,11 @@
     async function selectPlayer(playerId) {
       selectedPlayerId = playerId;
       document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
-      const selectedCard = document.querySelector(`[data-player-id="${playerId}"]`);
+      document.querySelectorAll('.spreadsheet-table tbody tr').forEach(r => r.classList.remove('selected'));
+      const selectedCard = document.querySelector(`.player-card[data-player-id="${playerId}"]`);
       if (selectedCard) selectedCard.classList.add('selected');
+      const selectedRow = document.querySelector(`.spreadsheet-table tbody tr[data-player-id="${playerId}"]`);
+      if (selectedRow) selectedRow.classList.add('selected');
       const player = players.find(p => p.id === playerId);
       document.getElementById('statsPlayerName').textContent = `${player.first_name} ${player.last_name}'s Stats`;
       try {

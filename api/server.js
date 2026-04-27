@@ -870,8 +870,7 @@ app.get('/api/announcements', async (req, res) => {
       const { data: coaches, error: coachesError } = await supabase
         .from('users')
         .select('id')
-        .eq('team_code', student.team_code)
-        .eq('role', 'coach');
+        .eq('team_code', student.team_code);
 
       if (coachesError) throw coachesError;
       const coachIds = (coaches || []).map(c => c.id);
@@ -2537,8 +2536,7 @@ app.get('/api/polls', async (req, res) => {
       const { data: coaches, error: coachesError } = await supabase
         .from('users')
         .select('id')
-        .eq('team_code', student.team_code)
-        .eq('role', 'coach');
+        .eq('team_code', student.team_code);
 
       if (coachesError) throw coachesError;
       const coachIds = (coaches || []).map(c => c.id);

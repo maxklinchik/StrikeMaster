@@ -2526,8 +2526,8 @@
     async function loadMatches() {
       const container = document.getElementById('matchesContainer');
       const season = localStorage.getItem('bowling_season') || '2025-2026';
-      const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
       const cacheKey = `matches_cache_${coachId}_${season}`;
+      const isStudent = typeof auth !== 'undefined' && auth.isStudent();
      
       // Helper function to render matches
       const renderMatches = (matchesWithRecords) => {
@@ -2726,23 +2726,24 @@
         }
 
         // Step 2: Fetch fresh data in the background
-        let url = `${API_BASE}/api/matches-with-records?coachId=${coachId}&season=${season}`;
+        let matchesEndpoint = isStudent ? `/api/matches-with-records?season=${season}` : `/api/matches-with-records?coachId=${coachId}&season=${season}`;
         if (currentGender !== 'all') {
-          url += `&gender=${currentGender}`;
+          matchesEndpoint += `&gender=${currentGender}`;
         }
 
-        console.log('Fetching matches from:', url);
-        let response = await fetch(url);
+        let fallbackEndpoint = isStudent ? `/api/matches?season=${season}` : `/api/matches?coachId=${coachId}&season=${season}`;
+        if (currentGender !== 'all') {
+          fallbackEndpoint += `&gender=${currentGender}`;
+        }
+
+        console.log('Fetching matches from:', matchesEndpoint);
+        let response = await apiRequest(matchesEndpoint);
         console.log('Response status:', response.status);
        
         // Fallback to old endpoint if new one doesn't exist (404)
         if (response.status === 404) {
           console.log('New endpoint not available, falling back to old endpoint');
-          url = `${API_BASE}/api/matches?coachId=${coachId}&season=${season}`;
-          if (currentGender !== 'all') {
-            url += `&gender=${currentGender}`;
-          }
-          response = await fetch(url);
+          response = await apiRequest(fallbackEndpoint);
         }
        
         if (!response.ok) {
@@ -2760,7 +2761,7 @@
           const recordsMap = {};
           try {
             const recordsFetches = matchesData.map(match =>
-              fetch(`${API_BASE}/api/records?matchId=${match.id}`)
+              apiRequest(`/api/records?matchId=${match.id}`)
                 .then(res => res.ok ? res.json() : [])
                 .then(records => { recordsMap[match.id] = records; })
                 .catch(err => {

@@ -1555,34 +1555,78 @@ app.get('/api/matches', async (req, res) => {
     }
 
     const { coachId, gender, season } = req.query;
+    const userId = req.headers['x-user-id'];
+    const userType = req.headers['x-user-type'];
 
-    if (!coachId) {
-      return res.status(400).json({ error: 'coachId is required' });
+    let targetCoachIds = [];
+
+    if (coachId) {
+      // Coach: use existing logic
+      targetCoachIds = await getOwnerCoachIds(coachId);
+    } else if (userType === 'student' && userId) {
+      // Student: get all coaches for their team
+      const { data: student, error: studentError } = await supabase
+        .from('students')
+        .select('team_code')
+        .eq('id', userId)
+        .single();
+
+      if (studentError) throw new Error(`Could not find student: ${studentError.message}`);
+      if (!student?.team_code) throw new Error('Student has no team assigned');
+
+      // Get all coaches for this team
+      const { data: coaches, error: coachesError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('team_code', student.team_code);
+
+      if (coachesError) throw coachesError;
+      targetCoachIds = (coaches || []).map(c => c.id);
+    } else {
+      return res.status(400).json({ error: 'coachId or valid student session is required' });
     }
 
-    const ownerCoachIds = await getOwnerCoachIds(coachId);
+    if (targetCoachIds.length === 0) {
+      return res.json([]);
+    }
+
+    let matchQuery = supabase
+      .from('matches')
+      .select('*')
+      .in('coach_id', targetCoachIds);
+
+    if (gender) {
+      matchQuery = matchQuery.eq('gender', gender);
+    }
+
+    if (season) {
+      matchQuery = matchQuery.eq('season', season);
+    }
+
+    const { data: matches, error: matchesError } = await matchQuery;
+    if (matchesError) throw matchesError;
+
+    // For students, return matches read-only (no edit permissions)
+    if (userType === 'student') {
+      const matchesWithFlags = (matches || []).map(match => ({
+        ...match,
+        can_edit: false,
+        is_owner: false
+      }));
+      const sorted = matchesWithFlags.sort((a, b) => {
+        const dateA = a.match_date ? new Date(a.match_date) : new Date(0);
+        const dateB = b.match_date ? new Date(b.match_date) : new Date(0);
+        return dateB - dateA;
+      });
+      return res.json(sorted);
+    }
+
+    // For coaches, use original logic with permissions
     const { data: accessList } = await supabase
       .from('coach_access')
       .select('owner_coach_id, can_edit')
       .eq('coach_id', coachId);
     const accessMap = new Map((accessList || []).map(entry => [entry.owner_coach_id, entry.can_edit]));
-
-    let ownerQuery = supabase
-      .from('matches')
-      .select('*')
-      .in('coach_id', ownerCoachIds);
-
-    if (gender) {
-      ownerQuery = ownerQuery.eq('gender', gender);
-    }
-
-    // Filter by season if provided
-    if (season) {
-      ownerQuery = ownerQuery.eq('season', season);
-    }
-
-    const { data: ownerMatches, error: ownerError } = await ownerQuery;
-    if (ownerError) throw ownerError;
 
     const { data: permissions, error: permError } = await supabase
       .from('match_permissions')
@@ -1590,45 +1634,16 @@ app.get('/api/matches', async (req, res) => {
       .eq('coach_id', coachId);
     if (permError) throw permError;
 
-    const sharedMatchIds = (permissions || []).map(p => p.match_id);
-    let sharedMatches = [];
-    if (sharedMatchIds.length > 0) {
-      let sharedQuery = supabase
-        .from('matches')
-        .select('*')
-        .in('id', sharedMatchIds);
-      if (gender) {
-        sharedQuery = sharedQuery.eq('gender', gender);
-      }
-      // Filter by season if provided
-      if (season) {
-        sharedQuery = sharedQuery.eq('season', season);
-      }
-      const { data: sharedData, error: sharedError } = await sharedQuery;
-      if (sharedError) throw sharedError;
-      sharedMatches = sharedData || [];
-    }
-
     const permissionMap = new Map((permissions || []).map(p => [p.match_id, p.can_edit]));
     const matchMap = new Map();
 
-    (ownerMatches || []).forEach(match => {
+    (matches || []).forEach(match => {
       const isOwner = match.coach_id === coachId;
       matchMap.set(match.id, {
         ...match,
         can_edit: isOwner ? true : !!accessMap.get(match.coach_id),
         is_owner: isOwner
       });
-    });
-
-    sharedMatches.forEach(match => {
-      if (!matchMap.has(match.id)) {
-        matchMap.set(match.id, {
-          ...match,
-          can_edit: !!permissionMap.get(match.id),
-          is_owner: false
-        });
-      }
     });
 
     const merged = Array.from(matchMap.values()).sort((a, b) => {
@@ -1653,79 +1668,94 @@ app.get('/api/matches-with-records', async (req, res) => {
     }
 
     const { coachId, gender, season } = req.query;
+    const userId = req.headers['x-user-id'];
+    const userType = req.headers['x-user-type'];
 
-    if (!coachId) {
-      return res.status(400).json({ error: 'coachId is required' });
+    let targetCoachIds = [];
+
+    if (coachId) {
+      // Coach: use existing logic
+      targetCoachIds = await getOwnerCoachIds(coachId);
+    } else if (userType === 'student' && userId) {
+      // Student: get all coaches for their team
+      const { data: student, error: studentError } = await supabase
+        .from('students')
+        .select('team_code')
+        .eq('id', userId)
+        .single();
+
+      if (studentError) throw new Error(`Could not find student: ${studentError.message}`);
+      if (!student?.team_code) throw new Error('Student has no team assigned');
+
+      // Get all coaches for this team
+      const { data: coaches, error: coachesError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('team_code', student.team_code);
+
+      if (coachesError) throw coachesError;
+      targetCoachIds = (coaches || []).map(c => c.id);
+    } else {
+      return res.status(400).json({ error: 'coachId or valid student session is required' });
     }
 
-    const ownerCoachIds = await getOwnerCoachIds(coachId);
-    const { data: accessList } = await supabase
-      .from('coach_access')
-      .select('owner_coach_id, can_edit')
-      .eq('coach_id', coachId);
-    const accessMap = new Map((accessList || []).map(entry => [entry.owner_coach_id, entry.can_edit]));
+    if (targetCoachIds.length === 0) {
+      return res.json([]);
+    }
 
-    let ownerQuery = supabase
+    let matchQuery = supabase
       .from('matches')
       .select('*')
-      .in('coach_id', ownerCoachIds);
+      .in('coach_id', targetCoachIds);
 
     if (gender) {
-      ownerQuery = ownerQuery.eq('gender', gender);
+      matchQuery = matchQuery.eq('gender', gender);
     }
 
     if (season) {
-      ownerQuery = ownerQuery.eq('season', season);
+      matchQuery = matchQuery.eq('season', season);
     }
 
-    const { data: ownerMatches, error: ownerError } = await ownerQuery;
-    if (ownerError) throw ownerError;
+    const { data: matches, error: matchesError } = await matchQuery;
+    if (matchesError) throw matchesError;
 
-    const { data: permissions, error: permError } = await supabase
-      .from('match_permissions')
-      .select('match_id, can_edit')
-      .eq('coach_id', coachId);
-    if (permError) throw permError;
+    // Prepare matches with permissions
+    let matchMap = new Map();
 
-    const sharedMatchIds = (permissions || []).map(p => p.match_id);
-    let sharedMatches = [];
-    if (sharedMatchIds.length > 0) {
-      let sharedQuery = supabase
-        .from('matches')
-        .select('*')
-        .in('id', sharedMatchIds);
-      if (gender) {
-        sharedQuery = sharedQuery.eq('gender', gender);
-      }
-      if (season) {
-        sharedQuery = sharedQuery.eq('season', season);
-      }
-      const { data: sharedData, error: sharedError } = await sharedQuery;
-      if (sharedError) throw sharedError;
-      sharedMatches = sharedData || [];
-    }
-
-    const permissionMap = new Map((permissions || []).map(p => [p.match_id, p.can_edit]));
-    const matchMap = new Map();
-
-    (ownerMatches || []).forEach(match => {
-      const isOwner = match.coach_id === coachId;
-      matchMap.set(match.id, {
-        ...match,
-        can_edit: isOwner ? true : !!accessMap.get(match.coach_id),
-        is_owner: isOwner
-      });
-    });
-
-    sharedMatches.forEach(match => {
-      if (!matchMap.has(match.id)) {
+    if (userType === 'student') {
+      // Students: read-only access
+      (matches || []).forEach(match => {
         matchMap.set(match.id, {
           ...match,
-          can_edit: !!permissionMap.get(match.id),
+          can_edit: false,
           is_owner: false
         });
-      }
-    });
+      });
+    } else {
+      // Coaches: use original permission logic
+      const { data: accessList } = await supabase
+        .from('coach_access')
+        .select('owner_coach_id, can_edit')
+        .eq('coach_id', coachId);
+      const accessMap = new Map((accessList || []).map(entry => [entry.owner_coach_id, entry.can_edit]));
+
+      const { data: permissions, error: permError } = await supabase
+        .from('match_permissions')
+        .select('match_id, can_edit')
+        .eq('coach_id', coachId);
+      if (permError) throw permError;
+
+      const permissionMap = new Map((permissions || []).map(p => [p.match_id, p.can_edit]));
+
+      (matches || []).forEach(match => {
+        const isOwner = match.coach_id === coachId;
+        matchMap.set(match.id, {
+          ...match,
+          can_edit: isOwner ? true : !!accessMap.get(match.coach_id),
+          is_owner: isOwner
+        });
+      });
+    }
 
     const merged = Array.from(matchMap.values()).sort((a, b) => {
       const dateA = a.match_date ? new Date(a.match_date) : new Date(0);

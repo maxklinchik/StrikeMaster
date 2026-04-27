@@ -550,15 +550,6 @@
 
     <!-- COUNTY RANKINGS TAB -->
     <div id="countyTab" class="tab-content active">
-      <div class="filter-controls">
-        <div class="filter-group">
-          <label for="countySeasonSelect">Season:</label>
-          <select id="countySeasonSelect">
-            <option value="2025-2026">2025-2026</option>
-            <option value="2024-2025">2024-2025</option>
-          </select>
-        </div>
-      </div>
 
       <div class="rankings-grid">
         <!-- Boys County Rankings -->
@@ -581,25 +572,6 @@
 
     <!-- DIVISION RANKINGS TAB -->
     <div id="divisionTab" class="tab-content">
-      <div class="filter-controls">
-        <div class="filter-group">
-          <label for="divisionSeasonSelect">Season:</label>
-          <select id="divisionSeasonSelect">
-            <option value="2025-2026">2025-2026</option>
-            <option value="2024-2025">2024-2025</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="divisionFilter">Division:</label>
-          <select id="divisionFilter">
-            <option value="">All Divisions</option>
-            <option value="north">North</option>
-            <option value="south">South</option>
-            <option value="east">East</option>
-            <option value="west">West</option>
-          </select>
-        </div>
-      </div>
 
       <div class="rankings-grid">
         <!-- Boys Division Rankings -->
@@ -653,9 +625,6 @@
 
     let allPlayers = [];
     let allMatches = [];
-    let countySeasonSelect = document.getElementById('countySeasonSelect');
-    let divisionSeasonSelect = document.getElementById('divisionSeasonSelect');
-    let divisionFilter = document.getElementById('divisionFilter');
 
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -694,6 +663,17 @@
         if (userStr) {
           const user = JSON.parse(userStr);
           return user.team_name || null;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function getUserDivision() {
+      try {
+        const userStr = localStorage.getItem('bowling_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          return user.division || null;
         }
       } catch (e) {}
       return null;
@@ -872,32 +852,40 @@
           { rank: 4, name: 'Southridge HS', division: 'South', wins: 10, average: 168 },
         ];
 
-        // Get user school for all division rankings
+        // Get user school and division
         const userSchool = getUserSchool();
+        const userDivision = getUserDivision();
+
+        // Filter rankings by user's division
+        const filteredDivisionBoysPlayers = userDivision 
+          ? divisionBoysPlayers.filter(p => p.division === userDivision) 
+          : divisionBoysPlayers;
+        const filteredDivisionBoysTeams = userDivision 
+          ? divisionBoysTeams.filter(t => t.division === userDivision) 
+          : divisionBoysTeams;
 
         // Render boys division
-        const bestDivisionBoysPlayer = findBestFromSchool(divisionBoysPlayers, userSchool);
-        const bestDivisionBoysTeam = findBestFromSchool(divisionBoysTeams, userSchool);
+        const bestDivisionBoysPlayer = findBestFromSchool(filteredDivisionBoysPlayers, userSchool);
+        const bestDivisionBoysTeam = findBestFromSchool(filteredDivisionBoysTeams, userSchool);
 
         document.getElementById('divisionBoysContent').innerHTML = `
           <div class="ranking-section-title">Top Players</div>
           <table class="ranking-table">
             <thead>
-              <tr><th>Rank</th><th>Player</th><th>Team</th><th>Division</th><th style="text-align: right;">Avg</th></tr>
+              <tr><th>Rank</th><th>Player</th><th>Team</th><th style="text-align: right;">Avg</th></tr>
             </thead>
             <tbody>
-              ${divisionBoysPlayers.map(p => `
+              ${filteredDivisionBoysPlayers.map(p => `
                 <tr>
                   <td><span class="${getMedalClass(p.rank)}"></span>${p.rank}</td>
                   <td>${p.name}</td>
                   <td>${p.team}</td>
-                  <td><strong>${p.division}</strong></td>
                   <td style="text-align: right;">${p.average}</td>
                 </tr>
               `).join('')}
               ${bestDivisionBoysPlayer ? `
                 <tr class="school-highlight-row">
-                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysPlayer.name} <strong style="margin-left: 8px;">${bestDivisionBoysPlayer.division}</strong></div><div style="text-align: right;">${bestDivisionBoysPlayer.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysPlayer.name}</div><div style="text-align: right;">${bestDivisionBoysPlayer.average}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
@@ -905,50 +893,56 @@
           <div class="ranking-section-title">Top Teams</div>
           <table class="ranking-table">
             <thead>
-              <tr><th>Rank</th><th>Team</th><th>Division</th><th style="text-align: center;">Wins</th><th style="text-align: right;">Avg</th></tr>
+              <tr><th>Rank</th><th>Team</th><th style="text-align: center;">Wins</th><th style="text-align: right;">Avg</th></tr>
             </thead>
             <tbody>
-              ${divisionBoysTeams.map(t => `
+              ${filteredDivisionBoysTeams.map(t => `
                 <tr>
                   <td><span class="${getMedalClass(t.rank)}"></span>${t.rank}</td>
                   <td>${t.name}</td>
-                  <td><strong>${t.division}</strong></td>
                   <td style="text-align: center;">${t.wins}</td>
                   <td style="text-align: right;">${t.average}</td>
                 </tr>
               `).join('')}
               ${bestDivisionBoysTeam ? `
                 <tr class="school-highlight-row">
-                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysTeam.name} <strong style="margin-left: 8px;">${bestDivisionBoysTeam.division}</strong></div><div style="text-align: right;">${bestDivisionBoysTeam.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysTeam.name}</div><div style="text-align: right;">${bestDivisionBoysTeam.average}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
           </table>
         `;
 
+        // Filter girls division rankings by user's division
+        const filteredDivisionGirlsPlayers = userDivision 
+          ? divisionGirlsPlayers.filter(p => p.division === userDivision) 
+          : divisionGirlsPlayers;
+        const filteredDivisionGirlsTeams = userDivision 
+          ? divisionGirlsTeams.filter(t => t.division === userDivision) 
+          : divisionGirlsTeams;
+
         // Render girls division
-        const bestDivisionGirlsPlayer = findBestFromSchool(divisionGirlsPlayers, userSchool);
-        const bestDivisionGirlsTeam = findBestFromSchool(divisionGirlsTeams, userSchool);
+        const bestDivisionGirlsPlayer = findBestFromSchool(filteredDivisionGirlsPlayers, userSchool);
+        const bestDivisionGirlsTeam = findBestFromSchool(filteredDivisionGirlsTeams, userSchool);
 
         document.getElementById('divisionGirlsContent').innerHTML = `
           <div class="ranking-section-title">Top Players</div>
           <table class="ranking-table">
             <thead>
-              <tr><th>Rank</th><th>Player</th><th>Team</th><th>Division</th><th style="text-align: right;">Avg</th></tr>
+              <tr><th>Rank</th><th>Player</th><th>Team</th><th style="text-align: right;">Avg</th></tr>
             </thead>
             <tbody>
-              ${divisionGirlsPlayers.map(p => `
+              ${filteredDivisionGirlsPlayers.map(p => `
                 <tr>
                   <td><span class="${getMedalClass(p.rank)}"></span>${p.rank}</td>
                   <td>${p.name}</td>
                   <td>${p.team}</td>
-                  <td><strong>${p.division}</strong></td>
                   <td style="text-align: right;">${p.average}</td>
                 </tr>
               `).join('')}
               ${bestDivisionGirlsPlayer ? `
                 <tr class="school-highlight-row">
-                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsPlayer.name} <strong style="margin-left: 8px;">${bestDivisionGirlsPlayer.division}</strong></div><div style="text-align: right;">${bestDivisionGirlsPlayer.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsPlayer.name}</div><div style="text-align: right;">${bestDivisionGirlsPlayer.average}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
@@ -956,21 +950,20 @@
           <div class="ranking-section-title">Top Teams</div>
           <table class="ranking-table">
             <thead>
-              <tr><th>Rank</th><th>Team</th><th>Division</th><th style="text-align: center;">Wins</th><th style="text-align: right;">Avg</th></tr>
+              <tr><th>Rank</th><th>Team</th><th style="text-align: center;">Wins</th><th style="text-align: right;">Avg</th></tr>
             </thead>
             <tbody>
-              ${divisionGirlsTeams.map(t => `
+              ${filteredDivisionGirlsTeams.map(t => `
                 <tr>
                   <td><span class="${getMedalClass(t.rank)}"></span>${t.rank}</td>
                   <td>${t.name}</td>
-                  <td><strong>${t.division}</strong></td>
                   <td style="text-align: center;">${t.wins}</td>
                   <td style="text-align: right;">${t.average}</td>
                 </tr>
               `).join('')}
               ${bestDivisionGirlsTeam ? `
                 <tr class="school-highlight-row">
-                  <td colspan="5" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsTeam.name} <strong style="margin-left: 8px;">${bestDivisionGirlsTeam.division}</strong></div><div style="text-align: right;">${bestDivisionGirlsTeam.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsTeam.name}</div><div style="text-align: right;">${bestDivisionGirlsTeam.average}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
@@ -983,17 +976,8 @@
       }
     }
 
-    // Event listeners
-    countySeasonSelect.addEventListener('change', (e) => {
-      loadCountyRankings(e.target.value);
-    });
-
-    divisionSeasonSelect.addEventListener('change', (e) => {
-      loadDivisionRankings(e.target.value);
-    });
-
-    // Initialize
-    loadRankingsData('2025-2026');
+    // Initialize with current season from context
+    loadRankingsData(SeasonContext.getSeason());
   </script>
 </body>
 </html>

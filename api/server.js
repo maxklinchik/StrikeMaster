@@ -443,7 +443,7 @@ app.post('/api/auth/student-login', async (req, res) => {
     res.json({
       success: true,
       user: {
-        id: coach?.id || student.coach_id,
+        id: student.id,
         email: student.email,
         coach_id: student.coach_id,
         team_name: coach?.team_name,

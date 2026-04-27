@@ -857,7 +857,11 @@
       const list = document.getElementById('announcementList');
       list.innerHTML = '<div class="announcement-item">Loading announcements...</div>';
       try {
-        const res = await api.get(`/api/announcements?coachId=${currentUser.id}`);
+        // Students see all team announcements; coaches see their own announcements
+        const announcementsUrl = userType === 'student' 
+          ? `/api/announcements` 
+          : `/api/announcements?coachId=${currentUser.id}`;
+        const res = await api.get(announcementsUrl);
         if (!res.ok) throw new Error('Failed to load announcements');
         const data = await res.json();
         if (!data.length) {
@@ -1093,7 +1097,11 @@
       const list = document.getElementById('pollList');
       list.innerHTML = '<div class="poll-item">Loading polls...</div>';
       try {
-        const res = await api.get(`/api/polls?coachId=${currentUser.id}`);
+        // Students see all team polls; coaches see their own polls
+        const pollsUrl = userType === 'student' 
+          ? `/api/polls` 
+          : `/api/polls?coachId=${currentUser.id}`;
+        const res = await api.get(pollsUrl);
         if (!res.ok) throw new Error('Failed to load polls');
         const data = await res.json();
         if (!data.length) {
@@ -1488,14 +1496,10 @@
       loadAnnouncements();
     });
 
-    // Hide form cards for students
+    // Hide form cards for students (but allow viewing announcements and polls)
     if (userType !== 'coach') {
       document.getElementById('announcementFormCard').style.display = 'none';
       document.getElementById('pollFormCard').style.display = 'none';
-      const tabBtns = document.querySelectorAll('.tab-btn');
-      tabBtns.forEach(btn => {
-        if (btn.dataset.tab === 'polls') btn.style.display = 'none'; // Hide polls tab for students if desired
-      });
     }
 
     // Cleanup polling when leaving page

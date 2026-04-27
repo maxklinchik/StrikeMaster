@@ -151,6 +151,36 @@ async function getAuthenticatedUserId(req) {
   }
 }
 
+// Determine user type (coach or student) from the database
+async function getUserType(userId) {
+  try {
+    if (!supabase) return null;
+    
+    // Check if user is in the users table (coaches)
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', userId)
+      .single();
+    
+    if (user && !userError) return 'coach';
+    
+    // Check if user is in the students table
+    const { data: student, error: studentError } = await supabase
+      .from('students')
+      .select('id')
+      .eq('id', userId)
+      .single();
+    
+    if (student && !studentError) return 'student';
+    
+    return null;
+  } catch (error) {
+    console.error('Error getting user type:', error);
+    return null;
+  }
+}
+
 // ==================== HEALTH CHECK ====================
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -800,16 +830,69 @@ app.get('/api/announcements', async (req, res) => {
   try {
     if (!supabase) return res.status(500).json({ error: 'Database not configured' });
     const { coachId } = req.query;
-    if (!coachId) return res.status(400).json({ error: 'coachId is required' });
+    
+    let userId = req.headers['x-user-id'];
+    let userType = req.headers['x-user-type'];
+    
+    // If user info not in headers, try to get from JWT
+    if (!userId) {
+      userId = await getAuthenticatedUserId(req);
+    }
+    if (!userType && userId) {
+      userType = await getUserType(userId);
+    }
 
-    const ownerCoachIds = await getOwnerCoachIds(coachId);
-    const { data, error } = await supabase
-      .from('announcements')
-      .select('*')
-      .in('coach_id', ownerCoachIds)
-      .order('created_at', { ascending: false });
+    let data;
 
-    if (error) throw error;
+    if (coachId) {
+      // Coach: get their announcements
+      const ownerCoachIds = await getOwnerCoachIds(coachId);
+      const { data: announcements, error } = await supabase
+        .from('announcements')
+        .select('*')
+        .in('coach_id', ownerCoachIds)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      data = announcements || [];
+    } else if (userType === 'student' && userId) {
+      // Student: get all announcements for their team
+      const { data: student, error: studentError } = await supabase
+        .from('students')
+        .select('team_name')
+        .eq('id', userId)
+        .single();
+
+      if (studentError) throw new Error(`Could not find student: ${studentError.message}`);
+      if (!student?.team_name) throw new Error('Student has no team assigned');
+
+      // Get all coaches for this team
+      const { data: coaches, error: coachesError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('team_name', student.team_name)
+        .eq('role', 'coach');
+
+      if (coachesError) throw coachesError;
+      const coachIds = (coaches || []).map(c => c.id);
+
+      if (coachIds.length === 0) {
+        // No coaches for this team, return empty announcements
+        data = [];
+      } else {
+        const { data: announcements, error } = await supabase
+          .from('announcements')
+          .select('*')
+          .in('coach_id', coachIds)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        data = announcements || [];
+      }
+    } else {
+      return res.status(400).json({ error: 'coachId or valid student session is required' });
+    }
+
     res.json(data || []);
   } catch (error) {
     console.error('Announcements fetch error:', error);
@@ -2414,16 +2497,68 @@ app.get('/api/polls', async (req, res) => {
   try {
     if (!supabase) return res.status(500).json({ error: 'Database not configured' });
     const { coachId } = req.query;
-    if (!coachId) return res.status(400).json({ error: 'coachId is required' });
+    
+    let userId = req.headers['x-user-id'];
+    let userType = req.headers['x-user-type'];
+    
+    // If user info not in headers, try to get from JWT
+    if (!userId) {
+      userId = await getAuthenticatedUserId(req);
+    }
+    if (!userType && userId) {
+      userType = await getUserType(userId);
+    }
 
-    const ownerCoachIds = await getOwnerCoachIds(coachId);
-    const { data: polls, error: pollsError } = await supabase
-      .from('polls')
-      .select('*')
-      .in('coach_id', ownerCoachIds)
-      .order('created_at', { ascending: false });
+    let polls;
 
-    if (pollsError) throw pollsError;
+    if (coachId) {
+      // Coach: get their polls
+      const ownerCoachIds = await getOwnerCoachIds(coachId);
+      const { data: coachPolls, error: pollsError } = await supabase
+        .from('polls')
+        .select('*')
+        .in('coach_id', ownerCoachIds)
+        .order('created_at', { ascending: false });
+
+      if (pollsError) throw pollsError;
+      polls = coachPolls || [];
+    } else if (userType === 'student' && userId) {
+      // Student: get all polls for their team
+      const { data: student, error: studentError } = await supabase
+        .from('students')
+        .select('team_name')
+        .eq('id', userId)
+        .single();
+
+      if (studentError) throw new Error(`Could not find student: ${studentError.message}`);
+      if (!student?.team_name) throw new Error('Student has no team assigned');
+
+      // Get all coaches for this team
+      const { data: coaches, error: coachesError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('team_name', student.team_name)
+        .eq('role', 'coach');
+
+      if (coachesError) throw coachesError;
+      const coachIds = (coaches || []).map(c => c.id);
+
+      if (coachIds.length === 0) {
+        // No coaches for this team, return empty polls
+        polls = [];
+      } else {
+        const { data: teamPolls, error: pollsError } = await supabase
+          .from('polls')
+          .select('*')
+          .in('coach_id', coachIds)
+          .order('created_at', { ascending: false });
+
+        if (pollsError) throw pollsError;
+        polls = teamPolls || [];
+      }
+    } else {
+      return res.status(400).json({ error: 'coachId or valid student session is required' });
+    }
 
     // Fetch poll options for each poll
     const pollIds = (polls || []).map(p => p.id);

@@ -23,6 +23,16 @@ async function apiRequest(endpoint, options = {}) {
     defaultOptions.headers['Authorization'] = `Bearer ${token}`;
   }
   
+  // Get user context from auth helper if available (for students)
+  if (typeof auth !== 'undefined' && auth.getUser) {
+    const currentUser = auth.getUser();
+    const userType = auth.isStudent() ? 'student' : 'coach';
+    if (currentUser?.id) {
+      defaultOptions.headers['x-user-id'] = currentUser.id;
+      defaultOptions.headers['x-user-type'] = userType;
+    }
+  }
+  
   const mergedOptions = {
     ...defaultOptions,
     ...options,

@@ -1362,17 +1362,45 @@ app.get('/api/players', async (req, res) => {
     }
 
     const { coachId, gender } = req.query;
+    const userId = req.headers['x-user-id'];
+    const userType = req.headers['x-user-type'];
 
-    if (!coachId) {
-      return res.status(400).json({ error: 'coachId is required' });
+    let targetCoachIds = [];
+
+    if (coachId) {
+      // Coach: use existing logic
+      targetCoachIds = await getOwnerCoachIds(coachId);
+    } else if (userType === 'student' && userId) {
+      // Student: get all coaches for their team
+      const { data: student, error: studentError } = await supabase
+        .from('students')
+        .select('team_code')
+        .eq('id', userId)
+        .single();
+
+      if (studentError) throw new Error(`Could not find student: ${studentError.message}`);
+      if (!student?.team_code) throw new Error('Student has no team assigned');
+
+      // Get all coaches for this team
+      const { data: coaches, error: coachesError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('team_code', student.team_code);
+
+      if (coachesError) throw coachesError;
+      targetCoachIds = (coaches || []).map(c => c.id);
+    } else {
+      return res.status(400).json({ error: 'coachId or valid student session is required' });
     }
 
-    const ownerCoachIds = await getOwnerCoachIds(coachId);
+    if (targetCoachIds.length === 0) {
+      return res.json([]);
+    }
 
     let query = supabase
       .from('players')
       .select('*')
-      .in('coach_id', ownerCoachIds)
+      .in('coach_id', targetCoachIds)
       .eq('is_active', true)
       .order('last_name');
 

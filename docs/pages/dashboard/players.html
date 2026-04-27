@@ -1158,18 +1158,21 @@
     async function loadPlayers() {
       const container = document.getElementById('playersList');
       try {
-        const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
+        const isStudent = typeof auth !== 'undefined' && auth.isStudent();
         let allPlayers = [];
         if (currentGender === 'all') {
+          const boysEndpoint = isStudent ? '/api/players?gender=boys' : `/api/players?coachId=${coachId}&gender=boys`;
+          const girlsEndpoint = isStudent ? '/api/players?gender=girls' : `/api/players?coachId=${coachId}&gender=girls`;
           const [boysRes, girlsRes] = await Promise.all([
-            fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=boys`),
-            fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=girls`)
+            apiRequest(boysEndpoint),
+            apiRequest(girlsEndpoint)
           ]);
           if (boysRes.ok) { const bp = await boysRes.json(); allPlayers = [...allPlayers, ...bp.map(p => ({...p, _gender: 'boys'}))]; }
           if (girlsRes.ok) { const gp = await girlsRes.json(); allPlayers = [...allPlayers, ...gp.map(p => ({...p, _gender: 'girls'}))]; }
           players = allPlayers;
         } else {
-          const response = await fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=${currentGender}`);
+          const endpoint = isStudent ? `/api/players?gender=${currentGender}` : `/api/players?coachId=${coachId}&gender=${currentGender}`;
+          const response = await apiRequest(endpoint);
           if (!response.ok) throw new Error('Failed to fetch players');
           players = await response.json();
         }

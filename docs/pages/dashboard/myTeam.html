@@ -367,6 +367,26 @@
 
     .spreadsheet-table th.sortable {
       cursor: pointer;
+      position: relative;
+    }
+
+    .spreadsheet-table th.sortable::after {
+      content: ' ↕';
+      opacity: 0.3;
+      margin-left: 4px;
+      font-size: 10px;
+    }
+
+    .spreadsheet-table th.sorted-asc::after {
+      content: ' ↑';
+      opacity: 1;
+      color: var(--accent-text-color, white);
+    }
+
+    .spreadsheet-table th.sorted-desc::after {
+      content: ' ↓';
+      opacity: 1;
+      color: var(--accent-text-color, white);
     }
 
     .spreadsheet-table th.sortable:hover {
@@ -1053,7 +1073,7 @@
         <table class="spreadsheet-table">
           <thead>
             <tr>
-              <th class="sortable" data-sort="date">Date ▼</th>
+              <th class="sortable" data-sort="date">Date</th>
               <th>Opponent</th>
               <th>Location</th>
               <th class="sortable" data-sort="total">Match Total</th>
@@ -1630,13 +1650,16 @@
     function renderData() {
       const matches = getFilteredMatches();
       
+      // Sort matches
+      const sortedMatches = sortMatches(matches);
+      
       // Calculate season stats
-      let totalMatches = matches.length;
+      let totalMatches = sortedMatches.length;
       let wins = 0, losses = 0;
       let allMatchTotals = [];
       let totalAvgSum = 0;
       
-      matches.forEach(m => {
+      sortedMatches.forEach(m => {
         if (m.result === 'win') wins++;
         else if (m.result === 'loss') losses++;
         
@@ -1659,17 +1682,20 @@
         ? Math.min(...allMatchTotals) : '0';
       
       // Find highest and lowest match totals for highlighting
-      updateTeamTrendChart(matches);
+      updateTeamTrendChart(sortedMatches);
+      
+      // Update header sort indicators
+      updateSortIndicators();
       
       // Render table
       const tbody = document.getElementById('matchesBody');
       
-      if (matches.length === 0) {
+      if (sortedMatches.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="no-data">No matches found for this filter.</td></tr>';
         return;
       }
       
-      tbody.innerHTML = matches.map(match => {
+      tbody.innerHTML = sortedMatches.map(match => {
         const dateValue = parseLocalDate(match.match_date);
         const formattedDate = dateValue ? dateValue.toLocaleDateString('en-US', { 
           month: 'short', day: 'numeric', year: 'numeric' 
@@ -1732,6 +1758,45 @@
         `;
       }).join('');
     }
+
+    function sortMatches(matches) {
+      let sorted = [...matches];
+      
+      sorted.sort((a, b) => {
+        let aVal, bVal;
+        
+        if (sortColumn === 'date') {
+          aVal = new Date(a.match_date).getTime();
+          bVal = new Date(b.match_date).getTime();
+        } else if (sortColumn === 'total') {
+          aVal = getMatchTotal(a);
+          bVal = getMatchTotal(b);
+        } else if (sortColumn === 'avg') {
+          aVal = getMatchAvg(a);
+          bVal = getMatchAvg(b);
+        }
+        
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+      
+      return sorted;
+    }
+
+    function updateSortIndicators() {
+      const headerRow = document.querySelector('.spreadsheet-table thead tr');
+      if (!headerRow) return;
+      
+      headerRow.querySelectorAll('th.sortable').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        if (th.dataset.sort === sortColumn) {
+          th.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
+      });
+    }
+
+    // Add click handlers to sortable headers
 
     // ====== PLAYERS MANAGEMENT ======
 

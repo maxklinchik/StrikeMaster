@@ -859,18 +859,18 @@ app.get('/api/announcements', async (req, res) => {
       // Student: get all announcements for their team
       const { data: student, error: studentError } = await supabase
         .from('students')
-        .select('team_name')
+        .select('team_code')
         .eq('id', userId)
         .single();
 
       if (studentError) throw new Error(`Could not find student: ${studentError.message}`);
-      if (!student?.team_name) throw new Error('Student has no team assigned');
+      if (!student?.team_code) throw new Error('Student has no team assigned');
 
       // Get all coaches for this team
       const { data: coaches, error: coachesError } = await supabase
         .from('users')
         .select('id')
-        .eq('team_name', student.team_name)
+        .eq('team_code', student.team_code)
         .eq('role', 'coach');
 
       if (coachesError) throw coachesError;
@@ -2526,18 +2526,18 @@ app.get('/api/polls', async (req, res) => {
       // Student: get all polls for their team
       const { data: student, error: studentError } = await supabase
         .from('students')
-        .select('team_name')
+        .select('team_code')
         .eq('id', userId)
         .single();
 
       if (studentError) throw new Error(`Could not find student: ${studentError.message}`);
-      if (!student?.team_name) throw new Error('Student has no team assigned');
+      if (!student?.team_code) throw new Error('Student has no team assigned');
 
       // Get all coaches for this team
       const { data: coaches, error: coachesError } = await supabase
         .from('users')
         .select('id')
-        .eq('team_name', student.team_name)
+        .eq('team_code', student.team_code)
         .eq('role', 'coach');
 
       if (coachesError) throw coachesError;

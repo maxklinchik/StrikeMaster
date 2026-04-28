@@ -289,7 +289,7 @@
       background: var(--accent-color);
       color: var(--accent-text-color, white);
       border-bottom-color: var(--accent-color);
-      border-radius: 6px 6px 0 0;
+      border-radius: 6px;
     }
 
     .tab-content {
@@ -509,6 +509,14 @@
       filter: brightness(0.9);
     }
 
+    .poll-form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
     .btn {
       padding: 12px 24px;
       border: none;
@@ -664,12 +672,14 @@
             </div>
           </div>
         </div>
-        <button type="button" class="add-option-btn" onclick="addPollOption()">+ Add Option</button>
         <div class="form-group" id="ownerSelectGroupPoll" style="display: none; margin-top: 15px;">
           <label for="ownerSelectPoll">Send to team</label>
           <select id="ownerSelectPoll"></select>
         </div>
-        <button class="btn" id="createPollBtn">Create Poll</button>
+        <div class="poll-form-actions">
+          <button type="button" class="add-option-btn" onclick="addPollOption()">+ Add Option</button>
+          <button class="btn" id="createPollBtn">Create Poll</button>
+        </div>
       </div>
 
       <div class="card" id="pollList"></div>

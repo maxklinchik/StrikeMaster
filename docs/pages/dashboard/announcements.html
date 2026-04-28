@@ -1138,7 +1138,7 @@
           const totalVotes = Object.values(results).reduce((a, b) => a + b, 0);
 
           const deleteBtn = userType === 'coach' && poll.coach_id === activeOwnerCoachId && canEditTeam
-            ? `<button class="delete-btn" onclick="deletePoll('${poll.id}')">Delete Poll</button>`
+            ? `<button class="delete-btn" onclick="deletePoll('${poll.id}')">Delete</button>`
             : '';
 
           const optionsHtml = (poll.poll_options || [])

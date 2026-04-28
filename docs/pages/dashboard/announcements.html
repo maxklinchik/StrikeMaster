@@ -239,18 +239,19 @@
     }
 
     .delete-btn {
-      background: #dc3545;
-      color: white;
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
       border: none;
       padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 12px;
       font-weight: 600;
+      transition: all 0.2s;
     }
 
     .delete-btn:hover {
-      background: #c82333;
+      filter: brightness(0.9);
     }
 
     .message {
@@ -477,12 +478,17 @@
 
     .poll-option-input button {
       padding: 8px 16px;
-      background: #dc3545;
-      color: white;
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
       border: none;
       border-radius: 6px;
       cursor: pointer;
       font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .poll-option-input button:hover {
+      filter: brightness(0.9);
     }
 
     .add-option-btn {

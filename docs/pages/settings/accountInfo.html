@@ -414,6 +414,92 @@
     html.accent-is-white .card-header .icon svg {
       stroke: var(--main-color);
     }
+
+    /* Location Settings Styles */
+    .location-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .location-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--content-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .location-item-text {
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    .location-item-btn {
+      padding: 6px 12px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .location-item-btn:hover {
+      background: #c82333;
+    }
+
+    .location-input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .location-input-group input {
+      flex: 1;
+      padding: 12px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--content-bg);
+      color: var(--text-color);
+    }
+
+    .location-input-group input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .location-input-group button {
+      padding: 12px 24px;
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .location-input-group button:hover {
+      filter: brightness(0.95);
+    }
+
+    .location-empty {
+      padding: 12px 14px;
+      color: var(--text-muted);
+      font-size: 14px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -569,6 +655,27 @@
         <div class="linked-pill" id="googleLinkedPill" style="display: none;">Google linked</div>
       </div>
 
+      <div class="card" id="locationSettingsCard" style="display: none;">
+        <div class="card-header">
+          <div class="icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <div>
+            <h2>Bowling Locations</h2>
+            <p>Manage your saved bowling locations</p>
+          </div>
+        </div>
+
+        <div class="location-input-group">
+          <input type="text" id="newLocationInput" placeholder="Add a new location...">
+          <button id="addLocationBtn" type="button">Add</button>
+        </div>
+
+        <div id="locationListContainer" class="location-list"></div>
+      </div>
 
     </div>
   </div>
@@ -924,6 +1031,112 @@
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1waHdna2VwbHZxbnFubGJhb2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MTA2NjYsImV4cCI6MjA5MTk4NjY2Nn0.jI8YKPJ1ZbLXwG2XYz9Z7eP5V5Q7K8R9_QvW0XxYz_8';
       return window.supabase.createClient(supabaseUrl, supabaseKey);
     }
+
+    // Location Settings Class
+    class locationSettings {
+      constructor(userId) {
+        this.userId = userId;
+        this.locations = [];
+        this.container = document.getElementById('locationListContainer');
+        this.inputElement = document.getElementById('newLocationInput');
+        this.addBtn = document.getElementById('addLocationBtn');
+        this.card = document.getElementById('locationSettingsCard');
+        
+        if (this.addBtn) {
+          this.addBtn.addEventListener('click', () => this.addLocation());
+        }
+        
+        if (this.inputElement) {
+          this.inputElement.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.addLocation();
+          });
+        }
+      }
+
+      async loadLocations() {
+        try {
+          const res = await api.get(`/api/locations?coachId=${this.userId}`);
+          if (!res.ok) throw new Error('Failed to load locations');
+          this.locations = await res.json();
+          this.render();
+          // Only show card if user is a coach
+          if (this.card) this.card.style.display = 'block';
+        } catch (err) {
+          console.error('Error loading locations:', err);
+        }
+      }
+
+      async addLocation() {
+        const location = this.inputElement.value.trim();
+        if (!location) {
+          showMessage('Please enter a location', 'error');
+          return;
+        }
+
+        try {
+          const res = await api.post('/api/locations', {
+            coachId: this.userId,
+            location: location
+          });
+          
+          if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || 'Failed to add location');
+          }
+          
+          this.inputElement.value = '';
+          await this.loadLocations();
+          showMessage('Location added successfully', 'success');
+        } catch (err) {
+          showMessage(err.message || 'Failed to add location', 'error');
+        }
+      }
+
+      async removeLocation(location) {
+        if (!confirm(`Remove "${location}"?`)) return;
+
+        try {
+          const filteredLocations = this.locations.filter(l => l !== location);
+          const res = await api.put('/api/locations', {
+            coachId: this.userId,
+            locations: filteredLocations
+          });
+          
+          if (!res.ok) throw new Error('Failed to remove location');
+          
+          await this.loadLocations();
+          showMessage('Location removed successfully', 'success');
+        } catch (err) {
+          showMessage(err.message || 'Failed to remove location', 'error');
+        }
+      }
+
+      render() {
+        if (!this.container) return;
+        
+        if (this.locations.length === 0) {
+          this.container.innerHTML = '<div class="location-empty">No saved locations yet</div>';
+          return;
+        }
+
+        this.container.innerHTML = this.locations.map(location => `
+          <div class="location-item">
+            <span class="location-item-text">${location}</span>
+            <button class="location-item-btn" onclick="locationSettingsInstance.removeLocation('${location.replace(/'/g, "\\'")}')" type="button">Remove</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    let locationSettingsInstance = null;
+
+    // Initialize location settings for coaches
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!isStudent && currentUser?.id) {
+        locationSettingsInstance = new locationSettings(currentUser.id);
+        await locationSettingsInstance.loadLocations();
+      }
+    });
 
     // Update icon colors if accent is white
     (function() {

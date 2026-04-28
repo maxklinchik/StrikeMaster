@@ -286,8 +286,10 @@
     }
 
     .tab-btn.active {
-      color: var(--accent-color);
+      background: var(--accent-color);
+      color: var(--accent-text-color, white);
       border-bottom-color: var(--accent-color);
+      border-radius: 6px 6px 0 0;
     }
 
     .tab-content {
@@ -493,13 +495,18 @@
 
     .add-option-btn {
       padding: 8px 16px;
-      background: var(--content-bg);
-      border: 1px solid var(--accent-color);
-      color: var(--accent-color);
+      background: var(--accent-color);
+      border: none;
+      color: var(--accent-text-color, white);
       border-radius: 6px;
       cursor: pointer;
       font-size: 12px;
       font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .add-option-btn:hover {
+      filter: brightness(0.9);
     }
 
     .btn {

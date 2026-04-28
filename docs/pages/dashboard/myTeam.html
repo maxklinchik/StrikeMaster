@@ -1003,7 +1003,7 @@
     </div>
 
     <!-- View Toggle -->
-    <div class="view-toggle">
+    <div class="view-toggle" id="viewToggle">
       <button class="view-btn active" data-view="stats">Match Stats</button>
       <button class="view-btn" data-view="players">Manage Players</button>
     </div>
@@ -1167,6 +1167,7 @@
     }
 
     const currentUser = auth.getUser();
+    const isStudent = auth.isStudent();
     let coachId = currentUser?.id;
     let currentStatsGender = 'all';
     let currentPlayerGender = 'boys';
@@ -1178,6 +1179,14 @@
     let teamTrendChart = null;
     let activeOwnerCoachId = currentUser?.id;
     let canEditTeamAccess = true;
+
+    // Hide coach-only elements for students
+    if (isStudent) {
+      document.getElementById('viewToggle').style.display = 'none';
+      document.getElementById('playersView').style.display = 'none';
+      document.querySelector('.invite-section').style.display = 'none';
+      document.getElementById('statsView').classList.add('active');
+    }
 
     // Load team logo based on user's school affiliation
     function loadTeamLogo() {
@@ -1983,18 +1992,23 @@
         if (!data.length) {
           activeOwnerCoachId = currentUser.id;
           canEditTeamAccess = true;
-          document.querySelector('.invite-section').style.display = 'block';
+          if (!isStudent) {
+            document.querySelector('.invite-section').style.display = 'block';
+          }
           return;
         }
         activeOwnerCoachId = data[0].owner_coach_id;
         canEditTeamAccess = !!data[0].can_edit;
-        document.querySelector('.invite-section').style.display = 'none';
+        if (!isStudent) {
+          document.querySelector('.invite-section').style.display = 'none';
+        }
       } catch (error) {
         console.error('Load owner teams failed:', error);
       }
     }
 
     document.getElementById('inviteCoachBtn')?.addEventListener('click', async () => {
+      if (isStudent) return; // Students cannot invite coaches
       const identifier = document.getElementById('inviteCoachIdentifier').value.trim();
       const canEdit = document.getElementById('inviteCoachCanEdit').checked;
       if (!identifier) {
@@ -2066,7 +2080,7 @@
     // Initialize - load matches
     loadOwnerTeams().then(() => {
       loadMatches();
-      if (canEditTeamAccess) {
+      if (!isStudent && canEditTeamAccess) {
         loadCoachInvites();
       }
     });

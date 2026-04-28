@@ -30,10 +30,7 @@ async function apiRequest(endpoint, options = {}) {
     if (currentUser?.id) {
       defaultOptions.headers['x-user-id'] = currentUser.id;
       defaultOptions.headers['x-user-type'] = userType;
-      console.log(`[API] Adding headers: x-user-id=${currentUser.id}, x-user-type=${userType}`);
     }
-  } else {
-    console.log('[API] auth object not available');
   }
   
   const mergedOptions = {
@@ -45,7 +42,6 @@ async function apiRequest(endpoint, options = {}) {
     },
   };
   
-  console.log(`[API] Request to ${endpoint}`, mergedOptions.headers);
   const response = await fetch(url, mergedOptions);
   return response;
 }

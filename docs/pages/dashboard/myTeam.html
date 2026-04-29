@@ -380,13 +380,18 @@
     .spreadsheet-table th.sorted-asc::after {
       content: ' ↑';
       opacity: 1;
-      color: white;
+      color: var(--accent-color);
     }
 
     .spreadsheet-table th.sorted-desc::after {
       content: ' ↓';
       opacity: 1;
-      color: white;
+      color: var(--accent-color);
+    }
+
+    [data-theme="light"] .spreadsheet-table th.sorted-asc::after,
+    [data-theme="light"] .spreadsheet-table th.sorted-desc::after {
+      color: black;
     }
 
     .spreadsheet-table th.sortable:hover {
@@ -565,6 +570,7 @@
       font-weight: 600;
       font-size: 14px;
       transition: all 0.2s;
+      color: white;
     }
 
     .btn-secondary:hover {

@@ -687,14 +687,24 @@
 
     async function loadCountyRankings(season) {
       try {
-        // Mock data for county rankings
-        const countyBoysPlayers = [
-          { rank: 1, name: 'Alex Johnson', team: 'Strike Master HS', average: 190 },
-          { rank: 2, name: 'Marcus Brown', team: 'Strike Master HS', average: 185 },
-          { rank: 3, name: 'Liam Carter', team: 'County Central HS', average: 182 },
-          { rank: 4, name: 'Noah Patel', team: 'Ridge Valley HS', average: 180 },
-        ];
+        // Fetch boys rankings from Google Sheets
+        const response = await fetch('https://strikemaster.up.railway.app/api/rankings/columns?sheet=ORB&columns=A,B,C,O');
+        const data = await response.json();
         
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid data format from API');
+        }
+        
+        // Map Google Sheets data to our format
+        // Skip the first few rows (headers and summary) - data should start from row 4
+        const countyBoysPlayers = data.slice(0, 4).map(row => ({
+          rank: parseInt(row['Rank'] || 0),
+          name: row['Name'] || '',
+          team: row['Team'] || '',
+          average: parseFloat(row['OvAvg'] || 0)
+        })).filter(p => p.rank > 0);
+        
+        // Mock data for county teams (keeping for now)
         const countyBoysTeams = [
           { rank: 1, name: 'Strike Master HS', wins: 15, average: 178 },
           { rank: 2, name: 'County Central HS', wins: 12, average: 172 },
@@ -702,6 +712,7 @@
           { rank: 4, name: 'Westbrook HS', wins: 10, average: 168 },
         ];
         
+        // Mock data for girls (keeping for now)
         const countyGirlsPlayers = [
           { rank: 1, name: 'Samantha Lee', team: 'Strike Master HS', average: 195 },
           { rank: 2, name: 'Emily Davis', team: 'Strike Master HS', average: 188 },

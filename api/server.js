@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
+import { getRankingsFromSheet } from './services/googleSheets.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -2908,6 +2909,21 @@ app.delete('/api/polls/:id', async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Delete poll error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// ==================== GOOGLE SHEETS - RANKINGS ====================
+
+app.get('/api/rankings', async (req, res) => {
+  try {
+    const spreadsheetId = '1y1EJWFhVe3eHohXEMTVOFVKcXdTDAD1Us24-fm5jm3k';
+    const range = 'ORB!A:Z'; // Fetch all data from ORB sheet
+    
+    const rankings = await getRankingsFromSheet(spreadsheetId, range);
+    res.json(rankings);
+  } catch (error) {
+    console.error('Get rankings error:', error);
     res.status(400).json({ error: error.message });
   }
 });

@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
-import { getRankingsFromSheet } from './services/googleSheets.js';
+import { getRankingsFromSheet, getRankingsByColumns } from './services/googleSheets.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -2924,6 +2924,26 @@ app.get('/api/rankings', async (req, res) => {
     res.json(rankings);
   } catch (error) {
     console.error('Get rankings error:', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Get rankings by specific columns
+// Usage: /api/rankings/columns?sheet=ORB&columns=A,B,C,O
+// Returns: Array of objects with selected columns (Rank, Name, Team, OvAvg)
+app.get('/api/rankings/columns', async (req, res) => {
+  try {
+    const spreadsheetId = '1y1EJWFhVe3eHohXEMTVOFVKcXdTDAD1Us24-fm5jm3k';
+    const sheetName = req.query.sheet || 'ORB';
+    const columnsParam = req.query.columns || 'A,B,C,O';
+    
+    // Parse columns parameter (e.g., "A,B,C,O" -> ["A", "B", "C", "O"])
+    const columns = columnsParam.split(',').map(col => col.trim().toUpperCase());
+    
+    const rankings = await getRankingsByColumns(spreadsheetId, sheetName, columns);
+    res.json(rankings);
+  } catch (error) {
+    console.error('Get rankings by columns error:', error);
     res.status(400).json({ error: error.message });
   }
 });

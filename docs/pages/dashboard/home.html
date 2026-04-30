@@ -1449,7 +1449,6 @@
       <div class="match-type-buttons">
         <button type="button" class="match-type-btn" data-gender="boys">Boys</button>
         <button type="button" class="match-type-btn" data-gender="girls">Girls</button>
-        <button type="button" class="match-type-btn" data-gender="coed">Coed</button>
       </div>
     </div>
   </div>
@@ -2057,7 +2056,7 @@
         const API_BASE = window.API_BASE_URL || 'https://strikemaster.up.railway.app';
         const activeGender = genderOverride || currentGender;
 
-        if (activeGender === 'all' || activeGender === 'coed') {
+        if (activeGender === 'all') {
           // Load both boys and girls players
           const [boysResponse, girlsResponse] = await Promise.all([
             fetch(`${API_BASE}/api/players?coachId=${coachId}&gender=boys`),
@@ -2622,7 +2621,7 @@
           // Get opponent logo
           const opponentLogo = getOpponentLogo(match.opponent);
 
-          const badgeText = match.gender === 'coed' ? 'Coed' : match.gender === 'boys' ? 'Boys' : 'Girls';
+          const badgeText = match.gender === 'boys' ? 'Boys' : 'Girls';
           const genderBadge = currentGender === 'all' ? `<span class="gender-badge ${match.gender || ''}">${badgeText}</span>` : '';
 
           html += `
@@ -2633,7 +2632,7 @@
                   <div class="match-text">
                     <div class="match-date">${formattedDate}${genderBadge}</div>
                     <div class="match-opponent">vs ${match.opponent}</div>
-                    ${match.location ? `<div class="match-location"> ${match.location}</div>` : ''}
+                    ${match.location ? `<div class="match-location">${match.location}</div>` : ''}
                   </div>
                 </div>
                 <div class="match-stats">
@@ -2903,7 +2902,7 @@
         // Load players for this match's gender
         const ownerCoachId = match.coach_id || coachId;
 
-        if (match.gender === 'coed') {
+        if (match.gender === 'all') {
           const [boysResponse, girlsResponse] = await Promise.all([
             fetch(`${API_BASE}/api/players?coachId=${ownerCoachId}&gender=boys`),
             fetch(`${API_BASE}/api/players?coachId=${ownerCoachId}&gender=girls`)

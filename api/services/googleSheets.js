@@ -5,13 +5,26 @@ import path from 'path';
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 
 async function authorize() {
-  const credentialsPath = path.join(process.cwd(), '..', 'strikemaster-credentials.json');
+  let credentials = null;
   
-  if (!fs.existsSync(credentialsPath)) {
-    throw new Error('Google credentials file not found at ' + credentialsPath);
+  // Try to load from environment variable first (preferred for production)
+  if (process.env.GOOGLE_CREDENTIALS) {
+    try {
+      credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    } catch (error) {
+      throw new Error('Failed to parse GOOGLE_CREDENTIALS environment variable: ' + error.message);
+    }
+  } 
+  // Fall back to file (for local development)
+  else {
+    const credentialsPath = path.join(process.cwd(), '..', 'strikemaster-credentials.json');
+    
+    if (!fs.existsSync(credentialsPath)) {
+      throw new Error('Google credentials file not found at ' + credentialsPath + ' and GOOGLE_CREDENTIALS environment variable is not set');
+    }
+    
+    credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
   }
-  
-  const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
   
   const auth = new google.auth.GoogleAuth({
     credentials,

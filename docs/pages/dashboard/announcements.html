@@ -218,7 +218,7 @@
     }
 
     .reaction-btn {
-      background: var(--content-bg);
+      background: white;
       border: 1px solid var(--border-color);
       border-radius: 20px;
       padding: 6px 12px;
@@ -226,12 +226,13 @@
       font-size: 14px;
       transition: all 0.2s;
       font-family: inherit;
-      color: black;
+      color: black !important;
     }
 
     @media (prefers-color-scheme: dark) {
       .reaction-btn {
-        color: white;
+        background: #2d2d2d;
+        color: white !important;
       }
     }
 

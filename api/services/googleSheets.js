@@ -83,7 +83,16 @@ export async function getRankingsByColumns(spreadsheetId, sheetName, columnLette
     const auth = await authorize();
     const sheets = google.sheets({ version: 'v4', auth });
     
-    const range = `${sheetName}!A:Z`;
+    // Calculate the maximum column needed to fetch (to handle columns beyond Z)
+    const maxColumn = columnLetters.reduce((max, col) => {
+      const colIndex = columnLetterToIndex(col);
+      return colIndex > max ? colIndex : max;
+    }, 0);
+    
+    // Convert index back to column letter to get the range
+    const maxColLetter = indexToColumnLetter(maxColumn);
+    const range = `${sheetName}!A:${maxColLetter}`;
+    
     const result = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range,
@@ -122,4 +131,16 @@ export async function getRankingsByColumns(spreadsheetId, sheetName, columnLette
     console.error('Error fetching columns from Google Sheets:', error);
     throw error;
   }
+}
+
+// Convert index to column letter (0=A, 1=B, ..., 25=Z, 26=AA, etc.)
+function indexToColumnLetter(index) {
+  let letter = '';
+  index += 1; // Convert to 1-based
+  while (index > 0) {
+    index--;
+    letter = String.fromCharCode(65 + (index % 26)) + letter;
+    index = Math.floor(index / 26);
+  }
+  return letter;
 }

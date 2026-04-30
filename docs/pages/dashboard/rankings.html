@@ -696,13 +696,13 @@
         }
         
         // Map Google Sheets data to our format
-        // Skip the first few rows (headers and summary) - data should start from row 4
-        const countyBoysPlayers = data.slice(0, 4).map(row => ({
-          rank: parseInt(row['Rank'] || 0),
+        // Skip the first row (description/header) and map the rest
+        const countyBoysPlayers = data.slice(1).map(row => ({
+          rank: parseInt(row[''] || 0),
           name: row['Name'] || '',
           team: row['Team'] || '',
-          average: parseFloat(row['OvAvg'] || 0)
-        })).filter(p => p.rank > 0);
+          average: parseFloat(row['CtyAvg'] || 0)
+        })).filter(p => p.rank > 0 && p.name.trim() !== '');
         
         // Mock data for county teams (keeping for now)
         const countyBoysTeams = [

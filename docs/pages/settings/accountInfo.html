@@ -658,31 +658,6 @@
         <div class="linked-pill" id="googleLinkedPill" style="display: none;">Google linked</div>
       </div>
 
-      <div class="card" id="locationSettingsCard" style="display: none;">
-        <div class="card-header">
-          <div class="icon">
-            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
-          <div>
-            <h2>Bowling Locations</h2>
-            <p>Manage your saved bowling locations</p>
-          </div>
-        </div>
-
-        <div class="location-input-group">
-          <input type="text" id="newLocationInput" placeholder="Add a new location...">
-          <button id="addLocationBtn" type="button">Add</button>
-        </div>
-
-        <div id="locationListContainer" class="location-list"></div>
-      </div>
-
-    </div>
-  </div>
-
   <script>
     if (!auth.requireAuth('../auth/login.html')) {
       throw new Error('Not authenticated');

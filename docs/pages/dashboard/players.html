@@ -239,11 +239,20 @@
     }
 
     .player-card:last-child { border-bottom: none; }
-    .player-card:hover { background: var(--content-bg); }
+    .player-card:hover { background: color-mix(in srgb, var(--accent-color) 6%, var(--content-bg)); }
 
     .player-card.selected {
-      background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+      background: color-mix(in srgb, var(--accent-color) 10%, var(--content-bg));
       border-left: 3px solid var(--accent-color);
+    }
+
+    /* When accent is white, use main color for hover/selected so highlight remains visible */
+    html.accent-is-white .player-card:hover {
+      background: color-mix(in srgb, var(--main-color) 6%, var(--content-bg));
+    }
+    html.accent-is-white .player-card.selected {
+      background: color-mix(in srgb, var(--main-color) 10%, var(--content-bg));
+      border-left-color: var(--main-color);
     }
 
     .player-info h4 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
@@ -353,7 +362,21 @@
     }
 
     .spreadsheet-table tbody tr:hover {
-      background: var(--content-bg);
+      background: color-mix(in srgb, var(--accent-color) 6%, var(--content-bg));
+    }
+
+    .spreadsheet-table tbody tr.selected {
+      background: color-mix(in srgb, var(--accent-color) 10%, var(--content-bg));
+      border-left: 3px solid var(--accent-color);
+    }
+
+    /* Accent-white fallback for spreadsheet rows */
+    html.accent-is-white .spreadsheet-table tbody tr:hover {
+      background: color-mix(in srgb, var(--main-color) 6%, var(--content-bg));
+    }
+    html.accent-is-white .spreadsheet-table tbody tr.selected {
+      background: color-mix(in srgb, var(--main-color) 10%, var(--content-bg));
+      border-left-color: var(--main-color);
     }
 
     .spreadsheet-table tbody td.player-name {
@@ -1151,9 +1174,11 @@
         });
       }
 
-      tbody.innerHTML = sortedData.map(({ player, stats }) => `
-        <tr>
-          <td class="player-name" onclick="selectPlayer('${player.id}');">${player.first_name} ${player.last_name}</td>
+      tbody.innerHTML = sortedData.map(({ player, stats }) => {
+        const isSelected = selectedPlayerId === player.id ? 'selected' : '';
+        return `
+        <tr data-player-id="${player.id}" class="${isSelected}" onclick="selectPlayer('${player.id}')">
+          <td class="player-name">${player.first_name} ${player.last_name}</td>
           ${showGender ? `<td>${(player._gender || currentGender) === 'boys' ? 'M' : 'F'}</td>` : ''}
           <td>${stats.matches}</td>
           <td>${stats.avgG1}</td>
@@ -1162,7 +1187,7 @@
           <td>${stats.avgG4}</td>
           <td>${stats.overallAvg}</td>
         </tr>
-      `).join('');
+      `}).join('');
     }
 
     async function loadPlayers() {
@@ -1193,14 +1218,16 @@
           }
           return;
         }
-        container.innerHTML = players.map(player => `
-          <div class="player-card" data-player-id="${player.id}" onclick="selectPlayer('${player.id}')">
+        container.innerHTML = players.map(player => {
+          const isSelected = selectedPlayerId === player.id ? 'selected' : '';
+          return `
+          <div class="player-card ${isSelected}" data-player-id="${player.id}" onclick="selectPlayer('${player.id}')">
             <div class="player-info">
               <h4>${player.first_name} ${player.last_name}</h4>
               <span>Class of ${player.grad_year || 'N/A'}${player.email ? ` • ${player.email}` : ''}</span>
             </div>
           </div>
-        `).join('');
+        `}).join('');
         if (currentView === 'sheet') {
           loadSpreadsheetData();
         }
@@ -1212,6 +1239,10 @@
       document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
       const selectedCard = document.querySelector(`[data-player-id="${playerId}"]`);
       if (selectedCard) selectedCard.classList.add('selected');
+      // Update spreadsheet selection (if visible)
+      document.querySelectorAll('.spreadsheet-table tbody tr').forEach(r => r.classList.remove('selected'));
+      const selectedRow = document.querySelector(`.spreadsheet-table tbody tr[data-player-id="${playerId}"]`);
+      if (selectedRow) selectedRow.classList.add('selected');
       const player = players.find(p => p.id === playerId);
       document.getElementById('statsPlayerName').textContent = `${player.first_name} ${player.last_name}'s Stats`;
       try {

@@ -845,6 +845,12 @@
 
       // Update all logo images on the page
       updateTeamLogoImages();
+      
+      // Dispatch custom event for other pages to listen to
+      window.dispatchEvent(new CustomEvent('logoDisplayChanged', { 
+        detail: { logoDisplay: logoType } 
+      }));
+      
       showMessage(`Logo display changed to ${logoType === 'strikemaster' ? 'Strike Master' : logoType === 'school' ? 'School' : 'None'}`, 'success');
     }
 
@@ -860,8 +866,10 @@
       logoImgs.forEach(img => {
         if (currentLogoDisplay === 'strikemaster') {
           img.src = `${basePath}BowlingPinCartoon.png`;
+          img.style.display = '';
         } else if (currentLogoDisplay === 'school') {
           // Get the school logo from user data if available
+          let schoolLogoSet = false;
           try {
             const userStr = localStorage.getItem('bowling_user');
             if (userStr) {
@@ -870,6 +878,8 @@
                 const schoolLogo = getTeamLogo(user.team_name, `${basePath}Team Logos/`);
                 if (schoolLogo) {
                   img.src = schoolLogo;
+                  img.style.display = '';
+                  schoolLogoSet = true;
                   return;
                 }
               }
@@ -879,6 +889,7 @@
           }
           // Fallback to default school logo
           img.src = `${basePath}Team Logos/phLogo.png`;
+          img.style.display = '';
         } else if (currentLogoDisplay === 'none') {
           img.style.display = 'none';
         }

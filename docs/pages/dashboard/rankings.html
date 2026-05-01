@@ -688,7 +688,7 @@
     async function loadCountyRankings(season) {
       try {
         // Fetch boys rankings from Google Sheets
-        const response = await fetch('https://strikemaster.up.railway.app/api/rankings/columns?sheet=ORB&columns=A,B,C,O');
+        const response = await fetch('https://strikemaster.up.railway.app/api/rankings/columns?sheet=ORB&columns=A,B,C,Q');
         const data = await response.json();
         
         if (!Array.isArray(data)) {
@@ -701,16 +701,24 @@
           rank: parseInt(row[''] || 0),
           name: row['Name'] || '',
           team: row['Team'] || '',
-          average: parseFloat(row['CtyAvg'] || 0)
+          average: parseFloat(row['OvAvg'] || 0)
         })).filter(p => p.rank > 0 && p.name.trim() !== '');
         
-        // Mock data for county teams (keeping for now)
-        const countyBoysTeams = [
-          { rank: 1, name: 'Strike Master HS', wins: 15, average: 178 },
-          { rank: 2, name: 'County Central HS', wins: 12, average: 172 },
-          { rank: 3, name: 'Ridge Valley HS', wins: 11, average: 170 },
-          { rank: 4, name: 'Westbrook HS', wins: 10, average: 168 },
-        ];
+// Fetch boys team rankings from Google Sheets TS tab
+        const teamResponse = await fetch('https://strikemaster.up.railway.app/api/rankings/columns?sheet=TS&columns=AH,AJ,AK,AP');
+        const teamData = await teamResponse.json();
+        
+        if (!Array.isArray(teamData)) {
+          throw new Error('Invalid team data format from API');
+        }
+        
+        // Map team data - skip first 3 rows to get to row 4 where data starts
+        const countyBoysTeams = teamData.slice(3).map(row => ({
+          rank: parseInt(row[''] || 0),
+          name: row['Team'] || '',
+          record: row['W-L-T'] || '',
+          average: parseFloat(row['APG'] ? row['APG'].toString().replace(/,/g, '') : 0)
+        })).filter(t => t.rank > 0 && t.name.trim() !== '');
         
         // Mock data for girls (keeping for now)
         const countyGirlsPlayers = [
@@ -739,17 +747,17 @@
               <tr><th>Rank</th><th>Player</th><th>Team</th><th style="text-align: right;">Avg</th></tr>
             </thead>
             <tbody>
-              ${countyBoysPlayers.map(p => `
+              ${countyBoysPlayers.slice(0, 5).map(p => `
                 <tr>
-                  <td><span class="${getMedalClass(p.rank)}"></span>${p.rank}</td>
+                  <td>${p.rank}</td>
                   <td>${p.name}</td>
                   <td>${p.team}</td>
-                  <td style="text-align: right;">${p.average}</td>
+                  <td style="text-align: right;">${p.average.toFixed(1)}</td>
                 </tr>
               `).join('')}
               ${bestSchoolPlayer ? `
                 <tr class="school-highlight-row">
-                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolPlayer.name}</div><div style="text-align: right;">${bestSchoolPlayer.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolPlayer.name}</div><div style="text-align: right;">${bestSchoolPlayer.average.toFixed(1)}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
@@ -757,20 +765,20 @@
           <div class="ranking-section-title">Top Teams</div>
           <table class="ranking-table">
             <thead>
-              <tr><th>Rank</th><th>Team</th><th style="text-align: center;">Wins</th><th style="text-align: right;">Avg</th></tr>
+              <tr><th>Rank</th><th>Team</th><th style="text-align: center;">Record</th><th style="text-align: right;">APG</th></tr>
             </thead>
             <tbody>
               ${countyBoysTeams.map(t => `
                 <tr>
-                  <td><span class="${getMedalClass(t.rank)}"></span>${t.rank}</td>
+                  <td>${t.rank}</td>
                   <td>${t.name}</td>
-                  <td style="text-align: center;">${t.wins}</td>
-                  <td style="text-align: right;">${t.average}</td>
+                  <td style="text-align: center;">${t.record}</td>
+                  <td style="text-align: right;">${t.average.toFixed(1)}</td>
                 </tr>
               `).join('')}
               ${bestSchoolTeam ? `
                 <tr class="school-highlight-row">
-                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolTeam.name}</div><div style="text-align: right;">${bestSchoolTeam.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolTeam.name}</div><div style="text-align: right;">${bestSchoolTeam.average.toFixed(1)}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
@@ -788,17 +796,17 @@
               <tr><th>Rank</th><th>Player</th><th>Team</th><th style="text-align: right;">Avg</th></tr>
             </thead>
             <tbody>
-              ${countyGirlsPlayers.map(p => `
+              ${countyGirlsPlayers.slice(0, 5).map(p => `
                 <tr>
-                  <td><span class="${getMedalClass(p.rank)}"></span>${p.rank}</td>
+                  <td>${p.rank}</td>
                   <td>${p.name}</td>
                   <td>${p.team}</td>
-                  <td style="text-align: right;">${p.average}</td>
+                  <td style="text-align: right;">${p.average.toFixed(1)}</td>
                 </tr>
               `).join('')}
               ${bestSchoolGirlsPlayer ? `
                 <tr class="school-highlight-row">
-                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolGirlsPlayer.name}</div><div style="text-align: right;">${bestSchoolGirlsPlayer.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolGirlsPlayer.name}</div><div style="text-align: right;">${bestSchoolGirlsPlayer.average.toFixed(1)}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
@@ -811,15 +819,15 @@
             <tbody>
               ${countyGirlsTeams.map(t => `
                 <tr>
-                  <td><span class="${getMedalClass(t.rank)}"></span>${t.rank}</td>
+                  <td>${t.rank}</td>
                   <td>${t.name}</td>
                   <td style="text-align: center;">${t.wins}</td>
-                  <td style="text-align: right;">${t.average}</td>
+                  <td style="text-align: right;">${t.average.toFixed(1)}</td>
                 </tr>
               `).join('')}
               ${bestSchoolGirlsTeam ? `
                 <tr class="school-highlight-row">
-                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolGirlsTeam.name}</div><div style="text-align: right;">${bestSchoolGirlsTeam.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestSchoolGirlsTeam.name}</div><div style="text-align: right;">${bestSchoolGirlsTeam.average.toFixed(1)}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
@@ -886,17 +894,17 @@
               <tr><th>Rank</th><th>Player</th><th>Team</th><th style="text-align: right;">Avg</th></tr>
             </thead>
             <tbody>
-              ${filteredDivisionBoysPlayers.map(p => `
+              ${filteredDivisionBoysPlayers.slice(0, 5).map(p => `
                 <tr>
-                  <td><span class="${getMedalClass(p.rank)}"></span>${p.rank}</td>
+                  <td>${p.rank}</td>
                   <td>${p.name}</td>
                   <td>${p.team}</td>
-                  <td style="text-align: right;">${p.average}</td>
+                  <td style="text-align: right;">${p.average.toFixed(1)}</td>
                 </tr>
               `).join('')}
               ${bestDivisionBoysPlayer ? `
                 <tr class="school-highlight-row">
-                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysPlayer.name}</div><div style="text-align: right;">${bestDivisionBoysPlayer.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysPlayer.name}</div><div style="text-align: right;">${bestDivisionBoysPlayer.average.toFixed(1)}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
@@ -909,15 +917,15 @@
             <tbody>
               ${filteredDivisionBoysTeams.map(t => `
                 <tr>
-                  <td><span class="${getMedalClass(t.rank)}"></span>${t.rank}</td>
+                  <td>${t.rank}</td>
                   <td>${t.name}</td>
                   <td style="text-align: center;">${t.wins}</td>
-                  <td style="text-align: right;">${t.average}</td>
+                  <td style="text-align: right;">${t.average.toFixed(1)}</td>
                 </tr>
               `).join('')}
               ${bestDivisionBoysTeam ? `
                 <tr class="school-highlight-row">
-                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysTeam.name}</div><div style="text-align: right;">${bestDivisionBoysTeam.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionBoysTeam.name}</div><div style="text-align: right;">${bestDivisionBoysTeam.average.toFixed(1)}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
@@ -943,17 +951,17 @@
               <tr><th>Rank</th><th>Player</th><th>Team</th><th style="text-align: right;">Avg</th></tr>
             </thead>
             <tbody>
-              ${filteredDivisionGirlsPlayers.map(p => `
+              ${filteredDivisionGirlsPlayers.slice(0, 5).map(p => `
                 <tr>
-                  <td><span class="${getMedalClass(p.rank)}"></span>${p.rank}</td>
+                  <td>${p.rank}</td>
                   <td>${p.name}</td>
                   <td>${p.team}</td>
-                  <td style="text-align: right;">${p.average}</td>
+                  <td style="text-align: right;">${p.average.toFixed(1)}</td>
                 </tr>
               `).join('')}
               ${bestDivisionGirlsPlayer ? `
                 <tr class="school-highlight-row">
-                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsPlayer.name}</div><div style="text-align: right;">${bestDivisionGirlsPlayer.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsPlayer.name}</div><div style="text-align: right;">${bestDivisionGirlsPlayer.average.toFixed(1)}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>
@@ -966,15 +974,15 @@
             <tbody>
               ${filteredDivisionGirlsTeams.map(t => `
                 <tr>
-                  <td><span class="${getMedalClass(t.rank)}"></span>${t.rank}</td>
+                  <td>${t.rank}</td>
                   <td>${t.name}</td>
                   <td style="text-align: center;">${t.wins}</td>
-                  <td style="text-align: right;">${t.average}</td>
+                  <td style="text-align: right;">${t.average.toFixed(1)}</td>
                 </tr>
               `).join('')}
               ${bestDivisionGirlsTeam ? `
                 <tr class="school-highlight-row">
-                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsTeam.name}</div><div style="text-align: right;">${bestDivisionGirlsTeam.average}</div></div></td>
+                  <td colspan="4" style="padding: 12px 10px;"><span class="school-highlight-label">Your School's Best</span><div style="display: flex; justify-content: space-between;"><div>${bestDivisionGirlsTeam.name}</div><div style="text-align: right;">${bestDivisionGirlsTeam.average.toFixed(1)}</div></div></td>
                 </tr>
               ` : ''}
             </tbody>

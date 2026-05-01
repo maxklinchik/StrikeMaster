@@ -2940,7 +2940,9 @@ app.get('/api/rankings/columns', async (req, res) => {
     // Parse columns parameter (e.g., "A,B,C,O" -> ["A", "B", "C", "O"])
     const columns = columnsParam.split(',').map(col => col.trim().toUpperCase());
     
+    console.log(`[DEBUG] Fetching sheet: ${sheetName}, columns: ${columns.join(',')}`);
     const rankings = await getRankingsByColumns(spreadsheetId, sheetName, columns);
+    console.log(`[DEBUG] Returned ${rankings.length} rows from ${sheetName}`);
     res.json(rankings);
   } catch (error) {
     console.error('Get rankings by columns error:', error);

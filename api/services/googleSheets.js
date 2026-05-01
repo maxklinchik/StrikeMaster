@@ -93,23 +93,28 @@ export async function getRankingsByColumns(spreadsheetId, sheetName, columnLette
     const maxColLetter = indexToColumnLetter(maxColumn);
     const range = `${sheetName}!A:${maxColLetter}`;
     
+    console.log(`[DEBUG] Fetching range: ${range}`);
     const result = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range,
     });
     
     const values = result.data.values || [];
+    console.log(`[DEBUG] Got ${values.length} total rows, first row headers:`, values[0] ? values[0].slice(0, 5) : 'none');
     
     if (values.length === 0) {
+      console.log(`[DEBUG] No data found in ${sheetName}`);
       return [];
     }
     
     // Convert column letters to indices
     const columnIndices = columnLetters.map(col => columnLetterToIndex(col));
+    console.log(`[DEBUG] Column letters: ${columnLetters.join(',')}, indices: ${columnIndices.join(',')}`);
     
     // Get headers
     const headers = values[0];
     const selectedHeaders = columnIndices.map(idx => headers[idx] || '');
+    console.log(`[DEBUG] Selected headers:`, selectedHeaders);
     
     // Extract only selected columns and skip header row
     const rankings = values.slice(1).map((row, index) => {
@@ -126,6 +131,7 @@ export async function getRankingsByColumns(spreadsheetId, sheetName, columnLette
       return obj;
     }).filter(row => row !== null);
     
+    console.log(`[DEBUG] Returning ${rankings.length} filtered rows`);
     return rankings;
   } catch (error) {
     console.error('Error fetching columns from Google Sheets:', error);

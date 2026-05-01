@@ -9,12 +9,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve index.html for the root path
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'docs', 'index.html'));
 });
 
 // Handle 404s - redirect to index
 app.get('*', (req, res) => {
-  res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.status(404).sendFile(path.join(__dirname, 'docs', 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {

@@ -1,13 +1,13 @@
 // Load and apply user's logo preference across all pages
 (function() {
   try {
-    const logoDisplay = localStorage.getItem('logoDisplay') || 'school';
+    let logoDisplay = localStorage.getItem('logoDisplay') || 'school';
     
     // Store for later use by page-specific handlers
     window.userLogoDisplay = logoDisplay;
     
     // Immediate application function
-    function applyLogoPreference() {
+    function applyLogoPreference(displayMode = logoDisplay) {
       const logoImgs = document.querySelectorAll('[data-team-logo], .navbar .logo img');
       if (!logoImgs.length) return;
       
@@ -17,10 +17,10 @@
         : 'assets/images/';
       
       logoImgs.forEach(img => {
-        if (logoDisplay === 'strikemaster') {
+        if (displayMode === 'strikemaster') {
           img.src = `${basePath}BowlingPinCartoon.png`;
           img.style.display = '';
-        } else if (logoDisplay === 'school') {
+        } else if (displayMode === 'school') {
           // Try to get school logo from user data if available
           let schoolLogoSet = false;
           try {
@@ -44,7 +44,7 @@
             img.src = `${basePath}Team Logos/phLogo.png`;
             img.style.display = '';
           }
-        } else if (logoDisplay === 'none') {
+        } else if (displayMode === 'none') {
           img.style.display = 'none';
         }
       });
@@ -56,6 +56,22 @@
     } else {
       applyLogoPreference();
     }
+
+    // Listen for storage changes from other tabs or programmatic updates
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'logoDisplay') {
+        logoDisplay = event.newValue || 'school';
+        window.userLogoDisplay = logoDisplay;
+        applyLogoPreference(logoDisplay);
+      }
+    });
+    
+    // Also listen for custom event in case logoDisplay is changed in the same tab/window
+    window.addEventListener('logoDisplayChanged', (event) => {
+      logoDisplay = event.detail.logoDisplay || 'school';
+      window.userLogoDisplay = logoDisplay;
+      applyLogoPreference(logoDisplay);
+    });
     
     // Also apply on mutation in case images are added dynamically
     if (window.MutationObserver) {
@@ -74,7 +90,7 @@
         });
         
         if (needsUpdate) {
-          applyLogoPreference();
+          applyLogoPreference(logoDisplay);
         }
       });
       observer.observe(document.body, { childList: true, subtree: true });
